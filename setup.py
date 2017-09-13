@@ -11,5 +11,6 @@ setup(name="detector_integration",
       license="GPL3",
 
       packages=['detector_integration',
-                'detector_integration.scripts'],
+                'detector_integration.client',
+                'detector_integration.rest_api'],
 )

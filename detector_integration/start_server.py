@@ -2,11 +2,13 @@ import argparse
 import logging
 
 import bottle
-
 from mflow_nodes import NodeClient
+
 from detector_integration import config
+from detector_integration.client.backend_rest_client import BackendClient
+from detector_integration.client.detector_cli_client import DetectorClient
 from detector_integration.manager import IntegrationManager
-from detector_integration.rest_server import register_rest_interface
+from detector_integration.rest_api.rest_server import register_rest_interface
 
 _logger = logging.getLogger(__name__)
 
@@ -15,12 +17,13 @@ def start_integration_server(host, port, backend_url, writer_url, writer_instanc
     _logger.debug("Starting integration REST API with:\nBackend url: %s\nWriter url: %\nWriter instance name: %s\n",
                   backend_url, writer_url, writer_instance_name)
 
-    app = bottle.Bottle()
     writer_client = NodeClient(writer_url, writer_instance_name)
-    # TODO: Get a backend client.
-    backend_client = None
-    integration_manager = IntegrationManager(writer_client, backend_client)
+    backend_client = BackendClient()
+    detector_client = DetectorClient()
 
+    integration_manager = IntegrationManager(writer_client, backend_client, detector_client)
+
+    app = bottle.Bottle()
     register_rest_interface(app=app, integration_manager=integration_manager)
 
     try:

@@ -9,12 +9,14 @@ backend_cfg_params = ["bit_depth", "period", "n_frames"]
 
 class IntegrationManager(object):
 
-    def __init__(self, backend_client, writer_client):
+    def __init__(self, backend_client, writer_client, detector_client):
         self.backend_client = backend_client
         self.writer_client = writer_client
+        self.detector_client = detector_client
 
     def start_acquisition(self):
         status = self.get_state()
+
         if status["status"] != "CONFIGURED":
             return {"state": "error", "message": "Cannot open in state %s" % status["status"]}
         r = requests.post(_config.backend_url + "/state/open", json={}).text

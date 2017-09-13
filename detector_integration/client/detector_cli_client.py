@@ -1,0 +1,2 @@
+class DetectorClient(object):
+    pass
