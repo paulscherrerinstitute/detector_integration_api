@@ -1,1 +1,5 @@
 DEFAULT_LOGGING_LEVEL = "DEBUG"
+
+DEFAULT_BACKEND_URL = "http://localhost:8080/v1"
+DEFAULT_WRITER_URL = "http://localhost:8083/api/v1/"
+DEFAULT_WRITER_INSTANCE_NAME = "writer"
