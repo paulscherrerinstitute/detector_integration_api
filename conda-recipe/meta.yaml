@@ -1,5 +1,5 @@
 package:
-    name: detector_integration
+    name: detector_integration_api
     version: 0.0.1
 
 source:
@@ -16,6 +16,7 @@ requirements:
         - python
         - bottle
         - requests
+        - mflow_nodes
 
 build:
   entry_points:

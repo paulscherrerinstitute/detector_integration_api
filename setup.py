@@ -1,6 +1,6 @@
 from setuptools import setup
 
-setup(name="detector_integration",
+setup(name="detector_integration_api",
       version="0.0.1",
       maintainer="Paul Scherrer Institute",
       maintainer_email="daq@psi.ch",
@@ -10,7 +10,7 @@ setup(name="detector_integration",
 
       license="GPL3",
 
-      packages=['detector_integration',
-                'detector_integration.client',
-                'detector_integration.rest_api'],
+      packages=['detector_integration_api',
+                'detector_integration_api.client',
+                'detector_integration_api.rest_api'],
 )
