@@ -14,93 +14,38 @@ class IntegrationManager(object):
         self.writer_client = writer_client
         self.detector_client = detector_client
 
+        self._last_set_backend_config = {}
+        self._last_set_writer_config = {}
+
     def start_acquisition(self):
         status = self.get_state()
 
         if status["status"] != "CONFIGURED":
             return {"state": "error", "message": "Cannot open in state %s" % status["status"]}
-        r = requests.post(_config.backend_url + "/state/open", json={}).text
-        _logger.debug("Opening backend got %s" % r)
-        if r != "OPEN":
-            logger.error("Cannot setart backend, aborting: %s" % r)
-            return {"status": "error", "message": r["message"], "state": get_status()}
 
-        r = requests.put(_config.writer_url + "/").text
-        if json.loads(r)["status"] != "ok":
-            logger.error("Cannot start writer, aborting: %s" % r)
-            return {"status": "error", "message": r, "state": get_status()}
-        _logger.debug("Opening writer got %s" % r)
+        self.backend_client.open()
+        self.writer_client.start()
 
     def stop_acquisition(self):
         status = self.get_state()
+
         if status["status"] != "OPEN":
             return {"state": "error", "message": "Cannot close in state %s" % status["status"]}
-        r = requests.post(_config.backend_url + "/state/close", json={}).text
-        _logger.debug("Stopping backend got %s" % r)
-        if r != "CLOSED" and r != "CLOSING":
-            logger.error("Cannot stop backend, aborting: %s" % r)
-            return {"status": "error", "message": r, "state": get_status()}
 
-        r = requests.delete(_config.writer_url + "/").text
-        if json.loads(r)["status"] != "ok":
-            logger.error("Cannot stop writer, aborting: %s" % r)
-            return {"status": "error", "message": r["message"], "state": get_status()}
-        _logger.debug("Stoppping writer got %s" % r)
+        self.backend_client.close()
+        self.writer_client.stop()
 
     def get_acquisition_status(self):
-        global _config
-        backend_status = json.loads(requests.get(_config.backend_url + "/state").text)["global_state"]
-        writer_status = requests.get(_config.writer_url + "/status").text
-        # logger.debug("Writer got %s" % writer_status)
-        writer_status = writer_statuses[json.loads(writer_status)["data"]["is_running"]]
-        # logger.debug("Writer status %s" % writer_status)
-        # print({"status": interpret_status(backend_status, writer_status),
-        #        "details": {"backend": backend_status, "writer": writer_status}})
-        return {"status": interpret_status(backend_status, writer_status),
-                "details": {"backend": backend_status, "writer": writer_status}}
 
-    def get_acquisition_config(self):
-        pass
+        backend_status = self.backend_client.get_status()
+        writer_status = self.writer_client.get_status()["is_running"]
 
-    def set_acquisition_config(self, acquisition_config):
-        writer_cfg = {}
-        backend_cfg = {"settings": {}}
-        logger.debug("Configuration: %s" % cfg)
-        for k, v in cfg["settings"].items():
-            if k in writer_cfg_params:
-                writer_cfg[k] = v
-            if k in backend_cfg_params:
-                backend_cfg["settings"][k] = v
-        logger.debug("Configurations for backend and writer: %s %s" % (backend_cfg, writer_cfg))
+        status = self.interpret_status(backend_status, writer_status)
 
-        if "output_file" in writer_cfg:
-            if writer_cfg["output_file"][-3:] != ".h5":
-                writer_cfg["output_file"] += ".h5"
+        return status
 
-        r = requests.post(_config.backend_url + "/state/configure", json=backend_cfg).text
-        logger.debug("Backend cfg got %s" % r)
-        if r != "CONFIGURED":
-            logger.error("Cannot setup backend parameters, aborting: %s" % r)
-            return {"state": _config.status, "message": r}
-
-        r = json.loads(requests.post(_config.writer_url + "/parameters", json=writer_cfg).text)
-        logger.debug("Writer cfg got %s" % r)
-        if r["status"] != "ok":
-            logger.error("Cannot setup writer parameters, aborting: %s" % r)
-            return {"state": _config.status, "message": r["message"]}
-
-    def reset(self):
-        status = get_status()
-        if status["status"] != "CLOSED":
-            return {"state": "error", "message": "Cannot reset in state %s" % status["status"]}
-        r = requests.post(_config.backend_url + "/state/reset", json={}).text
-        logger.debug("Stopping backend got %s" % r)
-        if r != "INITIALIZED":
-            logger.error("Cannot stop backend, aborting: %s" % r)
-            return {"status": "error", "message": r, "state": get_status()}
-
+    @staticmethod
     def interpret_status(backend, writer):
-        logger.debug("Raw statuses: backend %s writer %s" % (backend, writer))
         if writer == "CONFIGURED":
             if backend != "OPEN":
                 return backend
@@ -108,6 +53,46 @@ class IntegrationManager(object):
                 return writer
         else:
             return backend
+
+    def get_acquisition_config(self):
+        return {"last_set_writer_config": self._last_set_writer_config,
+                "last_set_backend_config": self._last_set_backend_config}
+
+    def set_acquisition_config(self, acquisition_config):
+        writer_config = {}
+        backend_config = {"settings": {}}
+
+        _logger.debug("Configuration: %s" % acquisition_config)
+
+        for k, v in acquisition_config["settings"].items():
+            if k in writer_cfg_params:
+                writer_config[k] = v
+            if k in backend_cfg_params:
+                backend_config["settings"][k] = v
+
+        _logger.debug("Configurations for backend and writer: %s %s" % (backend_config, writer_config))
+
+        if "output_file" in writer_config:
+            if writer_config["output_file"][-3:] != ".h5":
+                writer_config["output_file"] += ".h5"
+
+        self.backend_client.set_config(backend_config)
+        self._last_set_backend_config = backend_config
+
+        self.writer_client.set_parameters(writer_config)
+        self._last_set_writer_config = writer_config
+
+    def reset(self):
+        status = self.get_status()
+
+        if status["status"] != "CLOSED":
+            return {"state": "error", "message": "Cannot reset in state %s" % status["status"]}
+
+        self.backend_client.reset()
+
+        if r != "INITIALIZED":
+            logger.error("Cannot stop backend, aborting: %s" % r)
+            return {"status": "error", "message": r, "state": get_status()}
 
     def get_server_info(self):
         pass

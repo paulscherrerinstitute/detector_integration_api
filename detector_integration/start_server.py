@@ -17,9 +17,9 @@ def start_integration_server(host, port, backend_url, writer_url, writer_instanc
     _logger.debug("Starting integration REST API with:\nBackend url: %s\nWriter url: %\nWriter instance name: %s\n",
                   backend_url, writer_url, writer_instance_name)
 
-    writer_client = NodeClient(writer_url, writer_instance_name)
-    backend_client = BackendClient()
     detector_client = DetectorClient()
+    backend_client = BackendClient(backend_url)
+    writer_client = NodeClient(writer_url, writer_instance_name)
 
     integration_manager = IntegrationManager(writer_client, backend_client, detector_client)
 
