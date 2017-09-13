@@ -1,0 +1,24 @@
+package:
+    name: detector_integration
+    version: 0.0.1
+
+source:
+    path: ..
+
+build:
+    number: 0
+
+requirements:
+    build:
+        - python
+
+    run:
+        - python
+        - bottle
+
+build:
+  entry_points:
+    - detector_api_server = detector_integration.scripts.start_server:main
+
+about:
+    home: git@git.psi.ch:HPDI/integration_rest_api.git
