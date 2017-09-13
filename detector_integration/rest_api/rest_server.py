@@ -1,4 +1,8 @@
-from bottle import request
+from logging import getLogger
+
+from bottle import request, response
+
+_logger = getLogger(__name__)
 
 routes = {
     "start": "/api/v1/open",
@@ -13,10 +17,8 @@ routes = {
 
 
 def register_rest_interface(app, integration_manager):
-
     @app.post(routes["start"])
     def start():
-
         integration_manager.start_acquisition()
 
         return {"state": "ok",
@@ -24,7 +26,6 @@ def register_rest_interface(app, integration_manager):
 
     @app.post(routes["stop"])
     def stop():
-
         integration_manager.stop_acquisition()
 
         return {"state": "ok",
@@ -32,20 +33,17 @@ def register_rest_interface(app, integration_manager):
 
     @app.get(routes["get_status"])
     def get_status():
-
         return {"state": "ok",
                 "status": integration_manager.get_acquisition_status()}
 
     @app.get(routes["get_config"])
     def get_config():
-
         return {"state": "ok",
                 "status": integration_manager.get_acquisition_status(),
                 "config": integration_manager.get_acquisition_config()}
 
     @app.post(routes["set_config"])
     def set_config():
-
         integration_manager.set_acquisition_config(request.json)
 
         return {"state": "ok",
@@ -54,7 +52,6 @@ def register_rest_interface(app, integration_manager):
 
     @app.post(routes["reset"])
     def reset():
-
         integration_manager.reset()
 
         return {"state": "ok",
@@ -64,3 +61,16 @@ def register_rest_interface(app, integration_manager):
     def get_server_info():
         return {"state": "ok",
                 "server_info": integration_manager.get_server_info()}
+
+    @app.error(500)
+    def error_handler_500(error):
+        response.content_type = 'application/json'
+        response.status = 200
+
+        error_text = str(error.exception)
+
+        _logger.error(error_text)
+
+        return {"state": "error",
+                "status": error_text}
+
