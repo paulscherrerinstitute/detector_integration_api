@@ -1,4 +1,4 @@
-class ConfigValidator(object):
+class Validator(object):
 
     @staticmethod
     def validate_writer_config(configuration):
@@ -19,5 +19,16 @@ class ConfigValidator(object):
     writer_cfg_params = ["output_file", ]
     backend_cfg_params = ["bit_depth", "period", "n_frames"]
 
-    def validate_command_execution(self, current_state, command):
+    @staticmethod
+    def validate_command_execution(current_state, command):
         pass
+
+    @staticmethod
+    def interpret_status(writer, backend, detector):
+        if writer == "CONFIGURED":
+            if backend != "OPEN":
+                return backend
+            else:
+                return writer
+        else:
+            return backend

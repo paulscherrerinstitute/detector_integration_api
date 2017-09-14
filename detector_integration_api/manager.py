@@ -37,22 +37,13 @@ class IntegrationManager(object):
 
     def get_acquisition_status(self):
 
-        backend_status = self.backend_client.get_status()
         writer_status = self.writer_client.get_status()["is_running"]
+        backend_status = self.backend_client.get_status()
+        detector_status = self.detector_client.get_status()
 
-        status = self.interpret_status(backend_status, writer_status)
+        status = self.validator.interpret_status(writer_status, backend_status, detector_status)
 
         return status
-
-    @staticmethod
-    def interpret_status(backend, writer):
-        if writer == "CONFIGURED":
-            if backend != "OPEN":
-                return backend
-            else:
-                return writer
-        else:
-            return backend
 
     def get_acquisition_config(self):
         # Always return a copy - we do not want this to be updated.
