@@ -9,6 +9,7 @@ from detector_integration_api.client.backend_rest_client import BackendClient
 from detector_integration_api.client.detector_cli_client import DetectorClient
 from detector_integration_api.manager import IntegrationManager
 from detector_integration_api.rest_api.rest_server import register_rest_interface
+from detector_integration_api.validation import csax_eiger9m
 
 _logger = logging.getLogger(__name__)
 
@@ -20,8 +21,9 @@ def start_integration_server(host, port, backend_url, writer_url, writer_instanc
     detector_client = DetectorClient()
     backend_client = BackendClient(backend_url)
     writer_client = NodeClient(writer_url, writer_instance_name)
+    validator = csax_eiger9m.Validator
 
-    integration_manager = IntegrationManager(writer_client, backend_client, detector_client)
+    integration_manager = IntegrationManager(writer_client, backend_client, detector_client, validator)
 
     app = bottle.Bottle()
     register_rest_interface(app=app, integration_manager=integration_manager)

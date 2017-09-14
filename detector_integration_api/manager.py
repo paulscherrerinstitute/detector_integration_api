@@ -1,21 +1,20 @@
+from copy import copy
 from logging import getLogger
 
 _logger = getLogger(__name__)
 
-writer_statuses = {False: "CONFIGURED", True: "OPEN"}
-writer_cfg_params = ["output_file", ]
-backend_cfg_params = ["bit_depth", "period", "n_frames"]
-
 
 class IntegrationManager(object):
 
-    def __init__(self, backend_client, writer_client, detector_client):
+    def __init__(self, backend_client, writer_client, detector_client, validator):
         self.backend_client = backend_client
         self.writer_client = writer_client
         self.detector_client = detector_client
+        self.validator = validator
 
         self._last_set_backend_config = {}
         self._last_set_writer_config = {}
+        self._last_set_detector_config = {}
 
     def start_acquisition(self):
         status = self.get_state()
@@ -25,6 +24,7 @@ class IntegrationManager(object):
 
         self.backend_client.open()
         self.writer_client.start()
+        self.detector_client.acquire()
 
     def stop_acquisition(self):
         status = self.get_state()
@@ -55,32 +55,31 @@ class IntegrationManager(object):
             return backend
 
     def get_acquisition_config(self):
-        return {"last_set_writer_config": self._last_set_writer_config,
-                "last_set_backend_config": self._last_set_backend_config}
+        # Always return a copy - we do not want this to be updated.
+        return {"writer": copy(self._last_set_writer_config),
+                "backend": copy(self._last_set_backend_config),
+                "detector": copy(self._last_set_detector_config)}
 
-    def set_acquisition_config(self, acquisition_config):
-        writer_config = {}
-        backend_config = {"settings": {}}
+    def set_acquisition_config(self, writer_config, backend_config, detector_config):
+        _logger.debug("Set acquisition configuration:\n"
+                      "Writer config: %s\n"
+                      "Backend config: %s\n",
+                      "Detector config: %s" %
+                      (writer_config, backend_config, detector_config))
 
-        _logger.debug("Configuration: %s" % acquisition_config)
-
-        for k, v in acquisition_config["settings"].items():
-            if k in writer_cfg_params:
-                writer_config[k] = v
-            if k in backend_cfg_params:
-                backend_config["settings"][k] = v
-
-        _logger.debug("Configurations for backend and writer: %s %s" % (backend_config, writer_config))
-
-        if "output_file" in writer_config:
-            if writer_config["output_file"][-3:] != ".h5":
-                writer_config["output_file"] += ".h5"
+        # Before setting the new config, validate the provided values. All must be valid.
+        self.validator.validate_writer_config(writer_config)
+        self.validator.validate_backend_config(backend_config)
+        self.validator.validate_detector_config(detector_config)
 
         self.backend_client.set_config(backend_config)
         self._last_set_backend_config = backend_config
 
         self.writer_client.set_parameters(writer_config)
         self._last_set_writer_config = writer_config
+
+        self.detector_client.set_config(detector_config)
+        self._last_set_detector_config = detector_config
 
     def reset(self):
         status = self.get_status()
