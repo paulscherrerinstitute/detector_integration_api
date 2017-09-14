@@ -1,12 +1,36 @@
+import subprocess
+
+from logging import getLogger
+
+_logger = getLogger(__name__)
+
+
 class DetectorClient(object):
     def acquire(self):
-        pass
+        cli_result = self._set("status", "start")
 
-    def get(self, parameter_name):
-        pass
+        return cli_result
 
-    def put(self, parameter_name, value):
-        pass
+    def get_status(self):
+        raw_status = self._get("status")
+        return raw_status
+
+    def _get(self, parameter_name):
+        cli_command = "sls_detector_get %s" % parameter_name
+        _logger.debug("Executing get command: '%s'.", cli_command)
+
+        cli_result = subprocess.check_output(cli_command)
+        # TODO: Validate cli_result
+        return cli_result
+
+    def _put(self, parameter_name, value):
+        cli_command = "sls_detector_put %s %s" % (parameter_name, value)
+        _logger.debug("Executing put command: '%s'.", cli_command)
+
+        cli_result = subprocess.check_output(cli_command)
+        # TODO: Validate cli_result
+        return cli_result
 
     def set_config(self, configuration):
-        pass
+        for name, value in configuration.items():
+            self._put(name, value)
