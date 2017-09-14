@@ -5,12 +5,14 @@ from bottle import request, response
 _logger = getLogger(__name__)
 
 routes = {
-    "start": "/api/v1/open",
-    "stop": "/api/v1/close",
-    "get_status": "/api/v1/state",
-    "get_config": "/api/v1/configure",
-    "set_config": "/api/v1/configure",
+    "start": "/api/v1/start",
+    "stop": "/api/v1/stop",
     "reset": "/api/v1/reset",
+
+    "get_status": "/api/v1/status",
+    "get_config": "/api/v1/config",
+    "set_config": "/api/v1/config",
+    "update_config": "/api/v1/config",
 
     "get_server_info": "/api/v1/info",
 }
@@ -42,9 +44,36 @@ def register_rest_interface(app, integration_manager):
                 "status": integration_manager.get_acquisition_status(),
                 "config": integration_manager.get_acquisition_config()}
 
-    @app.post(routes["set_config"])
+    @app.put(routes["set_config"])
     def set_config():
-        integration_manager.set_acquisition_config(request.json)
+        new_config = request.json
+
+        if {"writer", "backend", "detector"} != set(new_config):
+            raise ValueError("Specify config JSON with 3 root elements: 'writer', 'backend', 'detector'.")
+
+        integration_manager.set_acquisition_config(new_config["writer"], new_config["backend"], new_config["detector"])
+
+        return {"state": "ok",
+                "status": integration_manager.get_acquisition_status(),
+                "config": integration_manager.get_acquisition_config()}
+
+    @app.post(routes["update_config"])
+    def update_config():
+        config_updates = request.json
+
+        current_config = integration_manager.get_acquisition_config()
+
+        def update_config_section(section_name):
+            if section_name in config_updates:
+                current_config[section_name].update(config_updates[section_name])
+
+        update_config_section("writer")
+        update_config_section("backend")
+        update_config_section("detector")
+
+        integration_manager.set_acquisition_config(current_config["writer"],
+                                                   current_config["backend"],
+                                                   current_config["detector"])
 
         return {"state": "ok",
                 "status": integration_manager.get_acquisition_status(),
