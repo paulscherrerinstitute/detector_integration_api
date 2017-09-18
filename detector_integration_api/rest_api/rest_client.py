@@ -62,7 +62,6 @@ class DetectorIntegrationClient(object):
 
         return validate_response(response)
 
-    @app.post(routes["reset"])
     def reset(self):
         request_url = self.api_address + routes["reset"]
 
@@ -70,7 +69,6 @@ class DetectorIntegrationClient(object):
 
         return validate_response(response)
 
-    @app.get(routes["get_server_info"])
     def get_server_info(self):
         request_url = self.api_address + routes["get_server_info"]
 
