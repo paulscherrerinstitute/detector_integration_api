@@ -3,6 +3,7 @@ from logging import getLogger
 from bottle import request, response
 
 _logger = getLogger(__name__)
+_audit_logger = getLogger("audit_trail")
 
 routes = {
     "start": "/api/v1/start",
@@ -10,6 +11,7 @@ routes = {
     "reset": "/api/v1/reset",
 
     "get_status": "/api/v1/status",
+    "get_status_details": "/api/v1/status_details",
     "get_config": "/api/v1/config",
     "set_config": "/api/v1/config",
     "update_config": "/api/v1/config",
@@ -37,6 +39,17 @@ def register_rest_interface(app, integration_manager):
     def get_status():
         return {"state": "ok",
                 "status": integration_manager.get_acquisition_status()}
+
+    @app.get(routes["get_status_details"])
+    def get_status_details():
+
+        writer_status, backend_status, detector_status = integration_manager.get_status_details()
+
+        return {"state": "ok",
+                "status": integration_manager.get_acquisition_status(),
+                "details": {"writer": writer_status,
+                            "backend": backend_status,
+                            "detector": detector_status}}
 
     @app.get(routes["get_config"])
     def get_config():
@@ -99,7 +112,7 @@ def register_rest_interface(app, integration_manager):
         error_text = str(error.exception)
 
         _logger.error(error_text)
+        _audit_logger.error(error_text)
 
         return {"state": "error",
                 "status": error_text}
-
