@@ -14,5 +14,6 @@ setup(name="detector_integration_api",
                 'detector_integration_api.client',
                 'detector_integration_api.rest_api'],
 
-      install_requires=['bottle']
+      install_requires=['bottle',
+                        'requests']
       )
