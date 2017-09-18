@@ -6,8 +6,13 @@ _logger = getLogger(__name__)
 
 
 class DetectorClient(object):
-    def acquire(self):
+    def start(self):
         cli_result = self._set("status", "start")
+
+        return cli_result
+
+    def stop(self):
+        cli_result = self._set("status", "stop")
 
         return cli_result
 
