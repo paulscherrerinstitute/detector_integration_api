@@ -1,0 +1,1 @@
+from detector_integration_api.rest_api.rest_client import DetectorIntegrationClient
