@@ -1,6 +1,6 @@
 package:
     name: detector_integration_api
-    version: 0.0.1
+    version: 0.0.2
 
 source:
     path: ..
@@ -20,7 +20,7 @@ requirements:
 
 build:
   entry_points:
-    - detector_api_server = detector_integration.start_server:main
+    - detector_api_server = detector_integration_api.start_server:main
 
 about:
     home: git@git.psi.ch:HPDI/integration_rest_api.git
