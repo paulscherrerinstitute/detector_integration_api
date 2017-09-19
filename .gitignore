@@ -141,3 +141,6 @@ ENV/
 
 .idea
 *.pyc
+
+# Docker build
+sls_detectors_package/
