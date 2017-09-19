@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSION=0.0.2
+VERSION=0.0.3
 SLS_DETECTOR_VERSION=3.0
 
 sh get_sls_detectors.sh ${SLS_DETECTOR_VERSION}
