@@ -13,7 +13,7 @@ RUN mkdir -p ${RUN_DIR}
 
 # Install the SLS detector software
 ADD sls_detectors_package/ ${INSTALL_DIR}/
-RUN cd ${INSTALL_DIR}; make REST=no textclient receiver
+RUN cd ${INSTALL_DIR}; make REST=no textclient
 ENV PATH="${INSTALL_DIR}/bin:${PATH}"
 
 # Install detector integration API.
@@ -25,5 +25,3 @@ RUN chmod +x ${RUN_DIR}/startup.sh
 ADD run_receivers.py ${RUN_DIR}
 
 WORKDIR ${RUN_DIR}
-
-ENTRYPOINT ["${RUN_DIR}/startup.sh"]

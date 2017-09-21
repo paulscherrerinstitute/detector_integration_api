@@ -1,8 +1,17 @@
-DIA_RECEIVERS_INIT_PORT=10000
-DIA_RECEIVERS_NUMBER=10
+# Address for the DIA REST interface.
 DIA_REST_ADDRESS=0.0.0.0
+
+# Port for the DIA REST interface.
 DIA_REST_PORT=10000
+
+# Log level in the integration API.
 DIA_LOG_LEVEL=DEBUG
-DIA_BACKEND_URL=http://127.0.0.1:8081/api/v1
-DIA_WRITER_URL=http://127.0.0.2:8081/api/v1
+
+# URL of the backend REST interface.
+DIA_BACKEND_URL=http://127.0.0.1:8080/v1
+
+# URL of the writer REST interface.
+DIA_WRITER_URL=http://127.0.0.1:40000/api/v1
+
+# Instance name of the writer.
 DIA_WRITER_INSTANCE_NAME=writer
