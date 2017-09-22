@@ -22,6 +22,5 @@ RUN conda install -c paulscherrerinstitute detector_integration_api --yes
 # Copy run files.
 ADD startup.sh ${RUN_DIR}
 RUN chmod +x ${RUN_DIR}/startup.sh
-ADD run_receivers.py ${RUN_DIR}
 
 WORKDIR ${RUN_DIR}
