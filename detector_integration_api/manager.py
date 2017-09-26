@@ -22,9 +22,8 @@ class IntegrationManager(object):
         self.validator = validator
 
         _audit_logger.info("Setting up integration manager to:\n"
-                           "Backend address: %s\n",
-                           "Writer address: %s\n"
-                           "State: %s",
+                           "Backend address: %s\n"
+                           "Writer address: %s\n",
                            self.backend_client.backend_url,
                            self.writer_client._api_address)
 
