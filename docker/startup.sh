@@ -18,7 +18,7 @@ if [ -z "${DIA_WRITER_URL}" ]; then echo "ENV variable DIA_WRITER_URL is not set
 if [ -z "${DIA_WRITER_INSTANCE_NAME}" ]; then echo "ENV variable DIA_WRITER_INSTANCE_NAME is not set."; exit -1; fi
 
 # Configure the SLS detectors.
-sls_detector_put config /etc/eiger_9m_10gb.config
+sls_detector_put 0-config /etc/eiger_9m_10gb.config
 
 # Run the API server.
 detector_api_server -i ${DIA_REST_ADDRESS} -p ${DIA_REST_PORT} --log_level=${DIA_LOG_LEVEL} -b ${DIA_BACKEND_URL} -w ${DIA_WRITER_URL} --writer_instance_name=${DIA_WRITER_INSTANCE_NAME}
