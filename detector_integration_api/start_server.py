@@ -18,12 +18,15 @@ def start_integration_server(host, port, backend_url, writer_url, writer_instanc
     _logger.debug("Starting integration REST API with:\nBackend url: %s\nWriter url: %\nWriter instance name: %s\n",
                   backend_url, writer_url, writer_instance_name)
 
-    detector_client = DetectorClient()
     backend_client = BackendClient(backend_url)
     writer_client = NodeClient(writer_url, writer_instance_name)
+    detector_client = DetectorClient()
     validator = csax_eiger9m.Validator
 
-    integration_manager = IntegrationManager(writer_client, backend_client, detector_client, validator)
+    integration_manager = IntegrationManager(writer_client=writer_client,
+                                             backend_client=backend_client,
+                                             detector_client=detector_client,
+                                             validator=validator)
 
     app = bottle.Bottle()
     register_rest_interface(app=app, integration_manager=integration_manager)
