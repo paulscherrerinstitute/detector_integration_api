@@ -15,7 +15,7 @@ _logger = logging.getLogger(__name__)
 
 
 def start_integration_server(host, port, backend_url, writer_url, writer_instance_name):
-    _logger.debug("Starting integration REST API with:\nBackend url: %s\nWriter url: %\nWriter instance name: %s\n",
+    _logger.debug("Starting integration REST API with:\nBackend url: %s\nWriter url: %s\nWriter instance name: %s\n",
                   backend_url, writer_url, writer_instance_name)
 
     backend_client = BackendClient(backend_url)

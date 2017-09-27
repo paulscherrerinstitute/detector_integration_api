@@ -36,7 +36,7 @@ class IntegrationManager(object):
 
         status = self.get_acquisition_status()
         if status != IntegrationStatus.CONFIGURED:
-            raise ValueError("Cannot start acquisition in %s state.")
+            raise ValueError("Cannot start acquisition in %s state. Please configure first.")
 
         self.backend_client.open()
         self.writer_client.start()
@@ -80,7 +80,7 @@ class IntegrationManager(object):
     def set_acquisition_config(self, writer_config, backend_config, detector_config):
         status = self.get_acquisition_status()
         if status not in (IntegrationStatus.INITIALIZED or IntegrationStatus.CONFIGURED):
-            raise ValueError("Cannot set config in %s state.")
+            raise ValueError("Cannot set config in %s state. Please reset first.")
 
         # The backend is configurable only in the INITIALIZED state.
         if status == IntegrationStatus.CONFIGURED:
