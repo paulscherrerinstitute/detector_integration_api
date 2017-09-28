@@ -1,3 +1,4 @@
+import json
 from logging import getLogger
 
 from bottle import request, response
@@ -114,5 +115,5 @@ def register_rest_interface(app, integration_manager):
         _logger.error(error_text)
         _audit_logger.error(error_text)
 
-        return {"state": "error",
-                "status": error_text}
+        return json.dumps({"state": "error",
+                           "status": error_text})
