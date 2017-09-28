@@ -25,7 +25,7 @@ class IntegrationManager(object):
                            "Backend address: %s\n"
                            "Writer address: %s\n",
                            self.backend_client.backend_url,
-                           self.writer_client._api_address)
+                           self.writer_client._api_address.format(url=""))
 
         self._last_set_backend_config = {}
         self._last_set_writer_config = {}
