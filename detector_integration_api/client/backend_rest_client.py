@@ -2,12 +2,14 @@ from logging import getLogger
 
 import requests
 
+from detector_integration_api import config
+
 _logger = getLogger(__name__)
 
 
 class BackendClient(object):
     def __init__(self, backend_url):
-        self.backend_url = backend_url.rstrip("/")
+        self.backend_url = backend_url.rstrip("/") + config.BACKEND_URL_SUFFIX
 
     def open(self):
         response_text = requests.post(self.backend_url + "/state/open", json={}).text
