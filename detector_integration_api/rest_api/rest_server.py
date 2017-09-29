@@ -27,19 +27,19 @@ def register_rest_interface(app, integration_manager):
         integration_manager.start_acquisition()
 
         return {"state": "ok",
-                "status": integration_manager.get_acquisition_status()}
+                "status": integration_manager.get_acquisition_status_string()}
 
     @app.post(routes["stop"])
     def stop():
         integration_manager.stop_acquisition()
 
         return {"state": "ok",
-                "status": integration_manager.get_acquisition_status()}
+                "status": integration_manager.get_acquisition_status_string()}
 
     @app.get(routes["get_status"])
     def get_status():
         return {"state": "ok",
-                "status": integration_manager.get_acquisition_status()}
+                "status": integration_manager.get_acquisition_status_string()}
 
     @app.get(routes["get_status_details"])
     def get_status_details():
@@ -47,7 +47,7 @@ def register_rest_interface(app, integration_manager):
         writer_status, backend_status, detector_status = integration_manager.get_status_details()
 
         return {"state": "ok",
-                "status": integration_manager.get_acquisition_status(),
+                "status": integration_manager.get_acquisition_status_string(),
                 "details": {"writer": writer_status,
                             "backend": backend_status,
                             "detector": detector_status}}
@@ -55,7 +55,7 @@ def register_rest_interface(app, integration_manager):
     @app.get(routes["get_config"])
     def get_config():
         return {"state": "ok",
-                "status": integration_manager.get_acquisition_status(),
+                "status": integration_manager.get_acquisition_status_string(),
                 "config": integration_manager.get_acquisition_config()}
 
     @app.put(routes["set_config"])
@@ -68,7 +68,7 @@ def register_rest_interface(app, integration_manager):
         integration_manager.set_acquisition_config(new_config["writer"], new_config["backend"], new_config["detector"])
 
         return {"state": "ok",
-                "status": integration_manager.get_acquisition_status(),
+                "status": integration_manager.get_acquisition_status_string(),
                 "config": integration_manager.get_acquisition_config()}
 
     @app.post(routes["update_config"])
@@ -90,7 +90,7 @@ def register_rest_interface(app, integration_manager):
                                                    current_config["detector"])
 
         return {"state": "ok",
-                "status": integration_manager.get_acquisition_status(),
+                "status": integration_manager.get_acquisition_status_string(),
                 "config": integration_manager.get_acquisition_config()}
 
     @app.post(routes["reset"])
@@ -98,7 +98,7 @@ def register_rest_interface(app, integration_manager):
         integration_manager.reset()
 
         return {"state": "ok",
-                "status": integration_manager.get_acquisition_status()}
+                "status": integration_manager.get_acquisition_status_string()}
 
     @app.get(routes["get_server_info"])
     def get_server_info():

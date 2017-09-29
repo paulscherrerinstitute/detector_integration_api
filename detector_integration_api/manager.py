@@ -7,10 +7,10 @@ _audit_logger = getLogger("audit_trail")
 
 
 class IntegrationStatus(Enum):
-    INITIALIZED = 0,
-    CONFIGURED = 1,
-    RUNNING = 2,
-    ERROR = 3
+    INITIALIZED = "initialized",
+    CONFIGURED = "configured",
+    RUNNING = "running",
+    ERROR = "error"
 
 
 class IntegrationManager(object):
@@ -42,8 +42,6 @@ class IntegrationManager(object):
         self.writer_client.start()
         self.detector_client.start()
 
-        self.validator.interpret_status(self.get_acquisition_status())
-
     def stop_acquisition(self):
         _audit_logger.info("Stopping acquisition.")
 
@@ -58,6 +56,9 @@ class IntegrationManager(object):
 
     def get_acquisition_status(self):
         return self.validator.interpret_status(*self.get_status_details())
+
+    def get_acquisition_status_string(self):
+        return str(self.get_acquisition_status())
 
     def get_status_details(self):
         writer_status = self.writer_client.get_status()["is_running"]
