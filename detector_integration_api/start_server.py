@@ -39,8 +39,8 @@ def start_integration_server(host, port, backend_url, writer_url, writer_instanc
 
 def main():
     parser = argparse.ArgumentParser(description='Rest API for beamline software')
-    parser.add_argument('-i', '--interface', default='0.0.0.0', help="Hostname interface to bind to")
-    parser.add_argument('-p', '--port', default=8000, help="Server port")
+    parser.add_argument('-i', '--interface', default=config.DEFAULT_SERVER_INTERFACE, help="Hostname interface to bind to")
+    parser.add_argument('-p', '--port', default=config.DEFAULT_SERVER_PORT, help="Server port")
     parser.add_argument("--log_level", default=config.DEFAULT_LOGGING_LEVEL,
                         choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'],
                         help="Log level to use.")

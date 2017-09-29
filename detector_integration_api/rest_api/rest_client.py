@@ -1,4 +1,6 @@
 import requests
+
+from detector_integration_api import config
 from detector_integration_api.rest_api.rest_server import routes
 
 
@@ -10,7 +12,10 @@ def validate_response(server_response):
 
 
 class DetectorIntegrationClient(object):
-    def __init__(self, api_address):
+    def __init__(self, api_address=None):
+        if not api_address:
+            api_address = "http://%s:%s" % (config.DEFAULT_SERVER_INTERFACE, config.DEFAULT_SERVER_PORT)
+
         self.api_address = api_address.rstrip("/")
 
     def start(self):
