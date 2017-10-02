@@ -36,7 +36,7 @@ class IntegrationManager(object):
 
         status = self.get_acquisition_status()
         if status != IntegrationStatus.CONFIGURED:
-            raise ValueError("Cannot start acquisition in %s state. Please configure first.")
+            raise ValueError("Cannot start acquisition in %s state. Please configure first.", status)
 
         self.backend_client.open()
         self.writer_client.start()
@@ -65,10 +65,8 @@ class IntegrationManager(object):
         backend_status = self.backend_client.get_status()
         detector_status = self.detector_client.get_status()
 
-        _logger.debug("Detailed status requested:\n"
-                      "Writer: %s\n",
-                      "Backend: %s\n"
-                      "Detector: %s", writer_status, backend_status, detector_status)
+        _logger.debug("Detailed status requested:\nWriter: %s\nBackend: %s\nDetector: %s",
+                      writer_status, backend_status, detector_status)
 
         return writer_status, backend_status, detector_status
 
