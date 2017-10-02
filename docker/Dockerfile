@@ -5,7 +5,7 @@ ENV RUN_DIR /runners
 ENV TERM=xterm
 
 # Install needed libraries.
-RUN yum install git make gcc-c++ -y
+RUN yum install git make gcc-c++ telnet -y
 
 # Create directory structure.
 RUN mkdir -p ${INSTALL_DIR}
