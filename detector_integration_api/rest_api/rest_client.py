@@ -6,7 +6,8 @@ from detector_integration_api.rest_api.rest_server import routes
 
 def validate_response(server_response):
     if server_response["state"] != "ok":
-        raise Exception("Server exception:\n" + server_response.get("status", "Unknown error occurred."))
+        raise Exception("An exception happened on the server:\n" +
+                        server_response.get("status", "Unknown error occurred."))
 
     return server_response
 

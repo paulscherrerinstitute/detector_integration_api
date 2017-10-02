@@ -26,7 +26,7 @@ class DetectorClient(object):
 
         cli_result = subprocess.check_output(cli_command)
         # TODO: Validate cli_result
-        return cli_result
+        return cli_result.decode("utf-8")
 
     def _put(self, parameter_name, value):
         cli_command = ["sls_detector_put", parameter_name, value]
@@ -34,7 +34,7 @@ class DetectorClient(object):
 
         cli_result = subprocess.check_output(cli_command)
         # TODO: Validate cli_result
-        return cli_result
+        return cli_result.decode("utf-8")
 
     def set_config(self, configuration):
         for name, value in configuration.items():
