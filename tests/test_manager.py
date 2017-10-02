@@ -13,6 +13,9 @@ class MockBackendClient(object):
     def get_status(self):
         return self.status
 
+    def set_config(self, configuration):
+        pass
+
 
 class MockDetectorClient(object):
     def __init__(self):
@@ -20,6 +23,9 @@ class MockDetectorClient(object):
 
     def get_status(self):
         return self.status
+
+    def set_config(self, configuration):
+        pass
 
 
 class MockWriterClient(object):
@@ -29,6 +35,9 @@ class MockWriterClient(object):
 
     def get_status(self):
         return {"is_running": self.status}
+
+    def set_parameters(self, configuration):
+        pass
 
 
 class TestIntegrationManager(unittest.TestCase):
@@ -70,5 +79,42 @@ class TestIntegrationManager(unittest.TestCase):
         manager.writer_client.status = False
         self.assertEqual(manager.get_acquisition_status(), IntegrationStatus.ERROR)
         self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.ERROR")
+
+    def test_set_config(self):
+        manager = self.get_integration_manager()
+
+        manager.writer_client.status = False
+        manager.backend_client.status = "INITIALIZED"
+        manager.detector_client.status = "status idle"
+
+        writer_config = {}
+        backend_config = {}
+        detector_config = {}
+
+        with self.assertRaisesRegex(ValueError, "Writer configuration missing mandatory"):
+            manager.set_acquisition_config(writer_config, backend_config, detector_config)
+
+        writer_config["output_file"] = "test.h5"
+
+        with self.assertRaisesRegex(ValueError, "Backend configuration missing mandatory"):
+            manager.set_acquisition_config(writer_config, backend_config, detector_config)
+
+        backend_config["bit_depth"] = 16
+
+        with self.assertRaisesRegex(ValueError, "Detector configuration missing mandatory"):
+            manager.set_acquisition_config(writer_config, backend_config, detector_config)
+
+        detector_config["exptime"] = 0.01
+        detector_config["frames"] = 1
+        detector_config["period"] = 0.1
+        detector_config["dr"] = 32
+
+        with self.assertRaisesRegex(ValueError, "Invalid config. Backend 'bit_depth' set to '16', "
+                                                "but detector 'dr' set to '32'. They must be equal."):
+            manager.set_acquisition_config(writer_config, backend_config, detector_config)
+
+        detector_config["dr"] = 16
+
+        manager.set_acquisition_config(writer_config, backend_config, detector_config)
 
 
