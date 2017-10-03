@@ -55,7 +55,7 @@ class TestIntegrationManager(unittest.TestCase):
 
         manager.writer_client.status = False
         manager.backend_client.status = "INITIALIZED"
-        manager.detector_client.status = "status idle"
+        manager.detector_client.status = "idle"
         self.assertEqual(manager.get_acquisition_status(), IntegrationStatus.INITIALIZED)
         self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.INITIALIZED")
 
@@ -66,13 +66,13 @@ class TestIntegrationManager(unittest.TestCase):
 
         manager.writer_client.status = False
         manager.backend_client.status = "CONFIGURED"
-        manager.detector_client.status = "status idle"
+        manager.detector_client.status = "idle"
         self.assertEqual(manager.get_acquisition_status(), IntegrationStatus.CONFIGURED)
         self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.CONFIGURED")
 
         manager.writer_client.status = True
         manager.backend_client.status = "OPEN"
-        manager.detector_client.status = "status running"
+        manager.detector_client.status = "running"
         self.assertEqual(manager.get_acquisition_status(), IntegrationStatus.RUNNING)
         self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.RUNNING")
 
@@ -85,7 +85,7 @@ class TestIntegrationManager(unittest.TestCase):
 
         manager.writer_client.status = False
         manager.backend_client.status = "INITIALIZED"
-        manager.detector_client.status = "status idle"
+        manager.detector_client.status = "idle"
 
         writer_config = {}
         backend_config = {}

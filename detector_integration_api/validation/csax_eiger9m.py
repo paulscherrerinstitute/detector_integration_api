@@ -34,13 +34,13 @@ class Validator(object):
     @staticmethod
     def interpret_status(writer, backend, detector):
 
-        if writer is False and detector == "status idle" and backend == "INITIALIZED":
+        if writer is False and detector == "idle" and backend == "INITIALIZED":
             return IntegrationStatus.INITIALIZED
 
-        elif writer is False and detector == "status idle" and backend == "CONFIGURED":
+        elif writer is False and detector == "idle" and backend == "CONFIGURED":
             return IntegrationStatus.CONFIGURED
 
-        elif writer is True and detector == "status running" and backend == "OPEN":
+        elif writer is True and detector == "running" and backend == "OPEN":
             return IntegrationStatus.RUNNING
 
         return IntegrationStatus.ERROR
