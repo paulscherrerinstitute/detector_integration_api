@@ -77,17 +77,19 @@ class IntegrationManager(object):
                 "detector": copy(self._last_set_detector_config)}
 
     def set_acquisition_config(self, writer_config, backend_config, detector_config):
+
         status = self.get_acquisition_status()
         if status not in (IntegrationStatus.INITIALIZED, IntegrationStatus.CONFIGURED):
             raise ValueError("Cannot set config in %s state. Please reset first.")
 
         # The backend is configurable only in the INITIALIZED state.
         if status == IntegrationStatus.CONFIGURED:
+            _logger.debug("Integration status is %s. Resetting before applying config.", status)
             self.reset()
 
         _audit_logger.info("Set acquisition configuration:\n"
                            "Writer config: %s\n"
-                           "Backend config: %s\n",
+                           "Backend config: %s\n"
                            "Detector config: %s",
                            writer_config, backend_config, detector_config)
 

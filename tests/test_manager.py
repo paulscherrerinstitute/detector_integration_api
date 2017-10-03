@@ -87,9 +87,9 @@ class TestIntegrationManager(unittest.TestCase):
         manager.backend_client.status = "INITIALIZED"
         manager.detector_client.status = "idle"
 
-        writer_config = {}
-        backend_config = {}
-        detector_config = {}
+        writer_config = {"test": 1}
+        backend_config = {"test": 1}
+        detector_config = {"test": 1}
 
         with self.assertRaisesRegex(ValueError, "Writer configuration missing mandatory"):
             manager.set_acquisition_config(writer_config, backend_config, detector_config)

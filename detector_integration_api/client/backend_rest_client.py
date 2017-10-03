@@ -33,12 +33,12 @@ class BackendClient(object):
         return requests.get(self.backend_url + "/state").json()["global_state"]
 
     def reset(self):
-        response_text = requests.post(self.backend_url.backend_url + "/state/reset", json={}).text
+        response_text = requests.post(self.backend_url + "/state/reset", json={}).text
 
         _logger.debug("Resetting backend got %s" % response_text)
 
     def set_config(self, configuration):
-        response_text = requests.post(self.backend_url + "/state/configure", json=configuration).text
+        response_text = requests.post(self.backend_url + "/state/configure", json={"settings": configuration}).text
 
         _logger.debug("Backend cfg got %s" % response_text)
 

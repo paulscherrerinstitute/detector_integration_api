@@ -21,7 +21,7 @@ class DetectorClient(object):
 
         cli_result = subprocess.check_output(cli_command)
         response, received_parameter_name, received_value = self.interpret_response(cli_result, "status")
-        self.verify_response_data(response, "status", received_parameter_name, "running", received_value)
+        self.verify_response_data(response, "status", received_parameter_name, "idle", received_value)
 
     def get_status(self):
         raw_status = self._get("status")
@@ -35,7 +35,7 @@ class DetectorClient(object):
         return self.validate_response(cli_result, parameter_name)
 
     def _put(self, parameter_name, value):
-        cli_command = ["sls_detector_put", parameter_name, value]
+        cli_command = ["sls_detector_put", parameter_name, str(value)]
         _logger.debug("Executing put command: '%s'.", " ".join(cli_command))
 
         cli_result = subprocess.check_output(cli_command)

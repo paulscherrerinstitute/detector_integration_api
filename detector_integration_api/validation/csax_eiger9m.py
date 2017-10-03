@@ -8,6 +8,9 @@ class Validator(object):
 
     @staticmethod
     def validate_writer_config(configuration):
+        if not configuration:
+            raise ValueError("Writer configuration cannot be empty.")
+
         if not all(x in configuration for x in Validator.writer_cfg_params):
             raise ValueError("Writer configuration missing mandatory parameters: %s", Validator.writer_cfg_params)
 
@@ -16,11 +19,17 @@ class Validator(object):
 
     @staticmethod
     def validate_backend_config(configuration):
+        if not configuration:
+            raise ValueError("Backend configuration cannot be empty.")
+
         if not all(x in configuration for x in Validator.backend_cfg_params):
             raise ValueError("Backend configuration missing mandatory parameters: %s", Validator.backend_cfg_params)
 
     @staticmethod
     def validate_detector_config(configuration):
+        if not configuration:
+            raise ValueError("Detector configuration cannot be empty.")
+
         if not all(x in configuration for x in Validator.detector_cfg_params):
             raise ValueError("Detector configuration missing mandatory parameters: %s", Validator.detector_cfg_params)
 
