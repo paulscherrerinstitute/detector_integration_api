@@ -32,7 +32,7 @@ class DetectorClient(object):
         _logger.debug("Executing get command: '%s'.", " ".join(cli_command))
 
         cli_result = subprocess.check_output(cli_command)
-        return self.validate_response(*self.interpret_response(cli_result, parameter_name))
+        return self.validate_response(cli_result, parameter_name)
 
     def _put(self, parameter_name, value):
         cli_command = ["sls_detector_put", parameter_name, value]
@@ -77,9 +77,9 @@ class DetectorClient(object):
             if isinstance(expected_value, Number):
                 received_value = float(received_value)
 
-        if received_value != expected_value:
-            raise ValueError("Invalid parameter '%s' value, set '%s' but received '%s': %s"
-                             % (expected_parameter_name, expected_value, received_value, response))
+            if received_value != expected_value:
+                raise ValueError("Invalid parameter '%s' value, set '%s' but received '%s': %s"
+                                 % (expected_parameter_name, expected_value, received_value, response))
 
         return received_value
 

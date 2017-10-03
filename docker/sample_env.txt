@@ -8,10 +8,10 @@ DIA_REST_PORT=10000
 DIA_LOG_LEVEL=DEBUG
 
 # URL of the backend REST interface.
-DIA_BACKEND_URL=http://127.0.0.1:8080/v1
+DIA_BACKEND_URL=http://127.0.0.1:8080
 
 # URL of the writer REST interface.
-DIA_WRITER_URL=http://127.0.0.1:40000/api/v1
+DIA_WRITER_URL=http://127.0.0.1:40000
 
 # Instance name of the writer.
 DIA_WRITER_INSTANCE_NAME=writer
