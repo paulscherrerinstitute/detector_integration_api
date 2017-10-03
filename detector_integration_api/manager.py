@@ -31,6 +31,8 @@ class IntegrationManager(object):
         self._last_set_writer_config = {}
         self._last_set_detector_config = {}
 
+        self.last_config_successful = False
+
     def start_acquisition(self):
         _audit_logger.info("Starting acquisition.")
 
@@ -55,7 +57,14 @@ class IntegrationManager(object):
         self.reset()
 
     def get_acquisition_status(self):
-        return self.validator.interpret_status(*self.get_status_details())
+        status = self.validator.interpret_status(*self.get_status_details())
+
+        # There is no way of knowing if the detector is configured as the user desired.
+        # We have a flag to check if the user config was passed on to the detector.
+        if status == IntegrationStatus.CONFIGURED and self.last_config_successful is False:
+            return IntegrationStatus.ERROR
+
+        return status
 
     def get_acquisition_status_string(self):
         return str(self.get_acquisition_status())
@@ -77,6 +86,7 @@ class IntegrationManager(object):
                 "detector": copy(self._last_set_detector_config)}
 
     def set_acquisition_config(self, writer_config, backend_config, detector_config):
+        self.last_config_successful = False
 
         status = self.get_acquisition_status()
         if status not in (IntegrationStatus.INITIALIZED, IntegrationStatus.CONFIGURED):
@@ -107,6 +117,8 @@ class IntegrationManager(object):
 
         self.detector_client.set_config(detector_config)
         self._last_set_detector_config = detector_config
+
+        self.last_config_successful = True
 
     def reset(self):
         _audit_logger.info("Resetting integration api.")
