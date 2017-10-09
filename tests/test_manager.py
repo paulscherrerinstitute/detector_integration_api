@@ -5,7 +5,6 @@ from detector_integration_api.validation import csax_eiger9m
 
 
 class MockBackendClient(object):
-
     def __init__(self):
         self.status = "INITIALIZED"
         self.backend_url = "backend_url"
@@ -41,8 +40,7 @@ class MockWriterClient(object):
 
 
 class TestIntegrationManager(unittest.TestCase):
-
-    def get_integration_manager(self):
+    def _get_integration_manager(self):
         backend_client = MockBackendClient()
         detector_client = MockDetectorClient()
         writer_client = MockWriterClient()
@@ -51,7 +49,7 @@ class TestIntegrationManager(unittest.TestCase):
         return manager
 
     def test_state_machine(self):
-        manager = self.get_integration_manager()
+        manager = self._get_integration_manager()
 
         manager.writer_client.status = False
         manager.backend_client.status = "INITIALIZED"
@@ -67,8 +65,12 @@ class TestIntegrationManager(unittest.TestCase):
         manager.writer_client.status = False
         manager.backend_client.status = "CONFIGURED"
         manager.detector_client.status = "idle"
+        manager.last_config_successful = True
         self.assertEqual(manager.get_acquisition_status(), IntegrationStatus.CONFIGURED)
         self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.CONFIGURED")
+
+        manager.last_config_successful = False
+        self.assertEqual(manager.get_acquisition_status(), IntegrationStatus.ERROR)
 
         manager.writer_client.status = True
         manager.backend_client.status = "OPEN"
@@ -81,7 +83,7 @@ class TestIntegrationManager(unittest.TestCase):
         self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.ERROR")
 
     def test_set_config(self):
-        manager = self.get_integration_manager()
+        manager = self._get_integration_manager()
 
         manager.writer_client.status = False
         manager.backend_client.status = "INITIALIZED"
@@ -100,6 +102,7 @@ class TestIntegrationManager(unittest.TestCase):
             manager.set_acquisition_config(writer_config, backend_config, detector_config)
 
         backend_config["bit_depth"] = 16
+        backend_config["n_frames"] = 1000
 
         with self.assertRaisesRegex(ValueError, "Detector configuration missing mandatory"):
             manager.set_acquisition_config(writer_config, backend_config, detector_config)
@@ -116,5 +119,3 @@ class TestIntegrationManager(unittest.TestCase):
         detector_config["dr"] = 16
 
         manager.set_acquisition_config(writer_config, backend_config, detector_config)
-
-

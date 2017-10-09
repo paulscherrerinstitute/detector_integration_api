@@ -3,7 +3,7 @@ from detector_integration_api.manager import IntegrationStatus
 
 class Validator(object):
     writer_cfg_params = ["output_file"]
-    backend_cfg_params = ["bit_depth"]
+    backend_cfg_params = ["bit_depth", "n_frames"]
     detector_cfg_params = ["period", "frames", "exptime", "dr"]
 
     @staticmethod
