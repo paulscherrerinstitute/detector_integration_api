@@ -4,10 +4,14 @@
 # Integration REST API
 REST API for integrating beamline software with the detector, backend, and writer.
 
-## cSAXS Eiger 9M
+## Deployed instances
+This section is dedicated for the discussion of specific deployment instances, when there is some custom behaviour not 
+described in the general documentation above.
+
+### cSAXS Eiger 9M
 In this section we will discuss only specific differences for the cSAXS Eiger 9M integration.
 
-### Integration status
+#### Integration status
 When calculating the integration status, we must take into account all 3 components of our system:
 
 - Detector status: "idle", "running"
@@ -32,7 +36,7 @@ def interpret_status(writer, backend, detector):
     return IntegrationStatus.ERROR
 ```
 
-### Detector configuration
+#### Detector configuration
 The mandatory attributes for the detector configuration are:
 
 - *"period"*: Period of time (in seconds) for each frame.
@@ -53,7 +57,7 @@ An example of a valid detector config:
 }
 ```
 
-### Backend configuration
+#### Backend configuration
 Available and at the same time mandatory backend attributes:
 
 - *"bit_depth"*: Dynamic range - number of bits (16, 32 etc.)
@@ -66,7 +70,7 @@ Available and at the same time mandatory backend attributes:
 
 If this is not the case, the configuration will fail.
 
-### Writer configuration
+#### Writer configuration
 Due to the data format used for the cSAXS acquisition, the writer configuration is quite large. It is divided into 2 
 parts:
 
