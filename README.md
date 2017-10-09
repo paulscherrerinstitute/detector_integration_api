@@ -11,7 +11,7 @@ REST API for integrating beamline software with the detector, backend, and write
     3. [Docker build](#docker_build)
 2. [Running the server](#running_the_server)
     1. [Detector integration server](#run_dia)
-    3. [Docker Container](#run_docker_container)
+    2. [Docker Container](#run_docker_container)
 3. [Configuration](#configuration)
 4. [Deployed instances](#deployed_instances)
     1. [cSAXS Eiger 9M](#deployed_instances_csaxs)
