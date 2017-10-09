@@ -1,7 +1,7 @@
 import unittest
 
 from detector_integration_api.manager import IntegrationStatus
-from tests.utils import get_test_integration_manager
+from tests.utils import get_test_integration_manager, get_csax9m_test_writer_parameters
 
 
 class TestIntegrationManager(unittest.TestCase):
@@ -53,7 +53,14 @@ class TestIntegrationManager(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Writer configuration missing mandatory"):
             manager.set_acquisition_config(writer_config, backend_config, detector_config)
 
-        writer_config["output_file"] = "test.h5"
+        writer_config.update(get_csax9m_test_writer_parameters())
+
+        with self.assertRaisesRegex(ValueError, "Writer configuration missing mandatory"):
+            manager.set_acquisition_config(writer_config, backend_config, detector_config)
+
+        writer_config["output_file"] = "not_important"
+        writer_config["user_id"] = 10
+        writer_config["group_id"] = 10
 
         with self.assertRaisesRegex(ValueError, "Backend configuration missing mandatory"):
             manager.set_acquisition_config(writer_config, backend_config, detector_config)
@@ -75,4 +82,25 @@ class TestIntegrationManager(unittest.TestCase):
 
         detector_config["dr"] = 16
 
+        with self.assertRaisesRegex(ValueError, "Invalid config. Backend 'n_frames' set to '1000', "
+                                                "but detector 'frames' set to '1'. They must be equal."):
+            manager.set_acquisition_config(writer_config, backend_config, detector_config)
+
+        detector_config["frames"] = 1000
+
         manager.set_acquisition_config(writer_config, backend_config, detector_config)
+
+    def test_acquisition_procedure(self):
+        manager = get_test_integration_manager()
+
+        self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.INITIALIZED")
+
+        writer_config = {"output_file": "test.h5",
+                         "user_id": 1,
+                         "group_id": 1}
+        writer_config.update(get_csax9m_test_writer_parameters())
+
+        backend_config = {"bit_depth": 16,
+                          "n_frames": 1000}
+
+        manager.set_acquisition_config()

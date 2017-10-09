@@ -55,7 +55,7 @@ class Validator(object):
                              % (backend_config["bit_depth"], detector_config["dr"]))
 
         if backend_config["n_frames"] != detector_config["frames"]:
-            raise ValueError("Invalid config. Backend 'n_frames' set to '%s', but detector 'frames' set to '%s'."
+            raise ValueError("Invalid config. Backend 'n_frames' set to '%s', but detector 'frames' set to '%s'. "
                              "They must be equal." % (backend_config["n_frames"], detector_config["frames"]))
 
     @staticmethod
