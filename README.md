@@ -4,10 +4,105 @@
 # Integration REST API
 REST API for integrating beamline software with the detector, backend, and writer.
 
+# Table of content
+1. [Build](#build)
+    1. [Conda setup](#conda_setup)
+    2. [Local build](#local_build)
+    3. [Docker build](#docker_build)
+2. [Running the server](#running_the_server)
+    1. [Detector integration server](#run_dia)
+    3. [Docker Container](#run_docker_container)
+3. [Configuration](#configuration)
+4. [Deployed instances](#deployed_instances)
+    1. [cSAXS Eiger 9M](#deployed_instances_csaxs)
+    
+<a id="build"></a>
+## Build
+
+<a id="conda_setup"></a>
+### Conda setup
+If you use conda, you can create an environment with the detector_integration_api library by running:
+
+```bash
+conda create -c paulscherrerinstitute --name <env_name> detector_integration_api
+```
+
+After that you can just source you newly created environment and start using the server.
+
+<a id="local_build"></a>
+### Local build
+You can build the library by running the setup script in the root folder of the project:
+
+```bash
+python setup.py install
+```
+
+or by using the conda also from the root folder of the project:
+
+```bash
+conda build conda-recipe
+conda install --use-local detector_integration_api
+```
+
+#### Requirements
+The library relies on the following packages:
+
+- python
+- bottle
+- requests
+- mflow_nodes
+
+In case you are using conda to install the packages, you might need to add the **paulscherrerinstitute** channel to 
+your conda config:
+
+```
+conda config --add channels paulscherrerinstitute
+```
+
+<a id="docker_build"></a>
+### Docker build
+**Warning**: When you build the docker image with **build.sh**, your built will be pushed to the PSI repo as the 
+latest detector_integration_api version. Please use the **build.sh** script only if you are sure that this 
+is what you want.
+
+To build the docker image, run the build from the **docker/** folder:
+```bash
+./build.sh
+```
+
+Before building the docker image, make sure the latest version of the library is available in Anaconda.
+
+**Please note**: There is no need to build the image if you just want to run the docker container. 
+Please see the [Docker Container](#run_docker_container) chapter.
+
+<a id="running_the_server"></a>
+## Running the server
+
+The script for running the server is located in the **detector_integration_api/** folder.
+
+- **DIA server** (start_server.py): Starts an instance of the detector integration API.
+
+You can also use the docker container directly, see the [Docker Container](#run_docker_container) chapter.
+
+Before you can run the server, you need to have (and specify where you have it) the detector configuration file and 
+the environment configuration file. Please see the [Configuration](#configuration) chapter for more details.
+
+<a id="run_dia"></a>
+### Detector integration server
+
+<a id="run_docker_container"></a>
+### Docker container
+
+
+<a id="configuration"></a>
+## Configuration
+
+<a id="deployed_instances"></a>
 ## Deployed instances
 This section is dedicated for the discussion of specific deployment instances, when there is some custom behaviour not 
 described in the general documentation above.
 
+<a id="deployed_instances_csaxs"></a>
 ### cSAXS Eiger 9M
 In this section we will discuss only specific differences for the cSAXS Eiger 9M integration.
 
