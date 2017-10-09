@@ -123,6 +123,8 @@ class IntegrationManager(object):
     def reset(self):
         _audit_logger.info("Resetting integration api.")
 
+        self.last_config_successful = False
+
         self.backend_client.reset()
         self.writer_client.stop()
         self.detector_client.stop()

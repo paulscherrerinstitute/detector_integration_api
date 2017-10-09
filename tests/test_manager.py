@@ -103,4 +103,31 @@ class TestIntegrationManager(unittest.TestCase):
         backend_config = {"bit_depth": 16,
                           "n_frames": 1000}
 
-        manager.set_acquisition_config()
+        detector_config = {"exptime": 0.01,
+                           "frames": 1000,
+                           "period": 0.01,
+                           "dr": 16}
+
+        manager.set_acquisition_config(writer_config, backend_config, detector_config)
+
+        self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.CONFIGURED")
+
+        manager.start_acquisition()
+
+        self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.RUNNING")
+
+        manager.stop_acquisition()
+
+        self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.INITIALIZED")
+
+        manager.set_acquisition_config(writer_config, backend_config, detector_config)
+
+        self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.CONFIGURED")
+
+        manager.reset()
+
+        self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.INITIALIZED")
+
+        self.assertDictEqual(writer_config, manager.writer_client.config)
+        self.assertDictEqual(backend_config, manager.backend_client.config)
+        self.assertDictEqual(detector_config, manager.detector_client.config)

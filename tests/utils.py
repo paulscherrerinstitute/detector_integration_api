@@ -6,35 +6,60 @@ class MockBackendClient(object):
     def __init__(self):
         self.status = "INITIALIZED"
         self.backend_url = "backend_url"
+        self.config = None
 
     def get_status(self):
         return self.status
 
     def set_config(self, configuration):
-        pass
+        self.status = "CONFIGURED"
+        self.config = configuration
+
+    def open(self):
+        self.status = "OPEN"
+
+    def close(self):
+        self.status = "CLOSE"
+
+    def reset(self):
+        self.status = "INITIALIZED"
 
 
 class MockDetectorClient(object):
     def __init__(self):
         self.status = "idle"
+        self.config = None
 
     def get_status(self):
         return self.status
 
     def set_config(self, configuration):
-        pass
+        self.config = configuration
+
+    def start(self):
+        self.status = "running"
+
+    def stop(self):
+        self.status = "idle"
 
 
 class MockWriterClient(object):
     def __init__(self):
-        self.status = False
+        self.is_running = False
         self._api_address = "writer_url"
+        self.config = None
 
     def get_status(self):
-        return {"is_running": self.status}
+        return {"is_running": self.is_running}
 
     def set_parameters(self, configuration):
-        pass
+        self.config = configuration
+
+    def start(self):
+        self.is_running = True
+
+    def stop(self):
+        self.is_running = False
 
 
 def get_test_integration_manager():
