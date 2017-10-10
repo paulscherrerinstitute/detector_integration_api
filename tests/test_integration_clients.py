@@ -19,6 +19,7 @@ class TestIntegrationManager(unittest.TestCase):
                                                 "was 'frames': invalid 10"):
             DetectorClient.validate_response(b'invalid 10', "frames")
 
-        with self.assertRaisesRegex(ValueError, "Invalid parameter 'frames' value, set '11' "
-                                                "but received '10.0': frames 10.0000"):
+        with self.assertRaisesRegex(ValueError, "Invalid parameter 'frames' value, expected "):
             DetectorClient.validate_response(b'frames 10.0000', "frames", 11)
+
+        DetectorClient.validate_response(b'status idle', "status", ["idle", "running"])

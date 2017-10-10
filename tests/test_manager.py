@@ -8,18 +8,18 @@ class TestIntegrationManager(unittest.TestCase):
     def test_state_machine(self):
         manager = get_test_integration_manager()
 
-        manager.writer_client.status = False
+        manager.writer_client.is_running = False
         manager.backend_client.status = "INITIALIZED"
         manager.detector_client.status = "idle"
         self.assertEqual(manager.get_acquisition_status(), IntegrationStatus.INITIALIZED)
         self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.INITIALIZED")
 
         writer_status, backend_status, detector_status = manager.get_status_details()
-        self.assertEqual(writer_status, manager.writer_client.status)
+        self.assertEqual(writer_status, manager.writer_client.is_running)
         self.assertEqual(backend_status, manager.backend_client.status)
         self.assertEqual(detector_status, manager.detector_client.status)
 
-        manager.writer_client.status = False
+        manager.writer_client.is_running = False
         manager.backend_client.status = "CONFIGURED"
         manager.detector_client.status = "idle"
         manager.last_config_successful = True
@@ -29,20 +29,20 @@ class TestIntegrationManager(unittest.TestCase):
         manager.last_config_successful = False
         self.assertEqual(manager.get_acquisition_status(), IntegrationStatus.ERROR)
 
-        manager.writer_client.status = True
+        manager.writer_client.is_running = True
         manager.backend_client.status = "OPEN"
         manager.detector_client.status = "running"
         self.assertEqual(manager.get_acquisition_status(), IntegrationStatus.RUNNING)
         self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.RUNNING")
 
-        manager.writer_client.status = False
+        manager.writer_client.is_running = False
         self.assertEqual(manager.get_acquisition_status(), IntegrationStatus.ERROR)
         self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.ERROR")
 
     def test_set_config(self):
         manager = get_test_integration_manager()
 
-        manager.writer_client.status = False
+        manager.writer_client.is_running = False
         manager.backend_client.status = "INITIALIZED"
         manager.detector_client.status = "idle"
 

@@ -13,7 +13,8 @@ class DetectorClient(object):
 
         cli_result = subprocess.check_output(cli_command)
         response, received_parameter_name, received_value = self.interpret_response(cli_result, "status")
-        self.verify_response_data(response, "status", received_parameter_name, "running", received_value)
+        # The status can also be 'idle', for single image short exptime acquisitions.
+        self.verify_response_data(response, "status", received_parameter_name, ["idle", "running"], received_value)
 
     def stop(self):
         cli_command = ["sls_detector_put", "status", "stop"]
@@ -74,11 +75,15 @@ class DetectorClient(object):
 
         # The returned expected_value must be the same as the set expected_value.
         if expected_value is not None:
-            if isinstance(expected_value, Number):
+
+            if not isinstance(expected_value, list):
+                expected_value = [expected_value]
+
+            if isinstance(expected_value[0], Number):
                 received_value = float(received_value)
 
-            if received_value != expected_value:
-                raise ValueError("Invalid parameter '%s' value, set '%s' but received '%s': %s"
+            if received_value not in expected_value:
+                raise ValueError("Invalid parameter '%s' value, expected '%s' but received '%s': %s"
                                  % (expected_parameter_name, expected_value, received_value, response))
 
         return received_value
