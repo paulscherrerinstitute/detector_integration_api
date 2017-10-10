@@ -61,3 +61,11 @@ class TestRestClient(unittest.TestCase):
         client.stop()
 
         self.assertEqual(client.get_status()["status"], "IntegrationStatus.INITIALIZED")
+
+        client.debug_start()
+
+        self.assertEqual(client.get_status()["status"], "IntegrationStatus.RUNNING")
+
+        client.debug_stop()
+
+        self.assertEqual(client.get_status()["status"], "IntegrationStatus.INITIALIZED")

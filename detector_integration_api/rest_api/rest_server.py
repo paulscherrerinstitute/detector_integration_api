@@ -21,6 +21,43 @@ routes = {
 }
 
 
+def register_debug_rest_interface(app, integration_manager):
+    @app.post("/debug" + routes["start"])
+    def debug_start():
+        # Stop the current acquisition if running.
+        debug_stop()
+
+        debug_config = request.json or {}
+
+        debug_writer_config = debug_config.get("writer", {})
+        if debug_writer_config:
+            integration_manager.writer_client.set_parameters(debug_writer_config)
+
+        # We always need to call the config parameter on the backend.
+        debug_backend_config = debug_config.get("backend", {})
+        integration_manager.backend_client.set_config(debug_backend_config)
+
+        debug_detector_config = debug_config.get("detector", {})
+        if debug_detector_config:
+            integration_manager.detector_client.set_config(debug_detector_config)
+
+        integration_manager.writer_client.start()
+        integration_manager.backend_client.open()
+        integration_manager.detector_client.start()
+
+        return {"state": "ok",
+                "status": integration_manager.get_acquisition_status_string()}
+
+    @app.post("/debug" + routes["stop"])
+    def debug_stop():
+        integration_manager.detector_client.stop()
+        integration_manager.backend_client.reset()
+        integration_manager.writer_client.stop()
+
+        return {"state": "ok",
+                "status": integration_manager.get_acquisition_status_string()}
+
+
 def register_rest_interface(app, integration_manager):
     @app.post(routes["start"])
     def start():

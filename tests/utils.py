@@ -1,7 +1,7 @@
 import bottle
 
 from detector_integration_api.manager import IntegrationManager
-from detector_integration_api.rest_api.rest_server import register_rest_interface
+from detector_integration_api.rest_api.rest_server import register_rest_interface, register_debug_rest_interface
 from detector_integration_api.validation import csax_eiger9m
 
 
@@ -88,6 +88,7 @@ def start_test_integration_server(host, port):
 
     app = bottle.Bottle()
     register_rest_interface(app=app, integration_manager=integration_manager)
+    register_debug_rest_interface(app=app, integration_manager=integration_manager)
 
     bottle.run(app=app, host=host, port=port)
 

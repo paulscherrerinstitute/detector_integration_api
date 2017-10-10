@@ -81,3 +81,17 @@ class DetectorIntegrationClient(object):
         response = requests.get(request_url).json()
 
         return validate_response(response)
+
+    def debug_start(self, configuration=None):
+        request_url = self.api_address + "/debug" + routes["start"]
+
+        response = requests.post(request_url, json=configuration).json()
+
+        return validate_response(response)
+
+    def debug_stop(self):
+        request_url = self.api_address + "/debug" + routes["stop"]
+
+        response = requests.post(request_url).json()
+
+        return validate_response(response)

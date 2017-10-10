@@ -8,7 +8,7 @@ from detector_integration_api import config
 from detector_integration_api.client.backend_rest_client import BackendClient
 from detector_integration_api.client.detector_cli_client import DetectorClient
 from detector_integration_api.manager import IntegrationManager
-from detector_integration_api.rest_api.rest_server import register_rest_interface
+from detector_integration_api.rest_api.rest_server import register_rest_interface, register_debug_rest_interface
 from detector_integration_api.validation import csax_eiger9m
 
 _logger = logging.getLogger(__name__)
@@ -30,6 +30,7 @@ def start_integration_server(host, port, backend_url, writer_url, writer_instanc
 
     app = bottle.Bottle()
     register_rest_interface(app=app, integration_manager=integration_manager)
+    register_debug_rest_interface(app=app, integration_manager=integration_manager)
 
     try:
         bottle.run(app=app, host=host, port=port)
