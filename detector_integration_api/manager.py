@@ -131,4 +131,4 @@ class IntegrationManager(object):
         self.detector_client.stop()
 
     def get_server_info(self):
-        pass
+        return "Nothing yet."

@@ -164,6 +164,7 @@ def register_rest_interface(app, integration_manager):
     @app.get(routes["get_server_info"])
     def get_server_info():
         return {"state": "ok",
+                "status": integration_manager.get_acquisition_status_string(),
                 "server_info": integration_manager.get_server_info()}
 
     @app.error(500)
