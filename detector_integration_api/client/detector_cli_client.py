@@ -25,17 +25,17 @@ class DetectorClient(object):
         self.verify_response_data(response, "status", received_parameter_name, "idle", received_value)
 
     def get_status(self):
-        raw_status = self._get("status")
+        raw_status = self.get_value("status")
         return raw_status
 
-    def _get(self, parameter_name):
+    def get_value(self, parameter_name):
         cli_command = ["sls_detector_get", parameter_name]
         _logger.debug("Executing get command: '%s'.", " ".join(cli_command))
 
         cli_result = subprocess.check_output(cli_command)
         return self.validate_response(cli_result, parameter_name)
 
-    def _put(self, parameter_name, value):
+    def set_value(self, parameter_name, value):
         cli_command = ["sls_detector_put", parameter_name, str(value)]
         _logger.debug("Executing put command: '%s'.", " ".join(cli_command))
 
@@ -44,7 +44,7 @@ class DetectorClient(object):
 
     def set_config(self, configuration):
         for name, value in configuration.items():
-            self._put(name, value)
+            self.set_value(name, value)
 
     @staticmethod
     def interpret_response(output_bytes, parameter_name):

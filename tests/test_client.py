@@ -104,3 +104,5 @@ class TestRestClient(unittest.TestCase):
         self.assertDictEqual(response["config"]["detector"], detector_config)
 
         self.assertEqual(client.get_status()["status"], "IntegrationStatus.CONFIGURED")
+
+        self.assertEqual(client.get_detector_value("frames"), response["config"]["detector"]["frames"])

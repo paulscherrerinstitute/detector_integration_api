@@ -83,6 +83,13 @@ class DetectorIntegrationClient(object):
 
         return validate_response(response)
 
+    def get_detector_value(self, name):
+        request_url = self.api_address + routes["get_detector_value"] + "/" + name
+
+        response = requests.get(request_url).json()
+
+        return validate_response(response)["value"]
+
     def reset(self):
         request_url = self.api_address + routes["reset"]
 

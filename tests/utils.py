@@ -45,6 +45,9 @@ class MockDetectorClient(object):
     def stop(self):
         self.status = "idle"
 
+    def get_value(self, name):
+        return self.config[name]
+
 
 class MockWriterClient(object):
     def __init__(self):
