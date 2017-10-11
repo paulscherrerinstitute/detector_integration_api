@@ -26,12 +26,6 @@ REST API for integrating beamline software with the detector, backend, and write
 7. [Deployed instances](#deployed_instances)
     1. [cSAXS Eiger 9M](#deployed_instances_csaxs)
     
-    
-    get_config | / | Integration configuration. | Information about the current set configuration. |
-| set_config | Writer, Backend and Detector config. | Config that was set. | Set the complete config for the acquisition. |
-| set_last_config | / | Config that was set. | Re-apply the last used config. Used to transit from INITIALIZED to CONIFGURED without sending a new config. |
-| update_config |
-    
 <a id="quick"></a>
 ## Quick introduction
 This is meant to be just a quick starting guide. Details on all topics covered in this introduction are available 
@@ -284,7 +278,7 @@ This section describes the available methods that can be accessed over the REST 
 discussed below).
 
 | Method | Parameters | Return value | Description |
-|---------|------------|-------------|
+|--------|------------|--------------|-------------|
 | start | / | / | Start the acquisition. |
 | stop | / | / | Stop the acquisition. |
 | reset | / | / | Reset the integration status. |
