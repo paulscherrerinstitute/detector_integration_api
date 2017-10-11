@@ -11,7 +11,6 @@ from tests.utils import start_test_integration_server, get_csax9m_test_writer_pa
 
 
 class TestRestClient(unittest.TestCase):
-
     def setUp(self):
         self.host = "0.0.0.0"
         self.port = 10000
@@ -23,7 +22,6 @@ class TestRestClient(unittest.TestCase):
         sleep(1)
 
     def tearDown(self):
-
         os.kill(self.dia_process.pid, signal.SIGINT)
 
         # Wait for the server to die.
@@ -46,7 +44,7 @@ class TestRestClient(unittest.TestCase):
                            "exptime": 0.01,
                            "dr": 16}
 
-        response = client.set_config({"writer": writer_config, "backend": backend_config, "detector": detector_config})
+        response = client.set_config(writer_config, backend_config, detector_config)
 
         self.assertDictEqual(response["config"]["writer"], writer_config)
         self.assertDictEqual(response["config"]["backend"], backend_config)
@@ -69,3 +67,40 @@ class TestRestClient(unittest.TestCase):
         client.debug_stop()
 
         self.assertEqual(client.get_status()["status"], "IntegrationStatus.INITIALIZED")
+
+        with self.assertRaisesRegex(Exception, "Invalid config"):
+            client.update_config(writer_config={"user_id": 1}, backend_config={"n_frames": 50})
+
+        response = client.update_config(writer_config={"user_id": 1},
+                                        backend_config={"n_frames": 50},
+                                        detector_config={"frames": 50})
+
+        writer_config["user_id"] = 1
+        backend_config["n_frames"] = 50
+        detector_config["frames"] = 50
+
+        self.assertDictEqual(response["config"]["writer"], writer_config)
+        self.assertDictEqual(response["config"]["backend"], backend_config)
+        self.assertDictEqual(response["config"]["detector"], detector_config)
+
+        response = client.update_config(writer_config={"group_id": 1})
+
+        writer_config["group_id"] = 1
+
+        self.assertDictEqual(response["config"]["writer"], writer_config)
+        self.assertDictEqual(response["config"]["backend"], backend_config)
+        self.assertDictEqual(response["config"]["detector"], detector_config)
+
+        self.assertEqual(client.get_status()["status"], "IntegrationStatus.CONFIGURED")
+
+        client.reset()
+
+        self.assertEqual(client.get_status()["status"], "IntegrationStatus.INITIALIZED")
+
+        response = client.set_last_config()
+
+        self.assertDictEqual(response["config"]["writer"], writer_config)
+        self.assertDictEqual(response["config"]["backend"], backend_config)
+        self.assertDictEqual(response["config"]["detector"], detector_config)
+
+        self.assertEqual(client.get_status()["status"], "IntegrationStatus.CONFIGURED")

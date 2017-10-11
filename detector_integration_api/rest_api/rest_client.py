@@ -54,15 +54,30 @@ class DetectorIntegrationClient(object):
 
         return validate_response(response)
 
-    def set_config(self, configuration):
+    def set_config(self, writer_config, backend_config, detector_config):
         request_url = self.api_address + routes["set_config"]
+
+        configuration = {"writer": writer_config,
+                         "backend": backend_config,
+                         "detector": detector_config}
 
         response = requests.put(request_url, json=configuration).json()
 
         return validate_response(response)
 
-    def update_config(self, configuration):
+    def set_last_config(self):
+        request_url = self.api_address + routes["set_last_config"]
+
+        response = requests.post(request_url).json()
+
+        return validate_response(response)
+
+    def update_config(self, writer_config=None, backend_config=None, detector_config=None):
         request_url = self.api_address + routes["update_config"]
+
+        configuration = {"writer": writer_config,
+                         "backend": backend_config,
+                         "detector": detector_config}
 
         response = requests.post(request_url, json=configuration).json()
 
