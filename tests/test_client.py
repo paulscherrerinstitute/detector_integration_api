@@ -31,10 +31,10 @@ class TestRestClient(unittest.TestCase):
         client = DetectorIntegrationClient()
         self.assertEqual(client.get_status()["status"], "IntegrationStatus.INITIALIZED")
 
-        writer_config = {"output_file": "/tmp/test.h5",
-                         "user_id": 0,
-                         "group_id": 0}
-        writer_config.update(get_csax9m_test_writer_parameters())
+        writer_config = get_csax9m_test_writer_parameters()
+        writer_config.update({"output_file": "/tmp/test.h5",
+                              "user_id": 0,
+                              "group_id": 0})
 
         backend_config = {"bit_depth": 16,
                           "n_frames": 100}
@@ -110,6 +110,6 @@ class TestRestClient(unittest.TestCase):
         client.reset()
 
         client.set_config_from_file(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                 "csax_eiger_config.json"))
+                                                 "csaxs_eiger_config.json"))
 
         self.assertEqual(client.get_status()["status"], "IntegrationStatus.CONFIGURED")

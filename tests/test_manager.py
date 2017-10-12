@@ -54,6 +54,8 @@ class TestIntegrationManager(unittest.TestCase):
             manager.set_acquisition_config(writer_config, backend_config, detector_config)
 
         writer_config.update(get_csax9m_test_writer_parameters())
+        # See if only 1 missing parameter is still detected.
+        del writer_config["output_file"]
 
         with self.assertRaisesRegex(ValueError, "Writer configuration missing mandatory"):
             manager.set_acquisition_config(writer_config, backend_config, detector_config)
@@ -95,10 +97,10 @@ class TestIntegrationManager(unittest.TestCase):
 
         self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.INITIALIZED")
 
-        writer_config = {"output_file": "test.h5",
-                         "user_id": 1,
-                         "group_id": 1}
-        writer_config.update(get_csax9m_test_writer_parameters())
+        writer_config = get_csax9m_test_writer_parameters()
+        writer_config.update({"output_file": "test.h5",
+                              "user_id": 1,
+                              "group_id": 1})
 
         backend_config = {"bit_depth": 16,
                           "n_frames": 1000}
