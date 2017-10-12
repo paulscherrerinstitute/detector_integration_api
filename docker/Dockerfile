@@ -24,3 +24,5 @@ ADD startup.sh ${RUN_DIR}
 RUN chmod +x ${RUN_DIR}/startup.sh
 
 WORKDIR ${RUN_DIR}
+
+ENTRYPOINT ${RUN_DIR}/startup.sh
