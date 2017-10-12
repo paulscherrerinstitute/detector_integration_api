@@ -14,7 +14,6 @@ class IntegrationStatus(Enum):
 
 
 class IntegrationManager(object):
-
     def __init__(self, backend_client, writer_client, detector_client, validator):
         self.backend_client = backend_client
         self.writer_client = writer_client
@@ -131,4 +130,10 @@ class IntegrationManager(object):
         self.detector_client.stop()
 
     def get_server_info(self):
-        return "Nothing yet."
+        return {
+            "clients": {
+                "backend_url": self.backend_client.backend_url,
+                "writer_url": self.writer_client._api_address.format(url="")},
+            "validator": self.validator.__name__,
+            "last_config_successful": self.last_config_successful
+        }

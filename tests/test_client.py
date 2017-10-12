@@ -113,3 +113,5 @@ class TestRestClient(unittest.TestCase):
                                                  "csaxs_eiger_config.json"))
 
         self.assertEqual(client.get_status()["status"], "IntegrationStatus.CONFIGURED")
+
+        self.assertTrue("server_info" in client.get_server_info())
