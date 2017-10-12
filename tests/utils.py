@@ -1,11 +1,11 @@
 import json
+from importlib import import_module
 
 import bottle
 import os
 
 from detector_integration_api.manager import IntegrationManager
 from detector_integration_api.rest_api.rest_server import register_rest_interface, register_debug_rest_interface
-from detector_integration_api.validation import csax_eiger9m
 
 
 class MockBackendClient(object):
@@ -71,11 +71,13 @@ class MockWriterClient(object):
         self.is_running = False
 
 
-def get_test_integration_manager():
+def get_test_integration_manager(validator_module="detector_integration_api.validation.debug"):
     backend_client = MockBackendClient()
     detector_client = MockDetectorClient()
     writer_client = MockWriterClient()
-    manager = IntegrationManager(backend_client, writer_client, detector_client, csax_eiger9m.Validator)
+    validator = import_module(validator_module)
+
+    manager = IntegrationManager(backend_client, writer_client, detector_client, validator)
 
     return manager
 
@@ -85,7 +87,7 @@ def start_test_integration_server(host, port):
     backend_client = MockBackendClient()
     writer_client = MockWriterClient()
     detector_client = MockDetectorClient()
-    validator = csax_eiger9m.Validator
+    validator = import_module("detector_integration_api.validation.csax_eiger9m")
 
     integration_manager = IntegrationManager(writer_client=writer_client,
                                              backend_client=backend_client,

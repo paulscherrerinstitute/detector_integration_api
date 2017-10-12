@@ -40,7 +40,7 @@ class TestIntegrationManager(unittest.TestCase):
         self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.ERROR")
 
     def test_set_config(self):
-        manager = get_test_integration_manager()
+        manager = get_test_integration_manager("detector_integration_api.validation.csax_eiger9m")
 
         manager.writer_client.is_running = False
         manager.backend_client.status = "INITIALIZED"
@@ -93,7 +93,7 @@ class TestIntegrationManager(unittest.TestCase):
         manager.set_acquisition_config(writer_config, backend_config, detector_config)
 
     def test_acquisition_procedure(self):
-        manager = get_test_integration_manager()
+        manager = get_test_integration_manager("detector_integration_api.validation.csax_eiger9m")
 
         self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.INITIALIZED")
 
@@ -133,3 +133,22 @@ class TestIntegrationManager(unittest.TestCase):
         self.assertDictEqual(writer_config, manager.writer_client.config)
         self.assertDictEqual(backend_config, manager.backend_client.config)
         self.assertDictEqual(detector_config, manager.detector_client.config)
+
+    def test_debug_validator(self):
+        manager = get_test_integration_manager()
+
+        writer_config = {"output_file": "test.h5",
+                         "user_id": 1,
+                         "group_id": 1}
+
+        backend_config = {"bit_depth": 16,
+                          "n_frames": 1000}
+
+        detector_config = {"exptime": 0.01,
+                           "frames": 1000,
+                           "period": 0.01,
+                           "dr": 16}
+
+        manager.set_acquisition_config(writer_config, backend_config, detector_config)
+
+        self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.CONFIGURED")
