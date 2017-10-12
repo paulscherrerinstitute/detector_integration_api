@@ -54,9 +54,7 @@ def register_debug_rest_interface(app, integration_manager):
 
     @app.post("/debug" + routes["stop"])
     def debug_stop():
-        integration_manager.detector_client.stop()
-        integration_manager.backend_client.reset()
-        integration_manager.writer_client.stop()
+        integration_manager.stop_acquisition()
 
         return {"state": "ok",
                 "status": integration_manager.get_acquisition_status_string()}

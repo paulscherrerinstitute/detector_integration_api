@@ -1,13 +1,13 @@
 from detector_integration_api.manager import IntegrationStatus
 
 
-writer_cfg_params = ["output_file"]
+writer_cfg_params = []
 backend_cfg_params = []
 detector_cfg_params = []
 
 
 def validate_writer_config(configuration):
-    if not configuration:
+    if configuration is None:
         raise ValueError("Writer configuration cannot be empty.")
 
     if not all(x in configuration for x in writer_cfg_params):
@@ -19,7 +19,7 @@ def validate_writer_config(configuration):
 
 
 def validate_backend_config(configuration):
-    if not configuration:
+    if configuration is None:
         raise ValueError("Backend configuration cannot be empty.")
 
     if not all(x in configuration for x in backend_cfg_params):
@@ -28,7 +28,7 @@ def validate_backend_config(configuration):
 
 
 def validate_detector_config(configuration):
-    if not configuration:
+    if configuration is None:
         raise ValueError("Detector configuration cannot be empty.")
 
     if not all(x in configuration for x in detector_cfg_params):
