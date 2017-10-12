@@ -3,9 +3,9 @@
 cd ${RUN_DIR}
 
 # Check if the SLS detector config file is present.
-if [ ! -f /etc/eiger_9m_10gb.config ]
+if [ ! -f /etc/detector.config ]
 then
-    echo "File /etc/eiger_9m_10gb.config not found in container.";
+    echo "File /etc/detector.config not found in container. Please mount it using -v.";
     exit -1;
 fi
 
