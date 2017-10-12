@@ -19,7 +19,7 @@ if [ -z "${DIA_WRITER_INSTANCE_NAME}" ]; then echo "ENV variable DIA_WRITER_INST
 
 # Configure the SLS detectors.
 echo "Configure SLS detector..."
-sls_detector_put 0-config /etc/eiger_9m_10gb.config
+sls_detector_put 0-config /etc/detector.config
 echo "Done."
 
 # Run the API server.
