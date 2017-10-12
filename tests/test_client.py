@@ -106,3 +106,10 @@ class TestRestClient(unittest.TestCase):
         self.assertEqual(client.get_status()["status"], "IntegrationStatus.CONFIGURED")
 
         self.assertEqual(client.get_detector_value("frames"), response["config"]["detector"]["frames"])
+
+        client.reset()
+
+        client.set_config_from_file(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                                 "csax_eiger_config.json"))
+
+        self.assertEqual(client.get_status()["status"], "IntegrationStatus.CONFIGURED")

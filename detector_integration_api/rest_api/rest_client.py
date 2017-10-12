@@ -1,3 +1,5 @@
+import json
+
 import requests
 
 from detector_integration_api import config
@@ -64,6 +66,14 @@ class DetectorIntegrationClient(object):
         response = requests.put(request_url, json=configuration).json()
 
         return validate_response(response)
+
+    def set_config_from_file(self, filename):
+        with open(filename) as input_file:
+            configuration = json.load(input_file)
+
+        self.set_config(configuration.get("writer"),
+                        configuration.get("backend"),
+                        configuration.get("detector"))
 
     def set_last_config(self):
         request_url = self.api_address + routes["set_last_config"]
