@@ -57,8 +57,7 @@ if status != "IntegrationStatus.INITIALIZED":
 
 # Define the config for the writer.
 writer_config = {"output_file": "/tmp/test.h5",
-                 "user_id": 0,
-                 "group_id": 0}
+                 "process_uid": 0}
 
 # Define the config for the backend.
 backend_config = {"bit_depth": 16,
