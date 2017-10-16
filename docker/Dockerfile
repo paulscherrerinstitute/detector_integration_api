@@ -25,4 +25,4 @@ RUN chmod +x ${RUN_DIR}/startup.sh
 
 WORKDIR ${RUN_DIR}
 
-ENTRYPOINT ${RUN_DIR}/startup.sh
+CMD ${RUN_DIR}/startup.sh
