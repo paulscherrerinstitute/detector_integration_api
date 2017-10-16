@@ -35,6 +35,12 @@ class TestIntegrationManager(unittest.TestCase):
         self.assertEqual(manager.get_acquisition_status(), IntegrationStatus.RUNNING)
         self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.RUNNING")
 
+        manager.writer_client.is_running = True
+        manager.backend_client.status = "OPEN"
+        manager.detector_client.status = "idle"
+        self.assertEqual(manager.get_acquisition_status(), IntegrationStatus.DETECTOR_STOPPED)
+        self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.DETECTOR_STOPPED")
+
         manager.writer_client.is_running = False
         self.assertEqual(manager.get_acquisition_status(), IntegrationStatus.ERROR)
         self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.ERROR")

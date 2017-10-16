@@ -10,6 +10,7 @@ class IntegrationStatus(Enum):
     INITIALIZED = "initialized",
     CONFIGURED = "configured",
     RUNNING = "running",
+    DETECTOR_STOPPED = "detector_stopped",
     ERROR = "error"
 
 

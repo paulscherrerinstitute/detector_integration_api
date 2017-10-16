@@ -36,4 +36,7 @@ def interpret_status(writer, backend, detector):
     elif writer is True and detector == "running" and backend == "OPEN":
         return IntegrationStatus.RUNNING
 
+    elif writer is True and detector == "idle" and backend == "OPEN":
+        return IntegrationStatus.DETECTOR_STOPPED
+
     return IntegrationStatus.ERROR
