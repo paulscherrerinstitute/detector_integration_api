@@ -186,6 +186,9 @@ Methods that do not modify the state machine are not described in this table, as
 | IntegrationStatus.RUNNING | Acquisition started. |||
 | | | stop | IntegrationStatus.INITIALIZED |
 | | | reset | IntegrationStatus.INITIALIZED |
+| IntegrationStatus.DETECTOR_STOPPED | Backend and writer ready, backend not sending data. |||
+| | | stop | IntegrationStatus.INITIALIZED |
+| | | reset | IntegrationStatus.INITIALIZED |
 | IntegrationStatus.ERROR | Something went wrong. |||
 | | | stop | IntegrationStatus.INITIALIZED |
 | | | reset | IntegrationStatus.INITIALIZED |
@@ -196,6 +199,8 @@ A short summary would be:
 - You cannot change the configuration while the acquisition is running or there is an error.
 - The stop method can be called in every state, but it stop the acquisition only if it is running.
 - Whatever happens, you have the reset method that returns you in the initial state.
+- When the detector stops sending data, the DETECTOR_STOPPED . Call STOP to close the backend and stop the 
+writing.
 
 <a id="configuration"></a>
 ## Configuration
