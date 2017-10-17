@@ -129,8 +129,18 @@ class TestRestClient(unittest.TestCase):
                              backend_config=backend_config,
                              writer_config=writer_config)
 
-        configuration = client.get_config()
+        configuration = client.get_config()["config"]
 
-        # self.assertEqual(configuration["detector"], detector_config)
-        # self.assertEqual(configuration["writer"], writer_config)
-        # self.assertEqual(configuration["backend"], backend_config)
+        self.assertEqual(configuration["detector"], detector_config)
+        self.assertEqual(configuration["writer"], writer_config)
+        self.assertEqual(configuration["backend"], backend_config)
+
+        client.update_config(detector_config={"dr": 32})
+        detector_config["dr"] = 32
+
+        configuration = client.get_config()["config"]
+        self.assertEqual(configuration["detector"], detector_config)
+        self.assertEqual(configuration["writer"], writer_config)
+        self.assertEqual(configuration["backend"], backend_config)
+
+
