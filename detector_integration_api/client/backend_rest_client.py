@@ -22,9 +22,11 @@ class BackendClient(object):
         return response_text
 
     def close(self):
+        _logger.debug("Stopping backend.")
+
         response_text = requests.post(self.backend_url + "/state/close", json={}).text
 
-        _logger.debug("Stopping backend got %s" % response_text)
+        _logger.debug("Response from backend: %s" % response_text)
 
         if response_text not in ("CLOSED", "CLOSING"):
             raise ValueError("Cannot stop backend, aborting: %s" % response_text)
@@ -33,14 +35,18 @@ class BackendClient(object):
         return requests.get(self.backend_url + "/state").json()["global_state"]
 
     def reset(self):
+        _logger.debug("Resetting backend.")
+
         response_text = requests.post(self.backend_url + "/state/reset", json={}).text
 
-        _logger.debug("Resetting backend got %s" % response_text)
+        _logger.debug("Response from backend: %s" % response_text)
 
     def set_config(self, configuration):
+        _logger.debug("Configuring backend.")
+
         response_text = requests.post(self.backend_url + "/state/configure", json={"settings": configuration}).text
 
-        _logger.debug("Backend cfg got %s" % response_text)
+        _logger.debug("Response from backend %s" % response_text)
 
         if response_text != "CONFIGURED":
             raise ValueError("Cannot setup backend parameters, aborting: %s" % response_text)

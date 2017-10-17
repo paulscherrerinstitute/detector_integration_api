@@ -50,9 +50,9 @@ class IntegrationManager(object):
         status = self.get_acquisition_status()
 
         if status == IntegrationStatus.RUNNING:
+            self.detector_client.stop()
             self.backend_client.close()
             self.writer_client.stop()
-            self.detector_client.stop()
 
         self.reset()
 
@@ -126,9 +126,9 @@ class IntegrationManager(object):
 
         self.last_config_successful = False
 
+        self.detector_client.stop()
         self.backend_client.reset()
         self.writer_client.stop()
-        self.detector_client.stop()
 
     def get_server_info(self):
         return {
