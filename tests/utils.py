@@ -82,12 +82,12 @@ def get_test_integration_manager(validator_module="detector_integration_api.vali
     return manager
 
 
-def start_test_integration_server(host, port):
+def start_test_integration_server(host, port, validator="detector_integration_api.validation.debug"):
 
     backend_client = MockBackendClient()
     writer_client = MockWriterClient()
     detector_client = MockDetectorClient()
-    validator = import_module("detector_integration_api.validation.csax_eiger9m")
+    validator = import_module(validator)
 
     integration_manager = IntegrationManager(writer_client=writer_client,
                                              backend_client=backend_client,

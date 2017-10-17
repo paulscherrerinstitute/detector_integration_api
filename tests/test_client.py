@@ -68,9 +68,6 @@ class TestRestClient(unittest.TestCase):
 
         self.assertEqual(client.get_status()["status"], "IntegrationStatus.INITIALIZED")
 
-        with self.assertRaisesRegex(Exception, "Invalid config"):
-            client.update_config(writer_config={"user_id": 1}, backend_config={"n_frames": 50})
-
         response = client.update_config(writer_config={"user_id": 1},
                                         backend_config={"n_frames": 50},
                                         detector_config={"frames": 50})
@@ -115,3 +112,25 @@ class TestRestClient(unittest.TestCase):
         self.assertEqual(client.get_status()["status"], "IntegrationStatus.CONFIGURED")
 
         self.assertTrue("server_info" in client.get_server_info())
+
+    def test_update_config(self):
+        client = DetectorIntegrationClient()
+
+        config = client.get_config()
+        self.assertEqual(config["config"]["backend"], {})
+        self.assertEqual(config["config"]["writer"], {})
+        self.assertEqual(config["config"]["detector"], {})
+
+        detector_config = {"frames": 10000, "dr": 16, "period": 0.001}
+        backend_config = {"n_frames": 10000, "bit_depth": 16}
+        writer_config = {"process_uid": 16371, "output_file": "something"}
+
+        client.update_config(detector_config=detector_config,
+                             backend_config=backend_config,
+                             writer_config=writer_config)
+
+        configuration = client.get_config()
+
+        # self.assertEqual(configuration["detector"], detector_config)
+        # self.assertEqual(configuration["writer"], writer_config)
+        # self.assertEqual(configuration["backend"], backend_config)
