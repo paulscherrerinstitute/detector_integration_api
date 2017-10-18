@@ -20,6 +20,7 @@ routes = {
     "set_last_config": "/api/v1/configure",
 
     "get_detector_value": "/api/v1/detector/value",
+    "set_detector_value": "/api/v1/detector/value",
 
     "get_server_info": "/api/v1/info",
 }
@@ -147,6 +148,25 @@ def register_rest_interface(app, integration_manager):
     @app.get(routes["get_detector_value"] + "/<name>")
     def get_detector_value(name):
         value = integration_manager.detector_client.get_value(name)
+
+        return {"state": "ok",
+                "status": integration_manager.get_acquisition_status_string(),
+                "value": value}
+
+    @app.post(routes["set_detector_value"])
+    def set_detector_value():
+        parameter_request = request.json
+
+        if not parameter_request:
+            raise ValueError("Set detector value JSON request cannot be empty.")
+
+        if "name" not in parameter_request or 'value' not in parameter_request:
+            raise ValueError("'name' and 'value' must be set in JSON request.")
+
+        parameter_name = parameter_request["name"]
+        parameter_value = parameter_request["value"]
+
+        value = integration_manager.detector_client.set_value(parameter_name, parameter_value, no_verification=True)
 
         return {"state": "ok",
                 "status": integration_manager.get_acquisition_status_string(),

@@ -100,6 +100,16 @@ class DetectorIntegrationClient(object):
 
         return validate_response(response)["value"]
 
+    def set_detector_value(self, parameter_name, parameter_value):
+        request_url = self.api_address + routes["set_detector_value"]
+
+        request_json = {"name": parameter_name,
+                        "value": parameter_value}
+
+        response = requests.post(request_url, json=request_json).json()
+
+        return validate_response(response)["value"]
+
     def reset(self):
         request_url = self.api_address + routes["reset"]
 

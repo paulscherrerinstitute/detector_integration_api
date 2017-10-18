@@ -34,7 +34,7 @@ class MockBackendClient(object):
 class MockDetectorClient(object):
     def __init__(self):
         self.status = "idle"
-        self.config = None
+        self.config = {}
 
     def get_status(self):
         return self.status
@@ -50,6 +50,10 @@ class MockDetectorClient(object):
 
     def get_value(self, name):
         return self.config[name]
+
+    def set_value(self, name, value, no_verification=False):
+        self.config[name] = value
+        return value
 
 
 class MockWriterClient(object):

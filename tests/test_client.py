@@ -143,4 +143,15 @@ class TestRestClient(unittest.TestCase):
         self.assertEqual(configuration["writer"], writer_config)
         self.assertEqual(configuration["backend"], backend_config)
 
+    def test_set_detector_value(self):
+        client = DetectorIntegrationClient()
+
+        client
+
+        value = 0.023
+        client.set_detector_value("period", value)
+
+        self.assertEqual(value, client.get_detector_value("period"))
+
+
 
