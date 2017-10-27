@@ -189,10 +189,10 @@ def register_rest_interface(app, integration_manager):
                 "status": integration_manager.get_acquisition_status_string(),
                 "server_info": integration_manager.get_server_info()}
 
-    @app.get(routes["get_metrics"] + "/<metrics_name>")
-    def get_metrics(metrics_name):
+    @app.get(routes["get_metrics"])
+    def get_metrics():
         return {"state": "ok",
-                "metrics": integration_manager.get_metrics(metric_name)}
+                "metrics": integration_manager.get_metrics()}
 
     @app.get(routes["backend_client"] + "/<action>")
     def get_backend_client(action):
@@ -201,16 +201,21 @@ def register_rest_interface(app, integration_manager):
 
     @app.put(routes["backend_client"] + "/<action>")
     def put_backend_client(action):
-        if action != "config":
+        if action not in ["open", "close", "reset", "config"]:
             raise ValueError("Action %s not supported. Currently supported actions: config" % action)
         new_config = request.json
-        integration_manager.validator.validate_backend_config(new_config)
-        integration_manager.backend_client.set_config(new_config)
-        integration_manager._last_set_backend_config = new_config
-
-        return {"state": "ok",
-                "status": integration_manager.backend_client.get_status(),
-                "config": integration_manager.backend_client._last_set_backend_config}
+        if action == "config":
+            integration_manager.validator.validate_backend_config(new_config)
+            integration_manager.backend_client.set_config(new_config)
+            integration_manager._last_set_backend_config = new_config 
+            return {"state": "ok",
+                    "status": integration_manager.backend_client.get_status(),
+                    "config": integration_manager.backend_client._last_set_backend_config}
+        else:
+            integration_manager.backend_client.__getattribute__(action)()
+            return {"state": "ok",
+                    "status": integration_manager.backend_client.get_status(),
+            }
 
     @app.error(500)
     def error_handler_500(error):
