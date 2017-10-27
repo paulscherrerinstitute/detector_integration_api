@@ -137,3 +137,22 @@ class DetectorIntegrationClient(object):
         response = requests.post(request_url).json()
 
         return validate_response(response)
+
+
+    def get_metrics(self, ):
+        request_url = self.api_address + routes["get_metrics"]
+        response = requests.get(request_url)
+        
+        return validate_response(response.json())
+
+    def get_backend(self, action, configuration={}):
+        request_url = self.api_address + routes["backend_client"] + "/" + action
+
+        response = requests.get(request_url).json() 
+        return validate_response(response)
+
+    def put_backend(self, action, configuration={}):
+        request_url = self.api_address + routes["backend_client"] + "/" + action
+
+        response = requests.put(request_url, json=configuration).json() 
+        return validate_response(response)
