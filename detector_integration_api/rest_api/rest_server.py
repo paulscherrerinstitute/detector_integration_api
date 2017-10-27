@@ -27,8 +27,6 @@ routes = {
     "get_metrics": "/api/v1/metrics",
 
     "backend_client": "/api/v1/backend",
-    "set_detector_value": "/api/v1/detector/value",
-
 }
 
 
@@ -191,11 +189,10 @@ def register_rest_interface(app, integration_manager):
                 "status": integration_manager.get_acquisition_status_string(),
                 "server_info": integration_manager.get_server_info()}
 
-    @app.get(routes["get_metrics"])
-    def get_metrics():
-        # do stuff
+    @app.get(routes["get_metrics"] + "/<metrics_name>")
+    def get_metrics(metrics_name):
         return {"state": "ok",
-                "metrics": {}}
+                "metrics": integration_manager.get_metrics(metric_name)}
 
     @app.get(routes["backend_client"] + "/<action>")
     def get_backend_client(action):
@@ -203,14 +200,14 @@ def register_rest_interface(app, integration_manager):
         return {"state": "ok", "value": value}
 
     @app.put(routes["backend_client"] + "/<action>")
-    def put_config(action):
+    def put_backend_client(action):
         if action != "config":
             raise ValueError("Action %s not supported. Currently supported actions: config" % action)
         new_config = request.json
         integration_manager.validator.validate_backend_config(new_config)
         integration_manager.backend_client.set_config(new_config)
         integration_manager._last_set_backend_config = new_config
-        
+
         return {"state": "ok",
                 "status": integration_manager.backend_client.get_status(),
                 "config": integration_manager.backend_client._last_set_backend_config}
