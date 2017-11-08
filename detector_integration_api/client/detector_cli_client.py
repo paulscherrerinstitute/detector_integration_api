@@ -36,15 +36,18 @@ class DetectorClient(object):
         return self.validate_response(cli_result, parameter_name)
 
     def set_value(self, parameter_name, value, no_verification=False):
-        cli_command = ["sls_detector_put", parameter_name, str(value)]
-        _logger.debug("Executing put command: '%s'.", " ".join(cli_command))
+        if isinstance(value, str):
+            cli_command = ["sls_detector_put", parameter_name, ] + list(map(str, value.split()))
+        else:
+            cli_command = ["sls_detector_put", parameter_name, str(value)]
+
+        _logger.debug("Exeaaacuting put command: '%s'.", " ".join(cli_command))
 
         cli_result = subprocess.check_output(cli_command)
 
         # This is to be used only when user interact manually with the detector.
         if no_verification:
             return cli_result.decode("utf-8")
-
         else:
             return self.validate_response(cli_result, parameter_name)
 
