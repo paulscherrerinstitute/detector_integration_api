@@ -23,6 +23,10 @@ routes = {
     "set_detector_value": "/api/v1/detector/value",
 
     "get_server_info": "/api/v1/info",
+
+    "get_metrics": "/api/v1/metrics",
+
+    "backend_client": "/api/v1/backend",
 }
 
 
@@ -184,6 +188,34 @@ def register_rest_interface(app, integration_manager):
         return {"state": "ok",
                 "status": integration_manager.get_acquisition_status_string(),
                 "server_info": integration_manager.get_server_info()}
+
+    @app.get(routes["get_metrics"])
+    def get_metrics():
+        return {"state": "ok",
+                "metrics": integration_manager.get_metrics()}
+
+    @app.get(routes["backend_client"] + "/<action>")
+    def get_backend_client(action):
+        value = integration_manager.backend_client.__getattribute__(action)()
+        return {"state": "ok", "value": value}
+
+    @app.put(routes["backend_client"] + "/<action>")
+    def put_backend_client(action):
+        if action not in ["open", "close", "reset", "config"]:
+            raise ValueError("Action %s not supported. Currently supported actions: config" % action)
+        new_config = request.json
+        if action == "config":
+            integration_manager.validator.validate_backend_config(new_config)
+            integration_manager.backend_client.set_config(new_config)
+            integration_manager._last_set_backend_config = new_config 
+            return {"state": "ok",
+                    "status": integration_manager.backend_client.get_status(),
+                    "config": integration_manager.backend_client._last_set_backend_config}
+        else:
+            integration_manager.backend_client.__getattribute__(action)()
+            return {"state": "ok",
+                    "status": integration_manager.backend_client.get_status(),
+            }
 
     @app.error(500)
     def error_handler_500(error):

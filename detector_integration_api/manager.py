@@ -138,3 +138,9 @@ class IntegrationManager(object):
             "validator": self.validator.__name__,
             "last_config_successful": self.last_config_successful
         }
+
+    def get_metrics(self):
+        # Always return a copy - we do not want this to be updated.
+        return {"writer": {},
+                "backend": self.backend_client.get_metrics(),
+                "detector": {}}
