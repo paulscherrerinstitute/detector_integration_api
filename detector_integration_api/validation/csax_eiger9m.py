@@ -66,7 +66,7 @@ def interpret_status(writer, backend, detector):
     elif writer is False and detector == "idle" and backend == "CONFIGURED":
         return IntegrationStatus.CONFIGURED
 
-    elif writer is True and detector == "running" and backend == "OPEN":
+    elif writer is True and detector in ("running", "waiting") and backend == "OPEN":
         return IntegrationStatus.RUNNING
 
     elif writer is True and detector == "idle" and backend == "OPEN":

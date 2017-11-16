@@ -9,6 +9,8 @@ then
     exit -1;
 fi
 
+# TODO: Call config file validator.
+
 # Check if the needed environment variables are present.
 if [ -z "${DIA_REST_ADDRESS}" ]; then echo "ENV variable DIA_REST_ADDRESS is not set."; exit -1; fi
 if [ -z "${DIA_REST_PORT}" ]; then echo "ENV variable DIA_REST_PORT is not set."; exit -1; fi

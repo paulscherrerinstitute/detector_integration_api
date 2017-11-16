@@ -14,7 +14,8 @@ class DetectorClient(object):
         cli_result = subprocess.check_output(cli_command)
         response, received_parameter_name, received_value = self.interpret_response(cli_result, "status")
         # The status can also be 'idle', for single image short exptime acquisitions.
-        self.verify_response_data(response, "status", received_parameter_name, ["idle", "running"], received_value)
+        self.verify_response_data(response, "status", received_parameter_name, ["idle", "running", "waiting"],
+                                  received_value)
 
     def stop(self):
         cli_command = ["sls_detector_put", "status", "stop"]

@@ -13,6 +13,7 @@ def validate_response(server_response):
 
     return server_response
 
+# TODO: Add functionality to get all the clients separatelly.
 
 class DetectorIntegrationClient(object):
     def __init__(self, api_address=None):
