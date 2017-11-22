@@ -1,6 +1,6 @@
 package:
     name: detector_integration_api
-    version: 0.1.5
+    version: 0.1.6
 
 source:
     path: ..
