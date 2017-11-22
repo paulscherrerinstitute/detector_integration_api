@@ -56,7 +56,7 @@ class MockDetectorClient(object):
         return value
 
 
-class MockWriterClient(object):
+class MockMflowNodesClient(object):
     def __init__(self):
         self.is_running = False
         self._api_address = "writer_url"
@@ -75,26 +75,30 @@ class MockWriterClient(object):
         self.is_running = False
 
 
-def get_test_integration_manager(validator_module="detector_integration_api.validation.debug"):
+def get_test_integration_manager(validator_module="detector_integration_api.validation.sf_validator"):
     backend_client = MockBackendClient()
     detector_client = MockDetectorClient()
-    writer_client = MockWriterClient()
+    writer_client = MockMflowNodesClient()
+    bsread_client = MockMflowNodesClient()
     validator = import_module(validator_module)
 
-    manager = sf_manager.IntegrationManager(backend_client, writer_client, detector_client, validator)
+    manager = sf_manager.IntegrationManager(backend_client, writer_client, detector_client, bsread_client, validator)
 
     return manager
 
 
-def start_test_integration_server(host, port, validator="detector_integration_api.validation.debug"):
+def start_test_integration_server(host, port, validator="detector_integration_api.validation.sf_validator"):
     backend_client = MockBackendClient()
-    writer_client = MockWriterClient()
+    writer_client = MockMflowNodesClient()
     detector_client = MockDetectorClient()
+
+    bsread_client = MockMflowNodesClient()
     validator = import_module(validator)
 
     integration_manager = sf_manager.IntegrationManager(writer_client=writer_client,
                                                         backend_client=backend_client,
                                                         detector_client=detector_client,
+                                                        bsread_client=bsread_client,
                                                         validator=validator)
 
     app = bottle.Bottle()

@@ -44,11 +44,16 @@ class TestRestClient(unittest.TestCase):
                            "exptime": 0.01,
                            "dr": 16}
 
-        response = client.set_config(writer_config, backend_config, detector_config)
+        bsread_config = {"output_file": "/tmp/test_meta.h5",
+                         "user_id": 0,
+                         "channels": []}
+
+        response = client.set_config(writer_config, backend_config, detector_config, bsread_config)
 
         self.assertDictEqual(response["config"]["writer"], writer_config)
         self.assertDictEqual(response["config"]["backend"], backend_config)
         self.assertDictEqual(response["config"]["detector"], detector_config)
+        self.assertDictEqual(response["config"]["bsread"], bsread_config)
 
         self.assertEqual(client.get_status()["status"], "IntegrationStatus.CONFIGURED")
 
@@ -70,15 +75,18 @@ class TestRestClient(unittest.TestCase):
 
         response = client.update_config(writer_config={"user_id": 1},
                                         backend_config={"n_frames": 50},
-                                        detector_config={"frames": 50})
+                                        detector_config={"frames": 50},
+                                        bsread_config={"user_id": 1})
 
         writer_config["user_id"] = 1
         backend_config["n_frames"] = 50
         detector_config["frames"] = 50
+        bsread_config["user_id"] = 1
 
         self.assertDictEqual(response["config"]["writer"], writer_config)
         self.assertDictEqual(response["config"]["backend"], backend_config)
         self.assertDictEqual(response["config"]["detector"], detector_config)
+        self.assertDictEqual(response["config"]["bsread"], bsread_config)
 
         response = client.update_config(writer_config={"group_id": 1})
 
@@ -87,6 +95,7 @@ class TestRestClient(unittest.TestCase):
         self.assertDictEqual(response["config"]["writer"], writer_config)
         self.assertDictEqual(response["config"]["backend"], backend_config)
         self.assertDictEqual(response["config"]["detector"], detector_config)
+        self.assertDictEqual(response["config"]["bsread"], bsread_config)
 
         self.assertEqual(client.get_status()["status"], "IntegrationStatus.CONFIGURED")
 
@@ -99,6 +108,8 @@ class TestRestClient(unittest.TestCase):
         self.assertDictEqual(response["config"]["writer"], writer_config)
         self.assertDictEqual(response["config"]["backend"], backend_config)
         self.assertDictEqual(response["config"]["detector"], detector_config)
+
+        self.assertDictEqual(response["config"]["bsread"], bsread_config)
 
         self.assertEqual(client.get_status()["status"], "IntegrationStatus.CONFIGURED")
 
@@ -120,20 +131,24 @@ class TestRestClient(unittest.TestCase):
         self.assertEqual(config["config"]["backend"], {})
         self.assertEqual(config["config"]["writer"], {})
         self.assertEqual(config["config"]["detector"], {})
+        self.assertEqual(config["config"]["bsread"], {})
 
         detector_config = {"frames": 10000, "dr": 16, "period": 0.001}
         backend_config = {"n_frames": 10000, "bit_depth": 16}
         writer_config = {"process_uid": 16371, "output_file": "something"}
+        bsread_config = {"process_uid": 122, "output_file": "something"}
 
         client.update_config(detector_config=detector_config,
                              backend_config=backend_config,
-                             writer_config=writer_config)
+                             writer_config=writer_config,
+                             bsread_config=bsread_config)
 
         configuration = client.get_config()["config"]
 
         self.assertEqual(configuration["detector"], detector_config)
         self.assertEqual(configuration["writer"], writer_config)
         self.assertEqual(configuration["backend"], backend_config)
+        self.assertEqual(configuration["bsread"], bsread_config)
 
         client.update_config(detector_config={"dr": 32})
         detector_config["dr"] = 32
@@ -142,6 +157,7 @@ class TestRestClient(unittest.TestCase):
         self.assertEqual(configuration["detector"], detector_config)
         self.assertEqual(configuration["writer"], writer_config)
         self.assertEqual(configuration["backend"], backend_config)
+        self.assertEqual(configuration["bsread"], bsread_config)
 
     def test_set_detector_value(self):
         client = DetectorIntegrationClient()
