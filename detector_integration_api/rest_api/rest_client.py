@@ -15,6 +15,7 @@ def validate_response(server_response):
 
 # TODO: Add functionality to get all the clients separatelly.
 
+
 class DetectorIntegrationClient(object):
     def __init__(self, api_address=None):
         if not api_address:
@@ -57,12 +58,13 @@ class DetectorIntegrationClient(object):
 
         return validate_response(response)
 
-    def set_config(self, writer_config, backend_config, detector_config):
+    def set_config(self, writer_config, backend_config, detector_config, bsread_config=None):
         request_url = self.api_address + routes["set_config"]
 
         configuration = {"writer": writer_config,
                          "backend": backend_config,
-                         "detector": detector_config}
+                         "detector": detector_config,
+                         "bsread": bsread_config or {}}
 
         response = requests.put(request_url, json=configuration).json()
 
@@ -74,7 +76,8 @@ class DetectorIntegrationClient(object):
 
         self.set_config(configuration.get("writer"),
                         configuration.get("backend"),
-                        configuration.get("detector"))
+                        configuration.get("detector"),
+                        configuration.get("bsread"))
 
     def set_last_config(self):
         request_url = self.api_address + routes["set_last_config"]
@@ -83,12 +86,13 @@ class DetectorIntegrationClient(object):
 
         return validate_response(response)
 
-    def update_config(self, writer_config=None, backend_config=None, detector_config=None):
+    def update_config(self, writer_config=None, backend_config=None, detector_config=None, bsread_config=None):
         request_url = self.api_address + routes["update_config"]
 
         configuration = {"writer": writer_config,
                          "backend": backend_config,
-                         "detector": detector_config}
+                         "detector": detector_config,
+                         "bsread": bsread_config}
 
         response = requests.post(request_url, json=configuration).json()
 
@@ -139,8 +143,7 @@ class DetectorIntegrationClient(object):
 
         return validate_response(response)
 
-
-    def get_metrics(self, ):
+    def get_metrics(self):
         request_url = self.api_address + routes["get_metrics"]
         response = requests.get(request_url)
         

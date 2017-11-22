@@ -46,7 +46,8 @@ def validate_detector_config(configuration):
         raise ValueError("Detector configuration missing mandatory parameters: %s" % missing_parameters)
 
 
-def validate_configs_dependencies(writer_config, backend_config, detector_config):
+# TODO: Remove bsread config when manager for csaxs is ready.
+def validate_configs_dependencies(writer_config, backend_config, detector_config, bsread_config):
     if backend_config["bit_depth"] != detector_config["dr"]:
         raise ValueError("Invalid config. Backend 'bit_depth' set to '%s', but detector 'dr' set to '%s'."
                          " They must be equal."

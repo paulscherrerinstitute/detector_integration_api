@@ -50,9 +50,14 @@ def register_debug_rest_interface(app, integration_manager):
         if debug_detector_config:
             integration_manager.detector_client.set_config(debug_detector_config)
 
+        debug_bsread_config = debug_config.get("bsread", {})
+        if debug_bsread_config:
+            integration_manager.bsread_client.set_parameters(debug_bsread_config)
+
         integration_manager.writer_client.start()
         integration_manager.backend_client.open()
         integration_manager.detector_client.start()
+        integration_manager.bsread_client.start()
 
         return {"state": "ok",
                 "status": integration_manager.get_acquisition_status_string()}
@@ -94,11 +99,7 @@ def register_rest_interface(app, integration_manager):
 
     @app.post(routes["set_last_config"])
     def set_last_config():
-        current_config = integration_manager.get_acquisition_config()
-
-        integration_manager.set_acquisition_config(current_config["writer"],
-                                                   current_config["backend"],
-                                                   current_config["detector"])
+        integration_manager.set_acquisition_config(integration_manager.get_acquisition_config())
 
         return {"state": "ok",
                 "status": integration_manager.get_acquisition_status_string(),
@@ -114,10 +115,7 @@ def register_rest_interface(app, integration_manager):
     def set_config():
         new_config = request.json
 
-        if {"writer", "backend", "detector"} != set(new_config):
-            raise ValueError("Specify config JSON with 3 root elements: 'writer', 'backend', 'detector'.")
-
-        integration_manager.set_acquisition_config(new_config["writer"], new_config["backend"], new_config["detector"])
+        integration_manager.set_acquisition_config(new_config)
 
         return {"state": "ok",
                 "status": integration_manager.get_acquisition_status_string(),
@@ -127,19 +125,7 @@ def register_rest_interface(app, integration_manager):
     def update_config():
         config_updates = request.json
 
-        current_config = integration_manager.get_acquisition_config()
-
-        def update_config_section(section_name):
-            if section_name in config_updates and config_updates.get(section_name):
-                current_config[section_name].update(config_updates[section_name])
-
-        update_config_section("writer")
-        update_config_section("backend")
-        update_config_section("detector")
-
-        integration_manager.set_acquisition_config(current_config["writer"],
-                                                   current_config["backend"],
-                                                   current_config["detector"])
+        integration_manager.update_acquisition_config(config_updates)
 
         return {"state": "ok",
                 "status": integration_manager.get_acquisition_status_string(),
