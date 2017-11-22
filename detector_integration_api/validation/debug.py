@@ -25,7 +25,10 @@ def validate_configs_dependencies(writer_config, backend_config, detector_config
     pass
 
 
-def interpret_status(writer, backend, detector):
+def interpret_status(statuses):
+    writer = statuses["writer"]
+    backend = statuses["backend"]
+    detector = statuses["detector"]
 
     if writer is False and detector == "idle" and backend == "INITIALIZED":
         return IntegrationStatus.INITIALIZED

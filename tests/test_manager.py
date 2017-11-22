@@ -14,7 +14,11 @@ class TestIntegrationManager(unittest.TestCase):
         self.assertEqual(manager.get_acquisition_status(), IntegrationStatus.INITIALIZED)
         self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.INITIALIZED")
 
-        writer_status, backend_status, detector_status = manager.get_status_details()
+        statuses = manager.get_status_details()
+        writer_status = statuses["writer"]
+        backend_status = statuses["backend"]
+        detector_status = statuses["detector"]
+
         self.assertEqual(writer_status, manager.writer_client.is_running)
         self.assertEqual(backend_status, manager.backend_client.status)
         self.assertEqual(detector_status, manager.detector_client.status)

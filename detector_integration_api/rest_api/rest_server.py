@@ -88,13 +88,9 @@ def register_rest_interface(app, integration_manager):
     @app.get(routes["get_status_details"])
     def get_status_details():
 
-        writer_status, backend_status, detector_status = integration_manager.get_status_details()
-
         return {"state": "ok",
                 "status": integration_manager.get_acquisition_status_string(),
-                "details": {"writer": writer_status,
-                            "backend": backend_status,
-                            "detector": detector_status}}
+                "details": integration_manager.get_status_details()}
 
     @app.post(routes["set_last_config"])
     def set_last_config():

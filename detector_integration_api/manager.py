@@ -57,7 +57,7 @@ class IntegrationManager(object):
         self.reset()
 
     def get_acquisition_status(self):
-        status = self.validator.interpret_status(*self.get_status_details())
+        status = self.validator.interpret_status(self.get_status_details())
 
         # There is no way of knowing if the detector is configured as the user desired.
         # We have a flag to check if the user config was passed on to the detector.
@@ -77,7 +77,9 @@ class IntegrationManager(object):
         _logger.debug("Detailed status requested:\nWriter: %s\nBackend: %s\nDetector: %s",
                       writer_status, backend_status, detector_status)
 
-        return writer_status, backend_status, detector_status
+        return {"writer": writer_status,
+                "backend": backend_status,
+                "detector": detector_status}
 
     def get_acquisition_config(self):
         # Always return a copy - we do not want this to be updated.
