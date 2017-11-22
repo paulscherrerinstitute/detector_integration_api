@@ -1,5 +1,4 @@
-from detector_integration_api.manager import IntegrationStatus
-
+from detector_integration_api.manager.sf_manager import IntegrationStatus
 
 writer_cfg_params = []
 backend_cfg_params = []

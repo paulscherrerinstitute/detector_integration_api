@@ -9,25 +9,30 @@ from mflow_nodes import NodeClient
 from detector_integration_api import config
 from detector_integration_api.client.backend_rest_client import BackendClient
 from detector_integration_api.client.detector_cli_client import DetectorClient
-from detector_integration_api.manager import IntegrationManager
 from detector_integration_api.rest_api.rest_server import register_rest_interface, register_debug_rest_interface
 
 _logger = logging.getLogger(__name__)
 
 
-def start_integration_server(host, port, backend_url, writer_url, writer_instance_name, validation_module):
+def start_integration_server(host, port, backend_url, writer_url, writer_instance_name,
+                             validation_module, manager_module):
     _logger.debug("Starting integration REST API with:\nBackend url: %s\nWriter url: %s\nWriter instance name: %s\n",
                   backend_url, writer_url, writer_instance_name)
 
     backend_client = BackendClient(backend_url)
     writer_client = NodeClient(writer_url, writer_instance_name)
     detector_client = DetectorClient()
-    validator = import_module(validation_module)
 
-    integration_manager = IntegrationManager(writer_client=writer_client,
-                                             backend_client=backend_client,
-                                             detector_client=detector_client,
-                                             validator=validator)
+    _logger.info("Using validation module '%s'.", validation_module)
+    module_validator = import_module(validation_module)
+
+    _logger.info("Using manager module '%s'.", manager_module)
+    module_manager = import_module(manager_module)
+
+    integration_manager = module_manager.Manager(writer_client=writer_client,
+                                                 backend_client=backend_client,
+                                                 detector_client=detector_client,
+                                                 validator=module_validator)
 
     app = bottle.Bottle()
     register_rest_interface(app=app, integration_manager=integration_manager)
@@ -41,7 +46,8 @@ def start_integration_server(host, port, backend_url, writer_url, writer_instanc
 
 def main():
     parser = argparse.ArgumentParser(description='Rest API for beamline software')
-    parser.add_argument('-i', '--interface', default=config.DEFAULT_SERVER_INTERFACE, help="Hostname interface to bind to")
+    parser.add_argument('-i', '--interface', default=config.DEFAULT_SERVER_INTERFACE,
+                        help="Hostname interface to bind to")
     parser.add_argument('-p', '--port', default=config.DEFAULT_SERVER_PORT, help="Server port")
     parser.add_argument("--log_level", default=config.DEFAULT_LOGGING_LEVEL,
                         choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'],
@@ -50,8 +56,9 @@ def main():
                         help="Backend REST API url.")
     parser.add_argument("-w", "--writer_url", default=config.DEFAULT_WRITER_URL,
                         help="Writer REST API url.")
-    parser.add_argument("-m", "--module", default=config.DEFAULT_VALIDATION_MODULE,
+    parser.add_argument("-v", "--validation_module", default=config.DEFAULT_VALIDATION_MODULE,
                         help="Module name to be used for config validation.")
+    parser.add_argument("-m", "--manager_module", default=config.DEFAULT_MANAGER_MODULE)
     parser.add_argument("--writer_instance_name", default=config.DEFAULT_WRITER_INSTANCE_NAME,
                         help="Writer instance name.")
 
@@ -62,7 +69,9 @@ def main():
 
     start_integration_server(arguments.interface, arguments.port,
                              arguments.backend_url, arguments.writer_url, arguments.writer_instance_name,
-                             arguments.module)
+                             arguments.validation_module,
+                             arguments.manager_module)
+
 
 if __name__ == "__main__":
     main()
