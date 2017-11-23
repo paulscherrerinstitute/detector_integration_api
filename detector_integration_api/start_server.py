@@ -15,12 +15,14 @@ _logger = logging.getLogger(__name__)
 
 
 def start_integration_server(host, port, backend_url, writer_url, writer_instance_name,
+                             bsread_url, bsread_instance_name,
                              validation_module, manager_module):
     _logger.debug("Starting integration REST API with:\nBackend url: %s\nWriter url: %s\nWriter instance name: %s\n",
                   backend_url, writer_url, writer_instance_name)
 
     backend_client = BackendClient(backend_url)
     writer_client = NodeClient(writer_url, writer_instance_name)
+    bsread_client = NodeClient(bsread_url, bsread_instance_name)
     detector_client = DetectorClient()
 
     _logger.info("Using validation module '%s'.", validation_module)
@@ -29,10 +31,11 @@ def start_integration_server(host, port, backend_url, writer_url, writer_instanc
     _logger.info("Using manager module '%s'.", manager_module)
     module_manager = import_module(manager_module)
 
-    integration_manager = module_manager.Manager(writer_client=writer_client,
-                                                 backend_client=backend_client,
-                                                 detector_client=detector_client,
-                                                 validator=module_validator)
+    integration_manager = module_manager.IntegrationManager(writer_client=writer_client,
+                                                            backend_client=backend_client,
+                                                            detector_client=detector_client,
+                                                            bsread_client=bsread_client,
+                                                            validator=module_validator)
 
     app = bottle.Bottle()
     register_rest_interface(app=app, integration_manager=integration_manager)
@@ -56,10 +59,14 @@ def main():
                         help="Backend REST API url.")
     parser.add_argument("-w", "--writer_url", default=config.DEFAULT_WRITER_URL,
                         help="Writer REST API url.")
+    parser.add_argument("-s", "--bsread_url", default=config.DEFAULT_BSREAD_URL,
+                        help="Writer REST API url.")
     parser.add_argument("-v", "--validation_module", default=config.DEFAULT_VALIDATION_MODULE,
                         help="Module name to be used for config validation.")
     parser.add_argument("-m", "--manager_module", default=config.DEFAULT_MANAGER_MODULE)
     parser.add_argument("--writer_instance_name", default=config.DEFAULT_WRITER_INSTANCE_NAME,
+                        help="Writer instance name.")
+    parser.add_argument("--bsread_instance_name", default=config.DEFAULT_BSREAD_INSTANCE_NAME,
                         help="Writer instance name.")
 
     arguments = parser.parse_args()
@@ -68,7 +75,9 @@ def main():
     logging.basicConfig(level=arguments.log_level, format='[%(levelname)s] %(message)s')
 
     start_integration_server(arguments.interface, arguments.port,
-                             arguments.backend_url, arguments.writer_url, arguments.writer_instance_name,
+                             arguments.backend_url,
+                             arguments.writer_url, arguments.writer_instance_name,
+                             arguments.bsread_url, arguments.bsread_instance_name,
                              arguments.validation_module,
                              arguments.manager_module)
 

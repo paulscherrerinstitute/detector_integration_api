@@ -24,7 +24,7 @@ class IntegrationManager(object):
 
         _audit_logger.info("Setting up integration manager to:\n"
                            "Backend address: %s\n"
-                           "Writer address: %s\n",
+                           "Writer address: %s\n"
                            "bsread address: %s\n",
                            self.backend_client.backend_url,
                            self.writer_client._api_address.format(url=""),
@@ -44,10 +44,10 @@ class IntegrationManager(object):
         if status != IntegrationStatus.CONFIGURED:
             raise ValueError("Cannot start acquisition in %s state. Please configure first." % status)
 
+        self.bsread_client.start()
         self.backend_client.open()
         self.writer_client.start()
         self.detector_client.start()
-        self.bsread_client.start()
 
     def stop_acquisition(self):
         _audit_logger.info("Stopping acquisition.")
