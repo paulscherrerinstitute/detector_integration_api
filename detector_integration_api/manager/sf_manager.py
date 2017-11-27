@@ -166,8 +166,8 @@ class IntegrationManager(object):
 
         self.detector_client.stop()
         self.backend_client.reset()
-        self.writer_client.stop()
-        self.bsread_client.stop()
+        self.writer_client.reset()
+        self.bsread_client.reset()
 
     def get_server_info(self):
         return {

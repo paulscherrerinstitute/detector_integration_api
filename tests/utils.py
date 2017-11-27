@@ -74,6 +74,9 @@ class MockMflowNodesClient(object):
     def stop(self):
         self.is_running = False
 
+    def reset(self):
+        self.is_running = False
+
 
 def get_test_integration_manager(validator_module="detector_integration_api.validation.sf_validator"):
     backend_client = MockBackendClient()
