@@ -69,11 +69,16 @@ detector_config = {"period": 0.1,
                    "exptime": 0.01,
                    "dr": 16}
 
+# Define the config for bsread.                   
+bsread_config = {"output_file": "/tmp/test_bsread.h5",
+                 "process_uid": 0}
+
 # Send the config to the writer, backend and detector. 
 # This changes the integration to IntegrationStatus.CONFIGURED state
 response = client.set_config(writer_config=writer_config, 
                              backend_config=backend_config, 
-                             detector_config=detector_config)
+                             detector_config=detector_config,
+                             bsread_config=bsread_config)
 
 # Start the acquisition. This changes the integration to IntegrationStatus.RUNNING state.
 client.start()
@@ -189,6 +194,9 @@ Methods that do not modify the state machine are not described in this table, as
 | IntegrationStatus.DETECTOR_STOPPED | Backend and writer ready, backend not sending data. |||
 | | | stop | IntegrationStatus.INITIALIZED |
 | | | reset | IntegrationStatus.INITIALIZED |
+| IntegrationStatus.BSREAD_STILL_RUNNING | Detector data acquisition stopped. But BSREAD still recording. |||
+| | | stop | IntegrationStatus.INITIALIZED |
+| | | reset | IntegrationStatus.INITIALIZED |
 | IntegrationStatus.ERROR | Something went wrong. |||
 | | | stop | IntegrationStatus.INITIALIZED |
 | | | reset | IntegrationStatus.INITIALIZED |
@@ -201,6 +209,8 @@ A short summary would be:
 - Whatever happens, you have the reset method that returns you in the initial state.
 - When the detector stops sending data, the DETECTOR_STOPPED . Call STOP to close the backend and stop the 
 writing.
+- When the detector stops sending data, the backend and writer have completed, but you are still waiting for the 
+bsread writer to finish, the status is BSREAD_STILL_RUNNING. 
 
 <a id="configuration"></a>
 ## Configuration
@@ -218,17 +228,18 @@ More info on each method can be found in the [Web interface](#web_interface) cha
 Returns the current config stored in the integration server. This config will be used as a base in case you 
 use the [Update config](#update_config) or [Set last config](#set_last_config) command.
 
-The method return all 3 of the available configs:
+The method return all 4 of the available configs:
 - writer config
 - backend config
 - detector config
+- bsread config
 
 <a id="set_config"></a>
 ### Set config
 Sets the complete config on the integration server. This command also propagates the config to all the integration 
 servers (writer, backend, detector).
 
-All 3 configs must be specified in full.
+All 4 configs must be specified in full.
 
 For an example, see [Quick introduction](#quick).
 
