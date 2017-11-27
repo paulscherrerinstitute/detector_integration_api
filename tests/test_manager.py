@@ -48,6 +48,15 @@ class TestIntegrationManager(unittest.TestCase):
         self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.DETECTOR_STOPPED")
 
         manager.writer_client.is_running = False
+        manager.backend_client.status = "INITIALIZED"
+        manager.detector_client.status = "idle"
+        manager.bsread_client.is_running = True
+        self.assertEqual(manager.get_acquisition_status(), IntegrationStatus.BSREAD_STILL_RUNNING)
+        self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.BSREAD_STILL_RUNNING")
+
+        manager.detector_client.status = "waiting"
+        manager.bsread_client.is_running = False
+        manager.writer_client.is_running = False
         self.assertEqual(manager.get_acquisition_status(), IntegrationStatus.ERROR)
         self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.ERROR")
 

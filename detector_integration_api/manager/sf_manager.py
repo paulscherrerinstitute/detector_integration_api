@@ -11,6 +11,7 @@ class IntegrationStatus(Enum):
     CONFIGURED = "configured",
     RUNNING = "running",
     DETECTOR_STOPPED = "detector_stopped",
+    BSREAD_STILL_RUNNING = "bsread_still_running",
     ERROR = "error"
 
 
