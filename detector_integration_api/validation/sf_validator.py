@@ -51,4 +51,7 @@ def interpret_status(statuses):
     elif writer is False and detector == "idle" and backend == "OPEN" and bsread is True:
         return IntegrationStatus.BSREAD_STILL_RUNNING
 
+    elif writer is False and detector == "idle" and backend == "OPEN" and bsread is False:
+        return IntegrationStatus.FINISHED
+
     return IntegrationStatus.ERROR

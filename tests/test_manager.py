@@ -48,17 +48,22 @@ class TestIntegrationManager(unittest.TestCase):
         self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.DETECTOR_STOPPED")
 
         manager.writer_client.is_running = False
-        manager.backend_client.status = "INITIALIZED"
+        manager.backend_client.status = "OPEN"
         manager.detector_client.status = "idle"
         manager.bsread_client.is_running = True
         self.assertEqual(manager.get_acquisition_status(), IntegrationStatus.BSREAD_STILL_RUNNING)
         self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.BSREAD_STILL_RUNNING")
 
-        manager.detector_client.status = "waiting"
+        manager.detector_client.status = "idle"
         manager.bsread_client.is_running = False
         manager.writer_client.is_running = False
-        self.assertEqual(manager.get_acquisition_status(), IntegrationStatus.ERROR)
-        self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.ERROR")
+        manager.backend_client.status = "OPEN"
+        self.assertEqual(manager.get_acquisition_status(), IntegrationStatus.FINISHED)
+        self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.FINISHED")
+
+
+
+
 
     def test_set_config(self):
         manager = get_test_integration_manager("detector_integration_api.validation.csax_eiger9m")
