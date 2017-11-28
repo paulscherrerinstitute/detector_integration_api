@@ -73,17 +73,17 @@ def register_debug_rest_interface(app, integration_manager):
 def register_rest_interface(app, integration_manager):
     @app.post(routes["start"])
     def start():
-        integration_manager.start_acquisition()
+        status = integration_manager.start_acquisition()
 
         return {"state": "ok",
-                "status": integration_manager.get_acquisition_status_string()}
+                "status": str(status)}
 
     @app.post(routes["stop"])
     def stop():
-        integration_manager.stop_acquisition()
+        status = integration_manager.stop_acquisition()
 
         return {"state": "ok",
-                "status": integration_manager.get_acquisition_status_string()}
+                "status": str(status)}
 
     @app.get(routes["get_status"])
     def get_status():
@@ -99,10 +99,10 @@ def register_rest_interface(app, integration_manager):
 
     @app.post(routes["set_last_config"])
     def set_last_config():
-        integration_manager.set_acquisition_config(integration_manager.get_acquisition_config())
+        status = integration_manager.set_acquisition_config(integration_manager.get_acquisition_config())
 
         return {"state": "ok",
-                "status": integration_manager.get_acquisition_status_string(),
+                "status": str(status),
                 "config": integration_manager.get_acquisition_config()}
 
     @app.get(routes["get_config"])
@@ -115,20 +115,20 @@ def register_rest_interface(app, integration_manager):
     def set_config():
         new_config = request.json
 
-        integration_manager.set_acquisition_config(new_config)
+        status = integration_manager.set_acquisition_config(new_config)
 
         return {"state": "ok",
-                "status": integration_manager.get_acquisition_status_string(),
+                "status": str(status),
                 "config": integration_manager.get_acquisition_config()}
 
     @app.post(routes["update_config"])
     def update_config():
         config_updates = request.json
 
-        integration_manager.update_acquisition_config(config_updates)
+        status = integration_manager.update_acquisition_config(config_updates)
 
         return {"state": "ok",
-                "status": integration_manager.get_acquisition_status_string(),
+                "status": str(status),
                 "config": integration_manager.get_acquisition_config()}
 
     @app.get(routes["get_detector_value"] + "/<name>")
@@ -160,10 +160,10 @@ def register_rest_interface(app, integration_manager):
 
     @app.post(routes["reset"])
     def reset():
-        integration_manager.reset()
+        status = integration_manager.reset()
 
         return {"state": "ok",
-                "status": integration_manager.get_acquisition_status_string()}
+                "status": str(status)}
 
     @app.get(routes["get_server_info"])
     def get_server_info():

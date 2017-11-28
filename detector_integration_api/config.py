@@ -11,3 +11,8 @@ DEFAULT_VALIDATION_MODULE = "detector_integration_api.validation.sf_validator"
 DEFAULT_MANAGER_MODULE = "detector_integration_api.manager.sf_manager"
 
 BACKEND_URL_SUFFIX = "/v1"
+
+# Number of retries when setting the start of the experiment.
+N_COLLECT_STATUS_RETRY = 3
+# Delay between re-tries.
+N_COLLECT_STATUS_RETRY_DELAY = 0.1

@@ -1,6 +1,9 @@
 from copy import copy
 from enum import Enum
 from logging import getLogger
+from time import sleep
+
+from detector_integration_api import config
 
 _logger = getLogger(__name__)
 _audit_logger = getLogger("audit_trail")
@@ -38,6 +41,20 @@ class IntegrationManager(object):
 
         self.last_config_successful = False
 
+    def check_for_target_status(self, desired_status):
+
+        for _ in range(config.N_COLLECT_STATUS_RETRY):
+
+            status = self.get_acquisition_status()
+
+            if status == desired_status:
+                return status
+
+            sleep(config.N_COLLECT_STATUS_RETRY_DELAY)
+
+        else:
+            raise ValueError("Cannot reach desired state from one of the components of the system. Try to reset.")
+
     def start_acquisition(self):
         _audit_logger.info("Starting acquisition.")
 
@@ -50,6 +67,8 @@ class IntegrationManager(object):
         self.writer_client.start()
         self.detector_client.start()
 
+        return self.check_for_target_status(IntegrationStatus.RUNNING)
+
     def stop_acquisition(self):
         _audit_logger.info("Stopping acquisition.")
 
@@ -61,7 +80,7 @@ class IntegrationManager(object):
             self.writer_client.stop()
             self.bsread_client.stop()
 
-        self.reset()
+        return self.reset()
 
     def get_acquisition_status(self):
         status = self.validator.interpret_status(self.get_status_details())
@@ -144,6 +163,8 @@ class IntegrationManager(object):
 
         self.last_config_successful = True
 
+        return self.check_for_target_status(IntegrationStatus.CONFIGURED)
+
     def update_acquisition_config(self, config_updates):
         current_config = self.get_acquisition_config()
 
@@ -160,6 +181,8 @@ class IntegrationManager(object):
 
         self.set_acquisition_config(current_config)
 
+        return self.check_for_target_status(IntegrationStatus.CONFIGURED)
+
     def reset(self):
         _audit_logger.info("Resetting integration api.")
 
@@ -169,6 +192,8 @@ class IntegrationManager(object):
         self.backend_client.reset()
         self.writer_client.reset()
         self.bsread_client.reset()
+
+        return self.check_for_target_status(IntegrationStatus.INITIALIZED)
 
     def get_server_info(self):
         return {
