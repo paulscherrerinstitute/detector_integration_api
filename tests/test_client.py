@@ -215,4 +215,54 @@ class TestRestClient(unittest.TestCase):
 
         self.assertTrue(time_to_wait >= timeout)
 
+    def test_clients_enabled(self):
+        client = DetectorIntegrationClient()
+        clients_enabled = client.get_clients_enabled()["clients_enabled"]
+
+        self.assertTrue(clients_enabled["writer"])
+        self.assertTrue(clients_enabled["backend"])
+        self.assertTrue(clients_enabled["detector"])
+        self.assertTrue(clients_enabled["bsread"])
+
+        client.set_clients_enabled()
+        clients_enabled = client.get_clients_enabled()["clients_enabled"]
+
+        self.assertTrue(clients_enabled["writer"])
+        self.assertTrue(clients_enabled["backend"])
+        self.assertTrue(clients_enabled["detector"])
+        self.assertTrue(clients_enabled["bsread"])
+
+        client.set_clients_enabled(bsread=False)
+        clients_enabled = client.get_clients_enabled()["clients_enabled"]
+
+        self.assertTrue(clients_enabled["writer"])
+        self.assertTrue(clients_enabled["backend"])
+        self.assertTrue(clients_enabled["detector"])
+        self.assertFalse(clients_enabled["bsread"])
+
+        client.set_clients_enabled(bsread=False, writer=False)
+        clients_enabled = client.get_clients_enabled()["clients_enabled"]
+
+        self.assertFalse(clients_enabled["writer"])
+        self.assertTrue(clients_enabled["backend"])
+        self.assertTrue(clients_enabled["detector"])
+        self.assertFalse(clients_enabled["bsread"])
+
+        client.set_clients_enabled(bsread=False, writer=False, detector=False)
+        clients_enabled = client.get_clients_enabled()["clients_enabled"]
+
+        self.assertFalse(clients_enabled["writer"])
+        self.assertTrue(clients_enabled["backend"])
+        self.assertFalse(clients_enabled["detector"])
+        self.assertFalse(clients_enabled["bsread"])
+
+        client.set_clients_enabled(bsread=False, writer=False, detector=False, backend=False)
+        clients_enabled = client.get_clients_enabled()["clients_enabled"]
+
+        self.assertFalse(clients_enabled["writer"])
+        self.assertFalse(clients_enabled["backend"])
+        self.assertFalse(clients_enabled["detector"])
+        self.assertFalse(clients_enabled["bsread"])
+
+
 

@@ -77,6 +77,25 @@ class DetectorIntegrationClient(object):
 
             sleep(polling_interval)
 
+    def get_clients_enabled(self):
+        request_url = self.api_address + routes["clients_enabled"]
+
+        response = requests.get(request_url).json()
+
+        return validate_response(response)
+
+    def set_clients_enabled(self, bsread=True, writer=True, backend=True, detector=True):
+        request_url = self.api_address + routes["clients_enabled"]
+
+        configuration = {"writer": writer,
+                         "backend": backend,
+                         "detector": detector,
+                         "bsread": bsread}
+
+        response = requests.post(request_url, json=configuration).json()
+
+        return validate_response(response)
+
     def set_config(self, writer_config, backend_config, detector_config, bsread_config=None):
         request_url = self.api_address + routes["set_config"]
 

@@ -190,26 +190,26 @@ class IntegrationManager(object):
     def set_clients_enabled(self, client_status):
 
         if "backend" in client_status:
-            self.backend_client.set_enabled(client_status["backend"])
+            self.backend_client.set_client_enabled(client_status["backend"])
             _logger.info("Backend client enable=%s.", self.backend_client.is_client_enabled())
 
         if "writer" in client_status:
-            self.writer_client.set_enabled(client_status["writer"])
+            self.writer_client.set_client_enabled(client_status["writer"])
             _logger.info("Writer client enable=%s.", self.writer_client.is_client_enabled())
 
         if "detector" in client_status:
-            self.detector_client.set_enabled(client_status["detector"])
+            self.detector_client.set_client_enabled(client_status["detector"])
             _logger.info("Detector client enable=%s.", self.detector_client.is_client_enabled())
 
         if "bsread" in client_status:
-            self.bsread_client.set_enabled(client_status["bsread"])
+            self.bsread_client.set_client_enabled(client_status["bsread"])
             _logger.info("bsread client enable=%s.", self.bsread_client.is_client_enabled())
 
     def get_clients_enabled(self):
         return {"backend": self.backend_client.is_client_enabled(),
                 "writer": self.writer_client.is_client_enabled(),
                 "bsread": self.bsread_client.is_client_enabled(),
-                "detector": self.bsread_client.is_client_enabled()}
+                "detector": self.detector_client.is_client_enabled()}
 
     def reset(self):
         _audit_logger.info("Resetting integration api.")
@@ -288,11 +288,13 @@ class IntegrationManager(object):
         elif cmp(writer, True) and cmp(detector, "idle") and cmp(backend, "OPEN") and cmp(bsread, True):
             return IntegrationStatus.DETECTOR_STOPPED
 
+        elif cmp(writer, False) and cmp(detector, "idle") and cmp(backend, "OPEN") and cmp(bsread, False):
+            return IntegrationStatus.FINISHED
+
         elif cmp(writer, False) and cmp(detector, "idle") and cmp(backend, "OPEN") and cmp(bsread, True):
             return IntegrationStatus.BSREAD_STILL_RUNNING
 
-        elif cmp(writer, False) and cmp(detector, "idle") and cmp(backend, "OPEN") and cmp(bsread, False):
-            return IntegrationStatus.FINISHED
+
 
         return IntegrationStatus.ERROR
 
