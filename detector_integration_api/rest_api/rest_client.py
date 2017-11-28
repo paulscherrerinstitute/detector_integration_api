@@ -1,4 +1,5 @@
 import json
+from time import time, sleep
 
 import requests
 
@@ -57,6 +58,24 @@ class DetectorIntegrationClient(object):
         response = requests.get(request_url).json()
 
         return validate_response(response)
+
+    def wait_for_status(self, target_status, timeout=None, polling_interval=0.2):
+
+        if not isinstance(target_status, (list, tuple)):
+            target_status = [target_status]
+
+        start_time = time()
+        while True:
+            last_status = self.get_status()["status"]
+
+            if last_status in target_status:
+                return
+
+            if timeout and time() - start_time > timeout:
+                raise ValueError("Timeout exceeded. Could not reach target status '%s'. Last received status: '%s'." %
+                                 (target_status, last_status))
+
+            sleep(polling_interval)
 
     def set_config(self, writer_config, backend_config, detector_config, bsread_config=None):
         request_url = self.api_address + routes["set_config"]

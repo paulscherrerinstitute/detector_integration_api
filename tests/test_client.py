@@ -2,7 +2,8 @@ import signal
 import unittest
 
 from multiprocessing import Process
-from time import sleep
+from threading import Thread
+from time import sleep, time
 
 import os
 
@@ -162,12 +163,56 @@ class TestRestClient(unittest.TestCase):
     def test_set_detector_value(self):
         client = DetectorIntegrationClient()
 
-        client
-
         value = 0.023
         client.set_detector_value("period", value)
 
         self.assertEqual(value, client.get_detector_value("period"))
 
+    def test_wait_for_status(self):
+
+        time_to_wait = 0
+        sleep_time = 1
+        timeout = 1.5
+
+        client = DetectorIntegrationClient()
+
+        detector_config = {"frames": 10000, "dr": 16, "period": 0.001}
+        backend_config = {"n_frames": 10000, "bit_depth": 16}
+        writer_config = {"process_uid": 16371, "output_file": "something"}
+        bsread_config = {"process_uid": 122, "output_file": "something"}
+
+        client.update_config(detector_config=detector_config,
+                             backend_config=backend_config,
+                             writer_config=writer_config,
+                             bsread_config=bsread_config)
+
+        def wait_for_status_thread():
+            client2 = DetectorIntegrationClient()
+            start_time = time()
+
+            try:
+                client2.wait_for_status("IntegrationStatus.RUNNING", timeout=timeout)
+            except:
+                pass
+
+            nonlocal time_to_wait
+            time_to_wait = time() - start_time
+
+        wait_thread = Thread(target=wait_for_status_thread)
+        wait_thread.start()
+
+        sleep(sleep_time)
+
+        client.start()
+        wait_thread.join()
+        client.stop()
+
+        self.assertTrue(time_to_wait > sleep_time)
+
+        wait_thread = Thread(target=wait_for_status_thread)
+        wait_thread.start()
+        wait_thread.join()
+
+        self.assertTrue(time_to_wait >= timeout)
 
 
