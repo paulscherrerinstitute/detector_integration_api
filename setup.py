@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name="detector_integration_api",
-      version="0.1.7",
+      version="0.1.8",
       maintainer="Paul Scherrer Institute",
       maintainer_email="daq@psi.ch",
       author="Paul Scherrer Institute",
