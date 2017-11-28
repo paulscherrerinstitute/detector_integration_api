@@ -15,8 +15,7 @@ _logger = logging.getLogger(__name__)
 
 
 def start_integration_server(host, port, backend_url, writer_url, writer_instance_name,
-                             bsread_url, bsread_instance_name,
-                             validation_module, manager_module):
+                             bsread_url, bsread_instance_name, manager_module):
     _logger.debug("Starting integration REST API with:\nBackend url: %s\nWriter url: %s\nWriter instance name: %s\n",
                   backend_url, writer_url, writer_instance_name)
 
@@ -25,17 +24,13 @@ def start_integration_server(host, port, backend_url, writer_url, writer_instanc
     bsread_client = NodeClient(bsread_url, bsread_instance_name)
     detector_client = DetectorClient()
 
-    _logger.info("Using validation module '%s'.", validation_module)
-    module_validator = import_module(validation_module)
-
     _logger.info("Using manager module '%s'.", manager_module)
     module_manager = import_module(manager_module)
 
     integration_manager = module_manager.IntegrationManager(writer_client=writer_client,
                                                             backend_client=backend_client,
                                                             detector_client=detector_client,
-                                                            bsread_client=bsread_client,
-                                                            validator=module_validator)
+                                                            bsread_client=bsread_client)
 
     app = bottle.Bottle()
     register_rest_interface(app=app, integration_manager=integration_manager)
@@ -61,8 +56,6 @@ def main():
                         help="Writer REST API url.")
     parser.add_argument("-s", "--bsread_url", default=config.DEFAULT_BSREAD_URL,
                         help="Writer REST API url.")
-    parser.add_argument("-v", "--validation_module", default=config.DEFAULT_VALIDATION_MODULE,
-                        help="Module name to be used for config validation.")
     parser.add_argument("-m", "--manager_module", default=config.DEFAULT_MANAGER_MODULE)
     parser.add_argument("--writer_instance_name", default=config.DEFAULT_WRITER_INSTANCE_NAME,
                         help="Writer instance name.")
@@ -78,7 +71,6 @@ def main():
                              arguments.backend_url,
                              arguments.writer_url, arguments.writer_instance_name,
                              arguments.bsread_url, arguments.bsread_instance_name,
-                             arguments.validation_module,
                              arguments.manager_module)
 
 

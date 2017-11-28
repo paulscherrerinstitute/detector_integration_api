@@ -4,7 +4,7 @@ from importlib import import_module
 import bottle
 import os
 
-from detector_integration_api.manager import sf_manager
+from detector_integration_api import config
 from detector_integration_api.rest_api.rest_server import register_rest_interface, register_debug_rest_interface
 
 
@@ -78,32 +78,30 @@ class MockMflowNodesClient(object):
         self.is_running = False
 
 
-def get_test_integration_manager(validator_module="detector_integration_api.validation.sf_validator"):
+def get_test_integration_manager(manager_module=config.DEFAULT_MANAGER_MODULE):
     backend_client = MockBackendClient()
     detector_client = MockDetectorClient()
     writer_client = MockMflowNodesClient()
     bsread_client = MockMflowNodesClient()
-    validator = import_module(validator_module)
+    manager_module = import_module(manager_module)
 
-    manager = sf_manager.IntegrationManager(backend_client, writer_client, detector_client, bsread_client, validator)
+    manager = manager_module.IntegrationManager(backend_client, writer_client, detector_client, bsread_client)
 
     return manager
 
 
-def start_test_integration_server(host, port, validator="detector_integration_api.validation.sf_validator"):
+def start_test_integration_server(host, port, manager_module=config.DEFAULT_MANAGER_MODULE):
     backend_client = MockBackendClient()
     writer_client = MockMflowNodesClient()
     detector_client = MockDetectorClient()
-
     bsread_client = MockMflowNodesClient()
-    validator = import_module(validator)
 
-    integration_manager = sf_manager.IntegrationManager(writer_client=writer_client,
-                                                        backend_client=backend_client,
-                                                        detector_client=detector_client,
-                                                        bsread_client=bsread_client,
-                                                        validator=validator)
+    manager_module = import_module(manager_module)
 
+    integration_manager = manager_module.IntegrationManager(writer_client=writer_client,
+                                                            backend_client=backend_client,
+                                                            detector_client=detector_client,
+                                                            bsread_client=bsread_client)
     app = bottle.Bottle()
     register_rest_interface(app=app, integration_manager=integration_manager)
     register_debug_rest_interface(app=app, integration_manager=integration_manager)

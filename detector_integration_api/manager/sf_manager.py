@@ -5,6 +5,8 @@ from time import sleep
 
 from detector_integration_api import config
 
+from detector_integration_api.manager.utils import ClientDisableWrapper
+
 _logger = getLogger(__name__)
 _audit_logger = getLogger("audit_trail")
 
@@ -20,20 +22,11 @@ class IntegrationStatus(Enum):
 
 
 class IntegrationManager(object):
-    def __init__(self, backend_client, writer_client, detector_client, bsread_client, validator):
-        self.backend_client = backend_client
-        self.writer_client = writer_client
-        self.detector_client = detector_client
-        self.bsread_client = bsread_client
-        self.validator = validator
-
-        _audit_logger.info("Setting up integration manager to:\n"
-                           "Backend address: %s\n"
-                           "Writer address: %s\n"
-                           "bsread address: %s\n",
-                           self.backend_client.backend_url,
-                           self.writer_client._api_address.format(url=""),
-                           self.bsread_client._api_address.format(url=""))
+    def __init__(self, backend_client, writer_client, detector_client, bsread_client):
+        self.backend_client = ClientDisableWrapper(backend_client)
+        self.writer_client = ClientDisableWrapper(writer_client)
+        self.detector_client = ClientDisableWrapper(detector_client)
+        self.bsread_client = ClientDisableWrapper(bsread_client)
 
         self._last_set_backend_config = {}
         self._last_set_writer_config = {}
@@ -84,7 +77,7 @@ class IntegrationManager(object):
         return self.reset()
 
     def get_acquisition_status(self):
-        status = self.validator.interpret_status(self.get_status_details())
+        status = self.interpret_status(self.get_status_details())
 
         # There is no way of knowing if the detector is configured as the user desired.
         # We have a flag to check if the user config was passed on to the detector.
@@ -97,10 +90,14 @@ class IntegrationManager(object):
         return str(self.get_acquisition_status())
 
     def get_status_details(self):
-        writer_status = self.writer_client.get_status()["is_running"]
-        backend_status = self.backend_client.get_status()
-        detector_status = self.detector_client.get_status()
-        bsread_status = self.bsread_client.get_status()["is_running"]
+        writer_status = self.writer_client.get_status()["is_running"] \
+            if self.writer_client.is_client_enabled() else ClientDisableWrapper.STATUS_DISABLED
+        backend_status = self.backend_client.get_status() \
+            if self.backend_client.is_client_enabled() else ClientDisableWrapper.STATUS_DISABLED
+        detector_status = self.detector_client.get_status() \
+            if self.detector_client.is_client_enabled() else ClientDisableWrapper.STATUS_DISABLED
+        bsread_status = self.bsread_client.get_status()["is_running"] \
+            if self.bsread_client.is_client_enabled() else ClientDisableWrapper.STATUS_DISABLED
 
         _logger.debug("Detailed status requested:\nWriter: %s\nBackend: %s\nDetector: %s\nbsread: %s",
                       writer_status, backend_status, detector_status, bsread_status)
@@ -145,10 +142,16 @@ class IntegrationManager(object):
                            writer_config, backend_config, detector_config)
 
         # Before setting the new config, validate the provided values. All must be valid.
-        self.validator.validate_writer_config(writer_config)
-        self.validator.validate_backend_config(backend_config)
-        self.validator.validate_detector_config(detector_config)
-        self.validator.validate_configs_dependencies(writer_config, backend_config, detector_config, bsread_config)
+        if self.writer_client.client_enabled:
+            self.validate_writer_config(writer_config)
+
+        if self.backend_client.client_enabled:
+            self.validate_backend_config(backend_config)
+
+        if self.detector_client.client_enabled:
+            self.validate_detector_config(detector_config)
+
+        self.validate_configs_dependencies(writer_config, backend_config, detector_config, bsread_config)
 
         self.backend_client.set_config(backend_config)
         self._last_set_backend_config = backend_config
@@ -184,6 +187,30 @@ class IntegrationManager(object):
 
         return self.check_for_target_status(IntegrationStatus.CONFIGURED)
 
+    def set_clients_enabled(self, client_status):
+
+        if "backend" in client_status:
+            self.backend_client.set_enabled(client_status["backend"])
+            _logger.info("Backend client enable=%s.", self.backend_client.is_client_enabled())
+
+        if "writer" in client_status:
+            self.writer_client.set_enabled(client_status["writer"])
+            _logger.info("Writer client enable=%s.", self.writer_client.is_client_enabled())
+
+        if "detector" in client_status:
+            self.detector_client.set_enabled(client_status["detector"])
+            _logger.info("Detector client enable=%s.", self.detector_client.is_client_enabled())
+
+        if "bsread" in client_status:
+            self.bsread_client.set_enabled(client_status["bsread"])
+            _logger.info("bsread client enable=%s.", self.bsread_client.is_client_enabled())
+
+    def get_clients_enabled(self):
+        return {"backend": self.backend_client.is_client_enabled(),
+                "writer": self.writer_client.is_client_enabled(),
+                "bsread": self.bsread_client.is_client_enabled(),
+                "detector": self.bsread_client.is_client_enabled()}
+
     def reset(self):
         _audit_logger.info("Resetting integration api.")
 
@@ -202,7 +229,8 @@ class IntegrationManager(object):
                 "backend_url": self.backend_client.backend_url,
                 "writer_url": self.writer_client._api_address.format(url=""),
                 "bsread_url": self.bsread_client._api_address.format(url="")},
-            "validator": self.validator.__name__,
+            "clients_enabled": self.get_clients_enabled(),
+            "validator": "NOT IMPLEMENTED",
             "last_config_successful": self.last_config_successful
         }
 
@@ -212,3 +240,59 @@ class IntegrationManager(object):
                 "backend": self.backend_client.get_metrics(),
                 "detector": {},
                 "bsread": {}}
+
+    def validate_writer_config(self, configuration):
+        if configuration is None:
+            raise ValueError("Writer configuration cannot be None.")
+
+    def validate_backend_config(self, configuration):
+        if configuration is None:
+            raise ValueError("Backend configuration cannot be None.")
+
+
+    def validate_detector_config(self, configuration):
+        if configuration is None:
+            raise ValueError("Detector configuration cannot be None.")
+
+    def validate_bsread_config(self, configuration):
+        if configuration is None:
+            raise ValueError("bsread configuration cannot be None.")
+
+    def validate_configs_dependencies(self, writer_config, backend_config, detector_config, bsread_config):
+        pass
+
+    def interpret_status(self, statuses):
+        writer = statuses["writer"]
+        backend = statuses["backend"]
+        detector = statuses["detector"]
+        bsread = statuses["bsread"]
+
+        def cmp(status, expected_value):
+            if status == ClientDisableWrapper.STATUS_DISABLED:
+                return True
+
+            if isinstance(expected_value, (tuple, list)):
+                return status in expected_value
+            else:
+                return status == expected_value
+
+        if cmp(writer, False) and cmp(detector, "idle") and cmp(backend, "INITIALIZED") and cmp(bsread, False):
+            return IntegrationStatus.INITIALIZED
+
+        elif cmp(writer, False) and cmp(detector, "idle") and cmp(backend, "CONFIGURED") and cmp(bsread, False):
+            return IntegrationStatus.CONFIGURED
+
+        elif cmp(writer, True) and cmp(detector, ("running", "waiting")) and cmp(backend, "OPEN") and cmp(bsread, True):
+            return IntegrationStatus.RUNNING
+
+        elif cmp(writer, True) and cmp(detector, "idle") and cmp(backend, "OPEN") and cmp(bsread, True):
+            return IntegrationStatus.DETECTOR_STOPPED
+
+        elif cmp(writer, False) and cmp(detector, "idle") and cmp(backend, "OPEN") and cmp(bsread, True):
+            return IntegrationStatus.BSREAD_STILL_RUNNING
+
+        elif cmp(writer, False) and cmp(detector, "idle") and cmp(backend, "OPEN") and cmp(bsread, False):
+            return IntegrationStatus.FINISHED
+
+        return IntegrationStatus.ERROR
+
