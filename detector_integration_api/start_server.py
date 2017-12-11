@@ -15,8 +15,8 @@ _logger = logging.getLogger(__name__)
 
 
 def start_integration_server(host, port, backend_url, writer_url, writer_instance_name,
-                             bsread_url, bsread_instance_name, manager_module):
-    _logger.debug("Starting integration REST API with:\nBackend url: %s\nWriter url: %s\nWriter instance name: %s\n",
+                             bsread_url, bsread_instance_name, manager_module, disable_bsread):
+    _logger.info("Starting integration REST API with:\nBackend url: %s\nWriter url: %s\nWriter instance name: %s\n",
                   backend_url, writer_url, writer_instance_name)
 
     backend_client = BackendClient(backend_url)
@@ -31,6 +31,10 @@ def start_integration_server(host, port, backend_url, writer_url, writer_instanc
                                                             backend_client=backend_client,
                                                             detector_client=detector_client,
                                                             bsread_client=bsread_client)
+
+    _logger.info("Bsread writer disabled at startup: %s", disable_bsread)
+    if disable_bsread:
+        integration_manager.set_clients_enabled({"bsread": False})
 
     app = bottle.Bottle()
     register_rest_interface(app=app, integration_manager=integration_manager)
@@ -61,6 +65,8 @@ def main():
                         help="Writer instance name.")
     parser.add_argument("--bsread_instance_name", default=config.DEFAULT_BSREAD_INSTANCE_NAME,
                         help="Writer instance name.")
+    parser.add_argument("--disable_bsread", action='store_true',
+                        help="Disable the bsread writer at startup.")
 
     arguments = parser.parse_args()
 
@@ -71,7 +77,8 @@ def main():
                              arguments.backend_url,
                              arguments.writer_url, arguments.writer_instance_name,
                              arguments.bsread_url, arguments.bsread_instance_name,
-                             arguments.manager_module)
+                             arguments.manager_module,
+                             arguments.disable_bsread)
 
 
 if __name__ == "__main__":
