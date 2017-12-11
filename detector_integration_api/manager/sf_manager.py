@@ -267,6 +267,9 @@ class IntegrationManager(object):
         pass
 
     def interpret_status(self, statuses):
+
+        _logger.debug("Interpreting statuses: %s", statuses)
+
         writer = statuses["writer"]
         backend = statuses["backend"]
         detector = statuses["detector"]
@@ -284,23 +287,30 @@ class IntegrationManager(object):
             else:
                 return status == expected_value
 
+        # If no other conditions match.
+        status = IntegrationStatus.ERROR
+
         if cmp(writer, False) and cmp(detector, "idle") and cmp(backend, "INITIALIZED") and cmp(bsread, False):
-            return IntegrationStatus.INITIALIZED
+            status = IntegrationStatus.INITIALIZED
 
         elif cmp(writer, False) and cmp(detector, "idle") and cmp(backend, "CONFIGURED") and cmp(bsread, False):
-            return IntegrationStatus.CONFIGURED
+            status = IntegrationStatus.CONFIGURED
 
         elif cmp(writer, True) and cmp(detector, ("running", "waiting")) and cmp(backend, "OPEN") and cmp(bsread, True):
-            return IntegrationStatus.RUNNING
+            status = IntegrationStatus.RUNNING
 
         elif cmp(writer, True) and cmp(detector, "idle") and cmp(backend, "OPEN") and cmp(bsread, True):
-            return IntegrationStatus.DETECTOR_STOPPED
+            status = IntegrationStatus.DETECTOR_STOPPED
 
         elif cmp(writer, False) and cmp(detector, "idle") and cmp(backend, "OPEN") and cmp(bsread, False):
-            return IntegrationStatus.FINISHED
+            status = IntegrationStatus.FINISHED
 
         elif cmp(writer, False) and cmp(detector, "idle") and cmp(backend, "OPEN") and cmp(bsread, True):
-            return IntegrationStatus.BSREAD_STILL_RUNNING
+            status = IntegrationStatus.BSREAD_STILL_RUNNING
 
-        return IntegrationStatus.ERROR
+        _logger.debug("Statuses interpreted as '%s'.", status)
+
+        return status
+
+
 
