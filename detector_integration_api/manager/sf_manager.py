@@ -37,8 +37,11 @@ class IntegrationManager(object):
 
     def check_for_target_status(self, desired_status):
 
+        status = None
+
         for _ in range(config.N_COLLECT_STATUS_RETRY):
 
+            nonlocal status
             status = self.get_acquisition_status()
 
             if status == desired_status:
@@ -47,7 +50,10 @@ class IntegrationManager(object):
             sleep(config.N_COLLECT_STATUS_RETRY_DELAY)
 
         else:
-            raise ValueError("Cannot reach desired state from one of the components of the system. Try to reset.")
+            status_details = self.get_status_details()
+            _logger.error("Trying to reach status '%s' but got '%s'. Status details: %s",
+                          desired_status, status, status_details)
+            raise ValueError("Cannot reach desired status '%s'. Try to reset or get_status_details for more info.")
 
     def start_acquisition(self):
         _audit_logger.info("Starting acquisition.")
@@ -249,7 +255,6 @@ class IntegrationManager(object):
         if configuration is None:
             raise ValueError("Backend configuration cannot be None.")
 
-
     def validate_detector_config(self, configuration):
         if configuration is None:
             raise ValueError("Detector configuration cannot be None.")
@@ -268,6 +273,9 @@ class IntegrationManager(object):
         bsread = statuses["bsread"]
 
         def cmp(status, expected_value):
+
+            _logger.debug("Comparing status '%s' with expected status '%s'.", status, expected_value)
+
             if status == ClientDisableWrapper.STATUS_DISABLED:
                 return True
 
@@ -293,8 +301,6 @@ class IntegrationManager(object):
 
         elif cmp(writer, False) and cmp(detector, "idle") and cmp(backend, "OPEN") and cmp(bsread, True):
             return IntegrationStatus.BSREAD_STILL_RUNNING
-
-
 
         return IntegrationStatus.ERROR
 
