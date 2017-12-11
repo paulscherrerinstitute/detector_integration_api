@@ -41,7 +41,6 @@ class IntegrationManager(object):
 
         for _ in range(config.N_COLLECT_STATUS_RETRY):
 
-            nonlocal status
             status = self.get_acquisition_status()
 
             if status == desired_status:
