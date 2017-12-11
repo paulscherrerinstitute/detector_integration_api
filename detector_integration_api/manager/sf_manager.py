@@ -61,9 +61,16 @@ class IntegrationManager(object):
         if status != IntegrationStatus.CONFIGURED:
             raise ValueError("Cannot start acquisition in %s state. Please configure first." % status)
 
+        _audit_logger.info("bsread_client.start()")
         self.bsread_client.start()
+
+        _audit_logger.info("backend_client.open()")
         self.backend_client.open()
+
+        _audit_logger.info("writer_client.start()")
         self.writer_client.start()
+
+        _audit_logger.info("detector_client.start()")
         self.detector_client.start()
 
         return self.check_for_target_status(IntegrationStatus.RUNNING)
@@ -74,9 +81,16 @@ class IntegrationManager(object):
         status = self.get_acquisition_status()
 
         if status == IntegrationStatus.RUNNING:
+            _audit_logger.info("detector_client.stop()")
             self.detector_client.stop()
+
+            _audit_logger.info("backend_client.close()")
             self.backend_client.close()
+
+            _audit_logger.info("writer_client.stop()")
             self.writer_client.stop()
+
+            _audit_logger.info("bsread_client.stop()")
             self.bsread_client.stop()
 
         return self.reset()
@@ -95,12 +109,21 @@ class IntegrationManager(object):
         return str(self.get_acquisition_status())
 
     def get_status_details(self):
+        _audit_logger.info("Getting status details.")
+
+        _audit_logger.info("writer_client.get_status()")
         writer_status = self.writer_client.get_status()["is_running"] \
             if self.writer_client.is_client_enabled() else ClientDisableWrapper.STATUS_DISABLED
+
+        _audit_logger.info("backend_client.get_status()")
         backend_status = self.backend_client.get_status() \
             if self.backend_client.is_client_enabled() else ClientDisableWrapper.STATUS_DISABLED
+
+        _audit_logger.info("detector_client.get_status()")
         detector_status = self.detector_client.get_status() \
             if self.detector_client.is_client_enabled() else ClientDisableWrapper.STATUS_DISABLED
+
+        _audit_logger.info("bsread_client.get_status()")
         bsread_status = self.bsread_client.get_status()["is_running"] \
             if self.bsread_client.is_client_enabled() else ClientDisableWrapper.STATUS_DISABLED
 
@@ -158,15 +181,19 @@ class IntegrationManager(object):
 
         self.validate_configs_dependencies(writer_config, backend_config, detector_config, bsread_config)
 
+        _audit_logger.info("backend_client.set_config(backend_config)")
         self.backend_client.set_config(backend_config)
         self._last_set_backend_config = backend_config
 
+        _audit_logger.info("writer_client.set_parameters(writer_config)")
         self.writer_client.set_parameters(writer_config)
         self._last_set_writer_config = writer_config
 
+        _audit_logger.info("detector_client.set_config(detector_config)")
         self.detector_client.set_config(detector_config)
         self._last_set_detector_config = detector_config
 
+        _audit_logger.info("bsread_client.set_parameters(bsread_config)")
         self.bsread_client.set_parameters(bsread_config)
         self._last_set_bsread_config = bsread_config
 
@@ -221,9 +248,16 @@ class IntegrationManager(object):
 
         self.last_config_successful = False
 
+        _audit_logger.info("detector_client.stop()")
         self.detector_client.stop()
+
+        _audit_logger.info("backend_client.reset()")
         self.backend_client.reset()
+
+        _audit_logger.info("writer_client.reset()")
         self.writer_client.reset()
+
+        _audit_logger.info("bsread_client.reset()")
         self.bsread_client.reset()
 
         return self.check_for_target_status(IntegrationStatus.INITIALIZED)
