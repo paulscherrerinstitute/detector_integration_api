@@ -56,11 +56,7 @@ def main():
     logging.basicConfig(level=arguments.log_level, format='[%(levelname)s] %(message)s')
 
     start_integration_server(arguments.interface, arguments.port,
-                             arguments.backend_url,
-                             arguments.writer_url, arguments.writer_instance_name,
-                             arguments.bsread_url, arguments.bsread_instance_name,
-                             arguments.manager_module,
-                             arguments.disable_bsread)
+                             arguments.backend_url, arguments.writer_url)
 
 
 if __name__ == "__main__":
