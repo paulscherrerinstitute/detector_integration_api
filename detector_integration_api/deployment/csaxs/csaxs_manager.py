@@ -4,8 +4,7 @@ from logging import getLogger
 from time import sleep
 
 from detector_integration_api import config
-
-from detector_integration_api.manager.utils import ClientDisableWrapper
+from detector_integration_api.utils import ClientDisableWrapper
 
 _logger = getLogger(__name__)
 _audit_logger = getLogger("audit_trail")

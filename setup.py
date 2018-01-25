@@ -13,5 +13,7 @@ setup(name="detector_integration_api",
       packages=['detector_integration_api',
                 'detector_integration_api.client',
                 'detector_integration_api.rest_api',
-                'detector_integration_api.validation']
+                'detector_integration_api.deployment',
+                'detector_integration_api.deployment.csaxs',
+                'detector_integration_api.deployment.sf']
       )

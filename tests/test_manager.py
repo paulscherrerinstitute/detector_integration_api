@@ -1,6 +1,6 @@
 import unittest
 
-from detector_integration_api.manager.sf_manager import IntegrationStatus
+from detector_integration_api.deployment.sf.sf_manager import IntegrationStatus
 from tests.utils import get_test_integration_manager, get_csax9m_test_writer_parameters
 
 

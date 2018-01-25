@@ -1,4 +1,4 @@
-from detector_integration_api.manager.sf_manager import IntegrationStatus
+from detector_integration_api.deployment.sf.sf_manager import IntegrationStatus
 
 writer_cfg_params = ["output_file", "user_id", "group_id"]
 backend_cfg_params = ["bit_depth", "n_frames"]
