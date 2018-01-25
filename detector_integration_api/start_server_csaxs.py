@@ -8,6 +8,7 @@ from mflow_nodes import NodeClient
 
 from detector_integration_api import config
 from detector_integration_api.client.backend_rest_client import BackendClient
+from detector_integration_api.client.cpp_writer_client import CppWriterClient
 from detector_integration_api.client.detector_cli_client import DetectorClient
 from detector_integration_api.manager import csaxs_manager
 from detector_integration_api.rest_api.rest_server import register_rest_interface, register_debug_rest_interface
@@ -20,8 +21,7 @@ def start_integration_server(host, port, backend_url, writer_url):
                  backend_url, writer_url)
 
     backend_client = BackendClient(backend_url)
-    # TODO: Instantiate the writer client.
-    writer_client = None
+    writer_client = CppWriterClient(writer_url)
     detector_client = DetectorClient()
 
     integration_manager = csaxs_manager.IntegrationManager(writer_client=writer_client,
