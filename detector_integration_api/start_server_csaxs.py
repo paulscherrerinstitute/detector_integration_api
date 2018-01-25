@@ -9,36 +9,27 @@ from mflow_nodes import NodeClient
 from detector_integration_api import config
 from detector_integration_api.client.backend_rest_client import BackendClient
 from detector_integration_api.client.detector_cli_client import DetectorClient
+from detector_integration_api.manager import csaxs_manager
 from detector_integration_api.rest_api.rest_server import register_rest_interface, register_debug_rest_interface
 
 _logger = logging.getLogger(__name__)
 
 
-def start_integration_server(host, port, backend_url, writer_url, writer_instance_name,
-                             bsread_url, bsread_instance_name, manager_module, disable_bsread):
-    _logger.info("Starting integration REST API with:\nBackend url: %s\nWriter url: %s\nWriter instance name: %s\n",
-                  backend_url, writer_url, writer_instance_name)
+def start_integration_server(host, port, backend_url, writer_url):
+    _logger.info("Starting integration REST API with:\nBackend url: %s\nWriter url: %s",
+                 backend_url, writer_url)
 
     backend_client = BackendClient(backend_url)
-    writer_client = NodeClient(writer_url, writer_instance_name)
-    bsread_client = NodeClient(bsread_url, bsread_instance_name)
+    # TODO: Instantiate the writer client.
+    writer_client = None
     detector_client = DetectorClient()
 
-    _logger.info("Using manager module '%s'.", manager_module)
-    module_manager = import_module(manager_module)
-
-    integration_manager = module_manager.IntegrationManager(writer_client=writer_client,
-                                                            backend_client=backend_client,
-                                                            detector_client=detector_client,
-                                                            bsread_client=bsread_client)
-
-    _logger.info("Bsread writer disabled at startup: %s", disable_bsread)
-    if disable_bsread:
-        integration_manager.set_clients_enabled({"bsread": False})
+    integration_manager = csaxs_manager.IntegrationManager(writer_client=writer_client,
+                                                           backend_client=backend_client,
+                                                           detector_client=detector_client)
 
     app = bottle.Bottle()
     register_rest_interface(app=app, integration_manager=integration_manager)
-    register_debug_rest_interface(app=app, integration_manager=integration_manager)
 
     try:
         bottle.run(app=app, host=host, port=port)
@@ -58,15 +49,6 @@ def main():
                         help="Backend REST API url.")
     parser.add_argument("-w", "--writer_url", default=config.DEFAULT_WRITER_URL,
                         help="Writer REST API url.")
-    parser.add_argument("-s", "--bsread_url", default=config.DEFAULT_BSREAD_URL,
-                        help="Writer REST API url.")
-    parser.add_argument("-m", "--manager_module", default=config.DEFAULT_MANAGER_MODULE)
-    parser.add_argument("--writer_instance_name", default=config.DEFAULT_WRITER_INSTANCE_NAME,
-                        help="Writer instance name.")
-    parser.add_argument("--bsread_instance_name", default=config.DEFAULT_BSREAD_INSTANCE_NAME,
-                        help="Writer instance name.")
-    parser.add_argument("--disable_bsread", action='store_true',
-                        help="Disable the bsread writer at startup.")
 
     arguments = parser.parse_args()
 
