@@ -13,12 +13,12 @@ from detector_integration_api.rest_api.rest_server import register_rest_interfac
 _logger = logging.getLogger(__name__)
 
 
-def start_integration_server(host, port, backend_url, writer_url):
-    _logger.info("Starting integration REST API with:\nBackend url: %s\nWriter url: %s",
-                 backend_url, writer_url)
+def start_integration_server(host, port, backend_api_url, backed_stream_url, writer_port):
+    _logger.info("Starting integration REST API with:\nBackend api url: %s\nBackend stream url: %s\nWriter port: %s",
+                 backend_api_url, backed_stream_url, writer_port)
 
-    backend_client = BackendClient(backend_url)
-    writer_client = CppWriterClient(writer_url)
+    backend_client = BackendClient(backend_api_url)
+    writer_client = CppWriterClient(backed_stream_url, writer_port)
     detector_client = DetectorClient()
 
     integration_manager = csaxs_manager.IntegrationManager(writer_client=writer_client,
@@ -42,10 +42,12 @@ def main():
     parser.add_argument("--log_level", default=config.DEFAULT_LOGGING_LEVEL,
                         choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'],
                         help="Log level to use.")
-    parser.add_argument("-b", "--backend_url", default=config.DEFAULT_BACKEND_URL,
+    parser.add_argument("-s", "--backend_stream", default="tcp://10.30.10.3:40000",
+                        help="Output stream address from the backend.")
+    parser.add_argument("-b", "--backend_url", default="http://xbl-daq-28:8080",
                         help="Backend REST API url.")
-    parser.add_argument("-w", "--writer_url", default=config.DEFAULT_WRITER_URL,
-                        help="Writer REST API url.")
+    parser.add_argument("-w", "--writer_port", default=10000,
+                        help="Writer REST API port.")
 
     arguments = parser.parse_args()
 
@@ -53,7 +55,9 @@ def main():
     logging.basicConfig(level=arguments.log_level, format='[%(levelname)s] %(message)s')
 
     start_integration_server(arguments.interface, arguments.port,
-                             arguments.backend_url, arguments.writer_url)
+                             backend_api_url=arguments.backend_url,
+                             backend_stream_url=arguments.backend_stream,
+                             writer_port=arguments.writer_port)
 
 
 if __name__ == "__main__":
