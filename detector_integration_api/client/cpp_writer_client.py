@@ -38,7 +38,7 @@ class CppWriterClient(object):
             raise RuntimeError("Writer process already running. Cannot start new one until old one is still alive.")
 
         if not self.writer_parameters:
-            raise ValueError("Parameters not set.")
+            raise ValueError("Writer parameters not set.")
 
         timestamp = datetime.now().strftime(config.WRITER_PROCESS_LOG_FILENAME_TIME_FORMAT)
         log_filename = os.path.join(config.WRITER_LOG_DIR, config.WRITER_PROCESS_LOG_FILENAME_FORMAT % timestamp)
@@ -98,9 +98,6 @@ class CppWriterClient(object):
         return {"is_running": False}
 
     def set_parameters(self, writer_parameters):
-
-        if not self.is_running():
-            raise RuntimeError("Process is not running. Cannot set parameters.")
 
         self.writer_parameters = writer_parameters
 
