@@ -13,12 +13,12 @@ from detector_integration_api.rest_api.rest_server import register_rest_interfac
 _logger = logging.getLogger(__name__)
 
 
-def start_integration_server(host, port, backend_api_url, backed_stream_url, writer_port):
+def start_integration_server(host, port, backend_api_url, backend_stream_url, writer_port):
     _logger.info("Starting integration REST API with:\nBackend api url: %s\nBackend stream url: %s\nWriter port: %s",
-                 backend_api_url, backed_stream_url, writer_port)
+                 backend_api_url, backend_stream_url, writer_port)
 
     backend_client = BackendClient(backend_api_url)
-    writer_client = CppWriterClient(backed_stream_url, writer_port)
+    writer_client = CppWriterClient(backend_stream_url, writer_port)
     detector_client = DetectorClient()
 
     integration_manager = csaxs_manager.IntegrationManager(writer_client=writer_client,
