@@ -15,6 +15,13 @@ N_COLLECT_STATUS_RETRY = 3
 # Delay between re-tries.
 N_COLLECT_STATUS_RETRY_DELAY = 0.1
 
+# CPP writer settings
+WRITER_PROCESS_URL_FORMAT = "http://localhost:%d"
+WRITER_PROCESS_STARTUP_WAIT_TIME = 0.2
+WRITER_PROCESS_LOG_DIR = "/var/log/h5_zmq_writer"
+WRITER_PROCESS_LOG_FILENAME_FORMAT = "h5_zmq_writer-%s.log"
+WRITER_PROCESS_LOG_FILENAME_TIME_FORMAT = "%Y%m%d-%H%M%S"
+
 # Rest API routes.
 ROUTES = {
     "start": "/api/v1/start",
