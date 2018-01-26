@@ -41,7 +41,7 @@ class CppWriterClient(object):
             raise ValueError("Writer parameters not set.")
 
         timestamp = datetime.now().strftime(config.WRITER_PROCESS_LOG_FILENAME_TIME_FORMAT)
-        log_filename = os.path.join(config.WRITER_LOG_DIR, config.WRITER_PROCESS_LOG_FILENAME_FORMAT % timestamp)
+        log_filename = os.path.join(config.WRITER_PROCESS_LOG_DIR, config.WRITER_PROCESS_LOG_FILENAME_FORMAT % timestamp)
 
         writer_command_format = "sh /home/dia/start_writer.sh %s %s %s %s %s"
         writer_command = writer_command_format % (self.stream_url,
@@ -58,7 +58,7 @@ class CppWriterClient(object):
 
         self.process = Popen(writer_command, shell=True, stdout=self.process_log_file, stderr=self.process_log_file)
 
-        sleep(config.PROCESS_STARTUP_WAIT_TIME)
+        sleep(config.WRITER_PROCESS_STARTUP_WAIT_TIME)
 
         process_parameters = self._sanitize_parameters(self.writer_parameters)
 
