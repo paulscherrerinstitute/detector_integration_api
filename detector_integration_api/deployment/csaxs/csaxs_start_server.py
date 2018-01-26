@@ -46,7 +46,7 @@ def main():
                         help="Output stream address from the backend.")
     parser.add_argument("-b", "--backend_url", default="http://xbl-daq-28:8080",
                         help="Backend REST API url.")
-    parser.add_argument("-w", "--writer_port", default=10000,
+    parser.add_argument("-w", "--writer_port", type=int, default=10000,
                         help="Writer REST API port.")
 
     arguments = parser.parse_args()
