@@ -29,9 +29,13 @@ class CppWriterClient(object):
 
     @staticmethod
     def _sanitize_parameters(parameters):
+
         return {key: parameters[key] for key in parameters if key not in CppWriterClient.PROCESS_STARTUP_PARAMETERS}
 
     def start(self):
+
+        if self.is_running():
+            raise RuntimeError("Writer process already running. Cannot start new one until old one is still alive.")
 
         if not self.writer_parameters:
             raise ValueError("Parameters not set.")
@@ -63,22 +67,45 @@ class CppWriterClient(object):
         response = requests.post(self.url + "/parameters", json=process_parameters)
 
     def stop(self):
+
         _logger.debug("Stopping writer.")
 
-        requests.get(self.url + "/stop")
+        if self.is_running():
+            requests.get(self.url + "/stop")
+            self.process.wait()
 
-        self.process.wait()
-        self.process_log_file.flush()
-        self.process_log_file.close()
+        else:
+            _logger.debug("Writer process is not running.")
+
+        if self.process_log_file:
+            self.process_log_file.flush()
+            self.process_log_file.close()
+
+        self.process = None
+        self.process_log_file = None
+
+    def is_running(self):
+
+        return self.process is not None and self.process.poll() is None
 
     def get_status(self):
-        status = requests.get(self.url + "/status")
-        return {"is_running": True}
+
+        if self.is_running():
+            status = requests.get(self.url + "/status")
+            print(status)
+            return {"is_running": True}
+
+        return {"is_running": False}
 
     def set_parameters(self, writer_parameters):
+
+        if not self.is_running():
+            raise RuntimeError("Process is not running. Cannot set parameters.")
+
         self.writer_parameters = writer_parameters
 
     def reset(self):
+
         _logger.debug("Resetting writer.")
 
         self.stop()
@@ -86,4 +113,8 @@ class CppWriterClient(object):
         self.writer_parameters = None
 
     def get_statistics(self):
+
+        if not self.is_running():
+            raise RuntimeError("Process is not running. Cannot get statistics.")
+
         return requests.get(self.url + "/statistics").json()
