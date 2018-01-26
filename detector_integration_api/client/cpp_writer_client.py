@@ -92,7 +92,7 @@ class CppWriterClient(object):
 
         if self.is_running():
             status = requests.get(self.url + "/status")
-            print(status)
+
             return {"is_running": True}
 
         return {"is_running": False}
