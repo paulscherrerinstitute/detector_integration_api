@@ -127,7 +127,8 @@ class IntegrationManager(object):
                 "detector": copy(self._last_set_detector_config)}
 
     def set_acquisition_config(self, new_config):
-        if {"writer", "backend", "detector"} != set(new_config):
+
+        if {"writer", "backend", "detector"} not in set(new_config):
             raise ValueError("Specify config JSON with 3 root elements: 'writer', 'backend', 'detector'.")
 
         writer_config = new_config["writer"]
