@@ -4,7 +4,7 @@ from time import time, sleep
 import requests
 
 from detector_integration_api import config
-from detector_integration_api.rest_api.rest_server import routes
+from detector_integration_api.config import ROUTES
 
 
 def validate_response(server_response):
@@ -25,35 +25,35 @@ class DetectorIntegrationClient(object):
         self.api_address = api_address.rstrip("/")
 
     def start(self):
-        request_url = self.api_address + routes["start"]
+        request_url = self.api_address + ROUTES["start"]
 
         response = requests.post(request_url).json()
 
         return validate_response(response)
 
     def stop(self):
-        request_url = self.api_address + routes["stop"]
+        request_url = self.api_address + ROUTES["stop"]
 
         response = requests.post(request_url).json()
 
         return validate_response(response)
 
     def get_status(self):
-        request_url = self.api_address + routes["get_status"]
+        request_url = self.api_address + ROUTES["get_status"]
 
         response = requests.get(request_url).json()
 
         return validate_response(response)
 
     def get_status_details(self):
-        request_url = self.api_address + routes["get_status_details"]
+        request_url = self.api_address + ROUTES["get_status_details"]
 
         response = requests.get(request_url).json()
 
         return validate_response(response)
 
     def get_config(self):
-        request_url = self.api_address + routes["get_config"]
+        request_url = self.api_address + ROUTES["get_config"]
 
         response = requests.get(request_url).json()
 
@@ -78,14 +78,14 @@ class DetectorIntegrationClient(object):
             sleep(polling_interval)
 
     def get_clients_enabled(self):
-        request_url = self.api_address + routes["clients_enabled"]
+        request_url = self.api_address + ROUTES["clients_enabled"]
 
         response = requests.get(request_url).json()
 
         return validate_response(response)
 
     def set_clients_enabled(self, bsread=True, writer=True, backend=True, detector=True):
-        request_url = self.api_address + routes["clients_enabled"]
+        request_url = self.api_address + ROUTES["clients_enabled"]
 
         configuration = {"writer": writer,
                          "backend": backend,
@@ -97,7 +97,7 @@ class DetectorIntegrationClient(object):
         return validate_response(response)
 
     def set_config(self, writer_config, backend_config, detector_config, bsread_config=None):
-        request_url = self.api_address + routes["set_config"]
+        request_url = self.api_address + ROUTES["set_config"]
 
         configuration = {"writer": writer_config,
                          "backend": backend_config,
@@ -118,14 +118,14 @@ class DetectorIntegrationClient(object):
                         configuration.get("bsread"))
 
     def set_last_config(self):
-        request_url = self.api_address + routes["set_last_config"]
+        request_url = self.api_address + ROUTES["set_last_config"]
 
         response = requests.post(request_url).json()
 
         return validate_response(response)
 
     def update_config(self, writer_config=None, backend_config=None, detector_config=None, bsread_config=None):
-        request_url = self.api_address + routes["update_config"]
+        request_url = self.api_address + ROUTES["update_config"]
 
         configuration = {"writer": writer_config,
                          "backend": backend_config,
@@ -137,14 +137,14 @@ class DetectorIntegrationClient(object):
         return validate_response(response)
 
     def get_detector_value(self, name):
-        request_url = self.api_address + routes["get_detector_value"] + "/" + name
+        request_url = self.api_address + ROUTES["get_detector_value"] + "/" + name
 
         response = requests.get(request_url).json()
 
         return validate_response(response)["value"]
 
     def set_detector_value(self, parameter_name, parameter_value):
-        request_url = self.api_address + routes["set_detector_value"]
+        request_url = self.api_address + ROUTES["set_detector_value"]
 
         request_json = {"name": parameter_name,
                         "value": parameter_value}
@@ -154,47 +154,47 @@ class DetectorIntegrationClient(object):
         return validate_response(response)["value"]
 
     def reset(self):
-        request_url = self.api_address + routes["reset"]
+        request_url = self.api_address + ROUTES["reset"]
 
         response = requests.post(request_url).json()
 
         return validate_response(response)
 
     def get_server_info(self):
-        request_url = self.api_address + routes["get_server_info"]
+        request_url = self.api_address + ROUTES["get_server_info"]
 
         response = requests.get(request_url).json()
 
         return validate_response(response)
 
     def debug_start(self, configuration=None):
-        request_url = self.api_address + "/debug" + routes["start"]
+        request_url = self.api_address + "/debug" + ROUTES["start"]
 
         response = requests.post(request_url, json=configuration).json()
 
         return validate_response(response)
 
     def debug_stop(self):
-        request_url = self.api_address + "/debug" + routes["stop"]
+        request_url = self.api_address + "/debug" + ROUTES["stop"]
 
         response = requests.post(request_url).json()
 
         return validate_response(response)
 
     def get_metrics(self):
-        request_url = self.api_address + routes["get_metrics"]
+        request_url = self.api_address + ROUTES["get_metrics"]
         response = requests.get(request_url)
         
         return validate_response(response.json())
 
     def get_backend(self, action, configuration={}):
-        request_url = self.api_address + routes["backend_client"] + "/" + action
+        request_url = self.api_address + ROUTES["backend_client"] + "/" + action
 
         response = requests.get(request_url).json() 
         return validate_response(response)
 
     def put_backend(self, action, configuration={}):
-        request_url = self.api_address + routes["backend_client"] + "/" + action
+        request_url = self.api_address + ROUTES["backend_client"] + "/" + action
 
         response = requests.put(request_url, json=configuration).json() 
         return validate_response(response)

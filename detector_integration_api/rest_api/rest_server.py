@@ -3,37 +3,14 @@ from logging import getLogger
 
 from bottle import request, response
 
+from detector_integration_api.config import ROUTES
+
 _logger = getLogger(__name__)
 _audit_logger = getLogger("audit_trail")
 
-routes = {
-    "start": "/api/v1/start",
-    "stop": "/api/v1/stop",
-    "reset": "/api/v1/reset",
-
-    "get_status": "/api/v1/status",
-    "get_status_details": "/api/v1/status_details",
-
-    "get_config": "/api/v1/config",
-    "set_config": "/api/v1/config",
-    "update_config": "/api/v1/config",
-    "set_last_config": "/api/v1/configure",
-
-    "get_detector_value": "/api/v1/detector/value",
-    "set_detector_value": "/api/v1/detector/value",
-
-    "get_server_info": "/api/v1/info",
-
-    "get_metrics": "/api/v1/metrics",
-
-    "backend_client": "/api/v1/backend",
-
-    "clients_enabled": "/api/v1/enabled_clients"
-}
-
 
 def register_debug_rest_interface(app, integration_manager):
-    @app.post("/debug" + routes["start"])
+    @app.post("/debug" + ROUTES["start"])
     def debug_start():
         # Stop the current acquisition if running.
         debug_stop()
@@ -64,7 +41,7 @@ def register_debug_rest_interface(app, integration_manager):
         return {"state": "ok",
                 "status": integration_manager.get_acquisition_status_string()}
 
-    @app.post("/debug" + routes["stop"])
+    @app.post("/debug" + ROUTES["stop"])
     def debug_stop():
         integration_manager.stop_acquisition()
 
@@ -73,33 +50,33 @@ def register_debug_rest_interface(app, integration_manager):
 
 
 def register_rest_interface(app, integration_manager):
-    @app.post(routes["start"])
+    @app.post(ROUTES["start"])
     def start():
         status = integration_manager.start_acquisition()
 
         return {"state": "ok",
                 "status": str(status)}
 
-    @app.post(routes["stop"])
+    @app.post(ROUTES["stop"])
     def stop():
         status = integration_manager.stop_acquisition()
 
         return {"state": "ok",
                 "status": str(status)}
 
-    @app.get(routes["get_status"])
+    @app.get(ROUTES["get_status"])
     def get_status():
         return {"state": "ok",
                 "status": integration_manager.get_acquisition_status_string()}
 
-    @app.get(routes["get_status_details"])
+    @app.get(ROUTES["get_status_details"])
     def get_status_details():
 
         return {"state": "ok",
                 "status": integration_manager.get_acquisition_status_string(),
                 "details": integration_manager.get_status_details()}
 
-    @app.post(routes["set_last_config"])
+    @app.post(ROUTES["set_last_config"])
     def set_last_config():
         status = integration_manager.set_acquisition_config(integration_manager.get_acquisition_config())
 
@@ -107,13 +84,13 @@ def register_rest_interface(app, integration_manager):
                 "status": str(status),
                 "config": integration_manager.get_acquisition_config()}
 
-    @app.get(routes["get_config"])
+    @app.get(ROUTES["get_config"])
     def get_config():
         return {"state": "ok",
                 "status": integration_manager.get_acquisition_status_string(),
                 "config": integration_manager.get_acquisition_config()}
 
-    @app.put(routes["set_config"])
+    @app.put(ROUTES["set_config"])
     def set_config():
         new_config = request.json
 
@@ -123,7 +100,7 @@ def register_rest_interface(app, integration_manager):
                 "status": str(status),
                 "config": integration_manager.get_acquisition_config()}
 
-    @app.post(routes["update_config"])
+    @app.post(ROUTES["update_config"])
     def update_config():
         config_updates = request.json
 
@@ -133,7 +110,7 @@ def register_rest_interface(app, integration_manager):
                 "status": str(status),
                 "config": integration_manager.get_acquisition_config()}
 
-    @app.get(routes["get_detector_value"] + "/<name>")
+    @app.get(ROUTES["get_detector_value"] + "/<name>")
     def get_detector_value(name):
         value = integration_manager.detector_client.get_value(name)
 
@@ -141,7 +118,7 @@ def register_rest_interface(app, integration_manager):
                 "status": integration_manager.get_acquisition_status_string(),
                 "value": value}
 
-    @app.post(routes["set_detector_value"])
+    @app.post(ROUTES["set_detector_value"])
     def set_detector_value():
         parameter_request = request.json
 
@@ -160,30 +137,30 @@ def register_rest_interface(app, integration_manager):
                 "status": integration_manager.get_acquisition_status_string(),
                 "value": value}
 
-    @app.post(routes["reset"])
+    @app.post(ROUTES["reset"])
     def reset():
         status = integration_manager.reset()
 
         return {"state": "ok",
                 "status": str(status)}
 
-    @app.get(routes["get_server_info"])
+    @app.get(ROUTES["get_server_info"])
     def get_server_info():
         return {"state": "ok",
                 "status": integration_manager.get_acquisition_status_string(),
                 "server_info": integration_manager.get_server_info()}
 
-    @app.get(routes["get_metrics"])
+    @app.get(ROUTES["get_metrics"])
     def get_metrics():
         return {"state": "ok",
                 "metrics": integration_manager.get_metrics()}
 
-    @app.get(routes["backend_client"] + "/<action>")
+    @app.get(ROUTES["backend_client"] + "/<action>")
     def get_backend_client(action):
         value = integration_manager.backend_client.__getattribute__(action)()
         return {"state": "ok", "value": value}
 
-    @app.put(routes["backend_client"] + "/<action>")
+    @app.put(ROUTES["backend_client"] + "/<action>")
     def put_backend_client(action):
         if action not in ["open", "close", "reset", "config"]:
             raise ValueError("Action %s not supported. Currently supported actions: config" % action)
@@ -200,13 +177,13 @@ def register_rest_interface(app, integration_manager):
             return {"state": "ok",
                     "status": integration_manager.backend_client.get_status()}
 
-    @app.get(routes["clients_enabled"])
+    @app.get(ROUTES["clients_enabled"])
     def get_clients_enabled():
         return {"state": "ok",
                 "status": integration_manager.get_clients_enabled(),
                 "clients_enabled": integration_manager.get_clients_enabled()}
 
-    @app.post(routes["clients_enabled"])
+    @app.post(ROUTES["clients_enabled"])
     def set_clients_enabled():
         config_clients_enable = request.json
 
