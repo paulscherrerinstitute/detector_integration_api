@@ -23,10 +23,10 @@ class IntegrationManager(object):
 
         self.last_config_successful = False
 
-    def check_for_target_status(self, desired_status):
+    def check_for_target_status(self, desired_statuses):
 
-        if not isinstance(desired_status, (tuple, list)):
-            desired_status = (desired_status,)
+        if not isinstance(desired_statuses, (tuple, list)):
+            desired_statuses = (desired_statuses,)
 
         status = None
 
@@ -34,7 +34,7 @@ class IntegrationManager(object):
 
             status = self.get_acquisition_status()
 
-            if status in desired_status:
+            if status in desired_statuses:
                 return status
 
             sleep(config.N_COLLECT_STATUS_RETRY_DELAY)
@@ -42,12 +42,14 @@ class IntegrationManager(object):
         else:
             status_details = self.get_status_details()
 
-            _logger.error("Trying to reach status '%s' but got '%s'. Status details: %s",
-                          desired_status, status, status_details)
+            desired_statuses_text = ", ".join(desired_statuses)
+
+            _logger.error("Trying to reach one of the statuses '%s' but got '%s'. Status details: %s",
+                          desired_statuses_text, status, status_details)
 
             raise ValueError("Cannot reach desired status '%s'. Current status '%s'. "
                              "Try to reset or get_status_details for more info." %
-                             (desired_status, status))
+                             (desired_statuses_text, status))
 
     def start_acquisition(self):
         _audit_logger.info("Starting acquisition.")
@@ -66,7 +68,9 @@ class IntegrationManager(object):
         self.detector_client.start()
 
         # We need the status FINISHED for very short acquisitions.
-        return self.check_for_target_status((IntegrationStatus.RUNNING, IntegrationStatus.FINISHED))
+        return self.check_for_target_status((IntegrationStatus.RUNNING,
+                                             IntegrationStatus.DETECTOR_STOPPED,
+                                             IntegrationStatus.FINISHED))
 
     def stop_acquisition(self):
         _audit_logger.info("Stopping acquisition.")
