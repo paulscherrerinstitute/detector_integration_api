@@ -71,6 +71,9 @@ class DetectorIntegrationClient(object):
             if last_status in target_status:
                 return
 
+            if last_status == 'IntegrationStatus.ERROR':
+                raise RuntimeError("Received status 'IntegrationStatus.ERROR'. Use get_status_details for more info.")
+
             if timeout and time() - start_time > timeout:
                 raise ValueError("Timeout exceeded. Could not reach target status '%s'. Last received status: '%s'." %
                                  (target_status, last_status))
