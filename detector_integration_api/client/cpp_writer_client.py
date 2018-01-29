@@ -66,7 +66,8 @@ class CppWriterClient(object):
         for _ in range(config.WRITER_PROCESS_RETRY_N):
 
             try:
-                requests.post(self.url + "/parameters", json=process_parameters)
+                requests.post(self.url + "/parameters", json=process_parameters,
+                              timeout=config.WRITER_PROCESS_COMMUNICATION_TIMEOUT)
                 break
 
             except:
@@ -82,8 +83,8 @@ class CppWriterClient(object):
         _logger.debug("Stopping writer.")
 
         if self.is_running():
-            requests.get(self.url + "/stop")
-            self.process.wait()
+            requests.get(self.url + "/stop", timeout=config.WRITER_PROCESS_COMMUNICATION_TIMEOUT)
+            self.process.wait(timeout=config.WRITER_PROCESS_COMMUNICATION_TIMEOUT)
 
         else:
             _logger.debug("Writer process is not running.")
@@ -102,7 +103,7 @@ class CppWriterClient(object):
 
         # Writer is running. Get status from the process.
         if self.is_running():
-            status = requests.get(self.url + "/status").json()
+            status = requests.get(self.url + "/status", timeout=config.WRITER_PROCESS_COMMUNICATION_TIMEOUT).json()
 
             return status["status"]
 
@@ -123,4 +124,4 @@ class CppWriterClient(object):
         if not self.is_running():
             return {}
 
-        return requests.get(self.url + "/statistics").json()
+        return requests.get(self.url + "/statistics", timeout=config.WRITER_PROCESS_COMMUNICATION_TIMEOUT).json()
