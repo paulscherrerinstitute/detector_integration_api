@@ -113,6 +113,6 @@ class CppWriterClient(object):
     def get_statistics(self):
 
         if not self.is_running():
-            raise RuntimeError("Process is not running. Cannot get statistics.")
+            return {}
 
         return requests.get(self.url + "/statistics").json()
