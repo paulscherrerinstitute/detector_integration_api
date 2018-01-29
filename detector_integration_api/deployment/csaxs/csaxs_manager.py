@@ -4,6 +4,7 @@ from logging import getLogger
 from time import sleep
 
 from detector_integration_api import config
+from detector_integration_api.deployment.csaxs import csaxs_validation_eiger9m
 from detector_integration_api.utils import ClientDisableWrapper
 
 _logger = getLogger(__name__)
@@ -86,7 +87,7 @@ class IntegrationManager(object):
         return self.reset()
 
     def get_acquisition_status(self):
-        status = self.interpret_status(self.get_status_details())
+        status = csaxs_validation_eiger9m.interpret_status(self.get_status_details())
 
         # There is no way of knowing if the detector is configured as the user desired.
         # We have a flag to check if the user config was passed on to the detector.
@@ -155,15 +156,15 @@ class IntegrationManager(object):
 
         # Before setting the new config, validate the provided values. All must be valid.
         if self.writer_client.client_enabled:
-            self.validate_writer_config(writer_config)
+            csaxs_validation_eiger9m.validate_writer_config(writer_config)
 
         if self.backend_client.client_enabled:
-            self.validate_backend_config(backend_config)
+            csaxs_validation_eiger9m.validate_backend_config(backend_config)
 
         if self.detector_client.client_enabled:
-            self.validate_detector_config(detector_config)
+            csaxs_validation_eiger9m.validate_detector_config(detector_config)
 
-        self.validate_configs_dependencies(writer_config, backend_config, detector_config)
+        csaxs_validation_eiger9m.validate_configs_dependencies(writer_config, backend_config, detector_config)
 
         _audit_logger.info("backend_client.set_config(backend_config)")
         self.backend_client.set_config(backend_config)
@@ -248,68 +249,3 @@ class IntegrationManager(object):
         return {"writer": self.writer_client.get_statistics(),
                 "backend": self.backend_client.get_metrics(),
                 "detector": {}}
-
-    def validate_writer_config(self, configuration):
-        if configuration is None:
-            raise ValueError("Writer configuration cannot be None.")
-
-    def validate_backend_config(self, configuration):
-        if configuration is None:
-            raise ValueError("Backend configuration cannot be None.")
-
-    def validate_detector_config(self, configuration):
-        if configuration is None:
-            raise ValueError("Detector configuration cannot be None.")
-
-    def validate_bsread_config(self, configuration):
-        if configuration is None:
-            raise ValueError("bsread configuration cannot be None.")
-
-    def validate_configs_dependencies(self, writer_config, backend_config, detector_config):
-        pass
-
-    def interpret_status(self, statuses):
-
-        _logger.debug("Interpreting statuses: %s", statuses)
-
-        writer = statuses["writer"]
-        backend = statuses["backend"]
-        detector = statuses["detector"]
-
-        def cmp(status, expected_value):
-
-            _logger.debug("Comparing status '%s' with expected status '%s'.", status, expected_value)
-
-            if status == ClientDisableWrapper.STATUS_DISABLED:
-                return True
-
-            if isinstance(expected_value, (tuple, list)):
-                return status in expected_value
-            else:
-                return status == expected_value
-
-        # If no other conditions match.
-        interpreted_status = IntegrationStatus.ERROR
-
-        # Dia after reset.
-        if cmp(writer, "stopped") and cmp(detector, "idle") and cmp(backend, "INITIALIZED"):
-            interpreted_status = IntegrationStatus.INITIALIZED
-
-        elif cmp(writer, "stopped") and cmp(detector, "idle") and cmp(backend, "CONFIGURED"):
-            interpreted_status = IntegrationStatus.CONFIGURED
-
-        elif cmp(writer, ("receiving", "writing")) and cmp(detector, ("running", "waiting")) and cmp(backend, "OPEN"):
-            interpreted_status = IntegrationStatus.RUNNING
-
-        elif cmp(writer, ("receiving", "writing")) and cmp(detector, "idle") and cmp(backend, "OPEN"):
-            interpreted_status = IntegrationStatus.DETECTOR_STOPPED
-
-        elif cmp(writer, ("finished", "stopped")) and cmp(detector, "idle") and cmp(backend, "OPEN"):
-            interpreted_status = IntegrationStatus.FINISHED
-
-        _logger.debug("Statuses interpreted as '%s'.", interpreted_status)
-
-        return interpreted_status
-
-
-
