@@ -70,14 +70,19 @@ class CppWriterClient(object):
                                          timeout=config.WRITER_PROCESS_COMMUNICATION_TIMEOUT)
 
                 if response.status_code != 200:
-                    raise ValueError("Cannot set parameters on writer. Response: %s" % response.text)
+                    continue
 
                 break
 
             except:
                 sleep(config.WRITER_PROCESS_RETRY_DELAY)
         else:
-            _logger.warning("Terminating writer process because it did not responde in the specified time.")
+            _logger.warning("Terminating writer process because it did not respond in the specified time.")
+
+            requests.get(self.url + "/kill", timeout=config.WRITER_PROCESS_COMMUNICATION_TIMEOUT)
+
+            self.process.wait(timeout=config.WRITER_PROCESS_TERMINATE_TIMEOUT)
+
             self.process.terminate()
 
             raise RuntimeError("Count not start writer process in time. Check writer logs.")
@@ -95,10 +100,14 @@ class CppWriterClient(object):
             except:
                 _logger.warning("Terminating writer process because it did not stop in the specified time.")
 
+                requests.get(self.url + "/kill", timeout=config.WRITER_PROCESS_COMMUNICATION_TIMEOUT)
+
+                self.process.wait(timeout=config.WRITER_PROCESS_TERMINATE_TIMEOUT)
+
                 self.process.terminate()
 
-                raise RuntimeError("Writer process was terminated because it did not stop in time."
-                                   "Acquisition file is probably corrupted.")
+                raise RuntimeError("Writer process was terminated because it did not stop in time. "
+                                   "Acquisition file maybe corrupted.")
 
         else:
             _logger.debug("Writer process is not running.")
