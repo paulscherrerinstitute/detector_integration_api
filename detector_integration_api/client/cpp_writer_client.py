@@ -90,12 +90,13 @@ class CppWriterClient(object):
 
     def get_status(self):
 
+        # Writer is running. Get status from the process.
         if self.is_running():
-            status = requests.get(self.url + "/status")
+            status = requests.get(self.url + "/status").json()
 
-            return {"is_running": True}
+            return status["status"]
 
-        return {"is_running": False}
+        return "stopped"
 
     def set_parameters(self, writer_parameters):
 

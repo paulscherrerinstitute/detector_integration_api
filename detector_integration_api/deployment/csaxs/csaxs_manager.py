@@ -102,7 +102,7 @@ class IntegrationManager(object):
         _audit_logger.info("Getting status details.")
 
         _audit_logger.info("writer_client.get_status()")
-        writer_status = self.writer_client.get_status()["is_running"] \
+        writer_status = self.writer_client.get_status() \
             if self.writer_client.is_client_enabled() else ClientDisableWrapper.STATUS_DISABLED
 
         _audit_logger.info("backend_client.get_status()")
@@ -291,19 +291,20 @@ class IntegrationManager(object):
         # If no other conditions match.
         interpreted_status = IntegrationStatus.ERROR
 
-        if cmp(writer, False) and cmp(detector, "idle") and cmp(backend, "INITIALIZED"):
+        # Dia after reset.
+        if cmp(writer, "stopped") and cmp(detector, "idle") and cmp(backend, "INITIALIZED"):
             interpreted_status = IntegrationStatus.INITIALIZED
 
-        elif cmp(writer, False) and cmp(detector, "idle") and cmp(backend, "CONFIGURED"):
+        elif cmp(writer, "stopped") and cmp(detector, "idle") and cmp(backend, "CONFIGURED"):
             interpreted_status = IntegrationStatus.CONFIGURED
 
-        elif cmp(writer, True) and cmp(detector, ("running", "waiting")) and cmp(backend, "OPEN"):
+        elif cmp(writer, ("receiving", "writing")) and cmp(detector, ("running", "waiting")) and cmp(backend, "OPEN"):
             interpreted_status = IntegrationStatus.RUNNING
 
-        elif cmp(writer, True) and cmp(detector, "idle") and cmp(backend, "OPEN"):
+        elif cmp(writer, ("receiving", "writing")) and cmp(detector, "idle") and cmp(backend, "OPEN"):
             interpreted_status = IntegrationStatus.DETECTOR_STOPPED
 
-        elif cmp(writer, False) and cmp(detector, "idle") and cmp(backend, "OPEN"):
+        elif cmp(writer, ("finished", "stopped")) and cmp(detector, "idle") and cmp(backend, "OPEN"):
             interpreted_status = IntegrationStatus.FINISHED
 
         _logger.debug("Statuses interpreted as '%s'.", interpreted_status)
