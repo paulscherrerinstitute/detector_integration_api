@@ -13,7 +13,6 @@ _logger = getLogger(__name__)
 
 
 class CppWriterClient(object):
-
     PROCESS_STARTUP_PARAMETERS = ("output_file", "n_frames", "user_id")
 
     def __init__(self, stream_url, writer_port):
@@ -41,7 +40,8 @@ class CppWriterClient(object):
             raise ValueError("Writer parameters not set.")
 
         timestamp = datetime.now().strftime(config.WRITER_PROCESS_LOG_FILENAME_TIME_FORMAT)
-        log_filename = os.path.join(config.WRITER_PROCESS_LOG_DIR, config.WRITER_PROCESS_LOG_FILENAME_FORMAT % timestamp)
+        log_filename = os.path.join(config.WRITER_PROCESS_LOG_DIR,
+                                    config.WRITER_PROCESS_LOG_FILENAME_FORMAT % timestamp)
 
         writer_command_format = "sh /home/dia/start_writer.sh %s %s %s %s %s"
         writer_command = writer_command_format % (self.stream_url,
@@ -66,8 +66,12 @@ class CppWriterClient(object):
         for _ in range(config.WRITER_PROCESS_RETRY_N):
 
             try:
-                requests.post(self.url + "/parameters", json=process_parameters,
-                              timeout=config.WRITER_PROCESS_COMMUNICATION_TIMEOUT)
+                response = requests.post(self.url + "/parameters", json=process_parameters,
+                                         timeout=config.WRITER_PROCESS_COMMUNICATION_TIMEOUT)
+
+                if response.status_code != 200:
+                    raise ValueError("Cannot set parameters on writer. Response: %s" % response.text)
+
                 break
 
             except:
