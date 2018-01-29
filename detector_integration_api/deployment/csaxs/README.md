@@ -208,43 +208,6 @@ curl -X GET http://xbl-daq-27:10000/api/v1/status
 curl -X POST http://xbl-daq-27:10000/api/v1/stop
 ```
 
-# Deployment information
-
-In this section we will describe the current deployment, server by server.
-
-# xbl-daq-28 (Backend server)
-On xbl-daq-28 we are running the backend server. The backend is listening on address:
-
-- **http://xbl-daq-28:8080**
-
-It is run using a **systemd** service (/etc/systemd/system/detector_backend.service). 
-
-The services invokes the startup file **/home/dbe/start_dbe.sh**.
-
-The service can be controlled with the following commands (using sudo or root):
-- **systemctl start detector\_backend.service** (start the backend)
-- **systemctl stop detector\_backend.service** (stop the backend)
-- **journalctl -u detector\_backend.service -f** (check the backend logs)
-
-# xbl-daq-27 (DIA and writer server)
-On xbl-daq-27 we are running the detector integration api. The DIA is listening on address:
-
-- **http://xbl-daq-27:10000**
-
-It is run using a **systemd** service (/etc/systemd/system/dia.service). 
-
-The services invokes the startup file **/home/dia/start_dia.sh**.
-
-The service can be controlled with the following commands (using sudo or root):
-- **systemctl start dia.service** (start the backend)
-- **systemctl stop dia.service** (stop the backend)
-- **journalctl -u dia.service -f** (check the dia logs)
-
-## Writer
-The writer is spawn on request from the DIA. To do that, DIA uses the startup file **/home/dia/start_writer.sh**.
-
-Each time the writer is spawn, a separate log file is generated in **/var/log/h5_zmq_writer/**.
-
 # State machine
 
 The table below describes the possible states of the integration and the methods that cause a transition 
@@ -288,4 +251,41 @@ A short summary would be:
 - When the detector stops sending data, the status is DETECTOR_STOPPED. Call STOP to close the backend and stop the 
 writing.
 - When the detector stops sending data, the backend and writer have completed, 
-the status is FINISHED. 
+the status is FINISHED.
+
+# Deployment information
+
+In this section we will describe the current deployment, server by server.
+
+# xbl-daq-28 (Backend server)
+On xbl-daq-28 we are running the backend server. The backend is listening on address:
+
+- **http://xbl-daq-28:8080**
+
+It is run using a **systemd** service (/etc/systemd/system/detector_backend.service). 
+
+The services invokes the startup file **/home/dbe/start_dbe.sh**.
+
+The service can be controlled with the following commands (using sudo or root):
+- **systemctl start detector\_backend.service** (start the backend)
+- **systemctl stop detector\_backend.service** (stop the backend)
+- **journalctl -u detector\_backend.service -f** (check the backend logs)
+
+# xbl-daq-27 (DIA and writer server)
+On xbl-daq-27 we are running the detector integration api. The DIA is listening on address:
+
+- **http://xbl-daq-27:10000**
+
+It is run using a **systemd** service (/etc/systemd/system/dia.service). 
+
+The services invokes the startup file **/home/dia/start_dia.sh**.
+
+The service can be controlled with the following commands (using sudo or root):
+- **systemctl start dia.service** (start the backend)
+- **systemctl stop dia.service** (stop the backend)
+- **journalctl -u dia.service -f** (check the dia logs)
+
+## Writer
+The writer is spawn on request from the DIA. To do that, DIA uses the startup file **/home/dia/start_writer.sh**.
+
+Each time the writer is spawn, a separate log file is generated in **/var/log/h5_zmq_writer/**.
