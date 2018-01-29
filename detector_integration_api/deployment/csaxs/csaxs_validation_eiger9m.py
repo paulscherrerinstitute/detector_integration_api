@@ -101,6 +101,10 @@ def validate_writer_config(configuration):
         missing_parameters = [x for x in writer_cfg_params if x not in configuration]
         raise ValueError("Writer configuration missing mandatory parameters: %s" % missing_parameters)
 
+    unexpected_parameters = [x for x in configuration.keys() if x not in writer_cfg_params]
+    if unexpected_parameters:
+        raise ValueError("Received unexpected parameters for writer: %s", unexpected_parameters)
+
     # Check if all format parameters are of correct type.
     wrong_parameter_types = ""
     for parameter_name, parameter_type in CSAXS_FORMAT_INPUT_PARAMETERS.items():
