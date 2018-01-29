@@ -15,6 +15,8 @@ The detector integration is made up from the following components:
 
 # Controlling the Detector Integration API (DIA)
 
+**DIA Address:** http://xbl-daq-27:10000
+
 To get a feeling on how to use the DIA, you can use the following example to start and write a test file.
 
 You can control the DIA via the Python client or over the REST api directly.
