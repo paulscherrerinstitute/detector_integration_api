@@ -308,6 +308,14 @@ Available and at the same time mandatory backend attributes:
 
 If this is not the case, the configuration will fail.
 
+An example of a valid detector config:
+```json
+{
+  "bit_depth": 16,
+  "n_frames": 1000
+}
+```
+
 <a id="dia_configuration_parameters_writer"></a>
 ### Writer configuration
 Due to the data format used for the cSAXS acquisition, the writer configuration is quite large. It is divided into 2 
