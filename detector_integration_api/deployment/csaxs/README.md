@@ -244,3 +244,48 @@ The service can be controlled with the following commands (using sudo or root):
 The writer is spawn on request from the DIA. To do that, DIA uses the startup file **/home/dia/start_writer.sh**.
 
 Each time the writer is spawn, a separate log file is generated in **/var/log/h5_zmq_writer/**.
+
+# State machine
+
+The table below describes the possible states of the integration and the methods that cause a transition 
+(this are also the methods that are allowed for a defined state).
+
+Methods that do not modify the state machine are not described in this table, as they can be executed in every state.
+
+| State | State description | Transition method | Next state |
+|-------|-------------------|-------------------|------------|
+| IntegrationStatus.INITIALIZED | Integration ready for configuration. |||
+| | | set_config | IntegrationStatus.CONFIGURED |
+| | | set_last_config | IntegrationStatus.CONFIGURED |
+| | | update_config | IntegrationStatus.CONFIGURED |
+| | | stop | IntegrationStatus.INITIALIZED |
+| | | reset | IntegrationStatus.INITIALIZED |
+| IntegrationStatus.CONFIGURED | Acquisition configured. |||
+| | | start | IntegrationStatus.RUNNING |
+| | | set_config | IntegrationStatus.CONFIGURED |
+| | | set_last_config | IntegrationStatus.CONFIGURED |
+| | | update_config | IntegrationStatus.CONFIGURED |
+| | | stop | IntegrationStatus.INITIALIZED |
+| | | reset | IntegrationStatus.INITIALIZED |
+| IntegrationStatus.RUNNING | Acquisition running. |||
+| | | stop | IntegrationStatus.INITIALIZED |
+| | | reset | IntegrationStatus.INITIALIZED |
+| IntegrationStatus.DETECTOR_STOPPED | Waiting for backend and writer to finish. |||
+| | | stop | IntegrationStatus.INITIALIZED |
+| | | reset | IntegrationStatus.INITIALIZED |
+| IntegrationStatus.FINISHED | Acquisition completed. |||
+| | | reset | IntegrationStatus.INITIALIZED |
+| IntegrationStatus.ERROR | Something went wrong. |||
+| | | stop | IntegrationStatus.INITIALIZED |
+| | | reset | IntegrationStatus.INITIALIZED |
+
+A short summary would be:
+
+- You always need to configure the integration before starting the acquisition.
+- You cannot change the configuration while the acquisition is running or there is an error.
+- The stop method can be called in every state, but it stop the acquisition only if it is running.
+- Whatever happens, you have the reset method that returns you in the initial state.
+- When the detector stops sending data, the status is DETECTOR_STOPPED. Call STOP to close the backend and stop the 
+writing.
+- When the detector stops sending data, the backend and writer have completed, 
+the status is FINISHED. 
