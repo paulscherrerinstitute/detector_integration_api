@@ -14,7 +14,7 @@ _logger = getLogger(__name__)
 
 class CppWriterClient(object):
 
-    PROCESS_STARTUP_PARAMETERS = ("output_file", "n_images", "user_id")
+    PROCESS_STARTUP_PARAMETERS = ("output_file", "n_frames", "user_id")
 
     def __init__(self, stream_url, writer_port):
 
@@ -46,7 +46,7 @@ class CppWriterClient(object):
         writer_command_format = "sh /home/dia/start_writer.sh %s %s %s %s %s"
         writer_command = writer_command_format % (self.stream_url,
                                                   self.writer_parameters["output_file"],
-                                                  self.writer_parameters.get("n_images", 0),
+                                                  self.writer_parameters.get("n_frames", 0),
                                                   self.writer_port,
                                                   self.writer_parameters.get("user_id", -1))
         _logger.debug("Starting writer with command '%s'.", writer_command)
