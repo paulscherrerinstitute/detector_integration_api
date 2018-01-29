@@ -8,6 +8,7 @@ from time import sleep, time
 import os
 
 from detector_integration_api import DetectorIntegrationClient
+from detector_integration_api.deployment.csaxs import csaxs_manager
 from tests.utils import start_test_integration_server, get_csax9m_test_writer_parameters
 
 
@@ -16,7 +17,7 @@ class TestRestClient(unittest.TestCase):
         self.host = "0.0.0.0"
         self.port = 10000
 
-        self.dia_process = Process(target=start_test_integration_server, args=(self.host, self.port))
+        self.dia_process = Process(target=start_test_integration_server, args=(self.host, self.port, csaxs_manager))
         self.dia_process.start()
 
         # Give it some time to start.
@@ -30,6 +31,7 @@ class TestRestClient(unittest.TestCase):
 
     def test_client_workflow(self):
         client = DetectorIntegrationClient()
+
         self.assertEqual(client.get_status()["status"], "IntegrationStatus.INITIALIZED")
 
         writer_config = get_csax9m_test_writer_parameters()

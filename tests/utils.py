@@ -78,7 +78,7 @@ class MockMflowNodesClient(object):
         self.is_running = False
 
 
-def get_test_integration_manager(manager_module=config.DEFAULT_MANAGER_MODULE):
+def get_test_integration_manager(manager_module):
     backend_client = MockBackendClient()
     detector_client = MockDetectorClient()
     writer_client = MockMflowNodesClient()
@@ -90,18 +90,14 @@ def get_test_integration_manager(manager_module=config.DEFAULT_MANAGER_MODULE):
     return manager
 
 
-def start_test_integration_server(host, port, manager_module=config.DEFAULT_MANAGER_MODULE):
+def start_test_integration_server(host, port, manager_module):
     backend_client = MockBackendClient()
     writer_client = MockMflowNodesClient()
     detector_client = MockDetectorClient()
-    bsread_client = MockMflowNodesClient()
-
-    manager_module = import_module(manager_module)
 
     integration_manager = manager_module.IntegrationManager(writer_client=writer_client,
                                                             backend_client=backend_client,
-                                                            detector_client=detector_client,
-                                                            bsread_client=bsread_client)
+                                                            detector_client=detector_client)
     app = bottle.Bottle()
     register_rest_interface(app=app, integration_manager=integration_manager)
     register_debug_rest_interface(app=app, integration_manager=integration_manager)
