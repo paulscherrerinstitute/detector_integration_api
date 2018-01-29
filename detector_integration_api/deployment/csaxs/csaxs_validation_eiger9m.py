@@ -1,9 +1,19 @@
+from enum import Enum
 from logging import getLogger
 
-from detector_integration_api.deployment.sf.sf_manager import IntegrationStatus
 from detector_integration_api.utils import ClientDisableWrapper
 
 _logger = getLogger(__name__)
+
+
+class IntegrationStatus(Enum):
+    INITIALIZED = "initialized",
+    CONFIGURED = "configured",
+    RUNNING = "running",
+    DETECTOR_STOPPED = "detector_stopped",
+    FINISHED = "finished"
+    ERROR = "error"
+
 
 MANDATORY_WRITER_CONFIG_PARAMETERS = ["n_frames", "user_id", "output_file"]
 MANDATORY_BACKEND_CONFIG_PARAMETERS = ["bit_depth", "n_frames"]

@@ -1,23 +1,14 @@
 from copy import copy
-from enum import Enum
 from logging import getLogger
 from time import sleep
 
 from detector_integration_api import config
 from detector_integration_api.deployment.csaxs import csaxs_validation_eiger9m
+from detector_integration_api.deployment.csaxs.csaxs_validation_eiger9m import IntegrationStatus
 from detector_integration_api.utils import ClientDisableWrapper
 
 _logger = getLogger(__name__)
 _audit_logger = getLogger("audit_trail")
-
-
-class IntegrationStatus(Enum):
-    INITIALIZED = "initialized",
-    CONFIGURED = "configured",
-    RUNNING = "running",
-    DETECTOR_STOPPED = "detector_stopped",
-    FINISHED = "finished"
-    ERROR = "error"
 
 
 class IntegrationManager(object):
@@ -51,8 +42,9 @@ class IntegrationManager(object):
             _logger.error("Trying to reach status '%s' but got '%s'. Status details: %s",
                           desired_status, status, status_details)
 
-            raise ValueError("Cannot reach desired status '%s'. Try to reset or get_status_details for more info.",
-                             desired_status)
+            raise ValueError("Cannot reach desired status '%s'. Current status '%s'. "
+                             "Try to reset or get_status_details for more info." %
+                             (desired_status, status))
 
     def start_acquisition(self):
         _audit_logger.info("Starting acquisition.")
