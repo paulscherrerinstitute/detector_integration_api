@@ -25,13 +25,16 @@ class IntegrationManager(object):
 
     def check_for_target_status(self, desired_status):
 
+        if not isinstance(desired_status, (tuple, list)):
+            desired_status = (desired_status,)
+
         status = None
 
         for _ in range(config.N_COLLECT_STATUS_RETRY):
 
             status = self.get_acquisition_status()
 
-            if status == desired_status:
+            if status in desired_status:
                 return status
 
             sleep(config.N_COLLECT_STATUS_RETRY_DELAY)
@@ -62,7 +65,8 @@ class IntegrationManager(object):
         _audit_logger.info("detector_client.start()")
         self.detector_client.start()
 
-        return self.check_for_target_status(IntegrationStatus.RUNNING)
+        # We need the status FINISHED for very short acquisitions.
+        return self.check_for_target_status((IntegrationStatus.RUNNING, IntegrationStatus.FINISHED))
 
     def stop_acquisition(self):
         _audit_logger.info("Stopping acquisition.")
