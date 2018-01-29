@@ -61,10 +61,21 @@ class CppWriterClient(object):
         sleep(config.WRITER_PROCESS_STARTUP_WAIT_TIME)
 
         process_parameters = self._sanitize_parameters(self.writer_parameters)
-
         _logger.debug("Setting process parameters: %s", process_parameters)
 
-        response = requests.post(self.url + "/parameters", json=process_parameters)
+        for _ in range(config.WRITER_PROCESS_RETRY_N):
+
+            try:
+                requests.post(self.url + "/parameters", json=process_parameters)
+                break
+
+            except:
+                sleep(config.WRITER_PROCESS_RETRY_DELAY)
+        else:
+            _logger.warning("Terminating writer process because it did not responde in the specified time.")
+            self.process.terminate()
+
+            raise RuntimeError("Count not start writer process in time. Check writer logs.")
 
     def stop(self):
 
@@ -85,7 +96,6 @@ class CppWriterClient(object):
         self.process_log_file = None
 
     def is_running(self):
-
         return self.process is not None and self.process.poll() is None
 
     def get_status(self):
@@ -99,11 +109,9 @@ class CppWriterClient(object):
         return "stopped"
 
     def set_parameters(self, writer_parameters):
-
         self.writer_parameters = writer_parameters
 
     def reset(self):
-
         _logger.debug("Resetting writer.")
 
         self.stop()
