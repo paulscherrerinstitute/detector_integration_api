@@ -84,7 +84,17 @@ class CppWriterClient(object):
 
         if self.is_running():
             requests.get(self.url + "/stop", timeout=config.WRITER_PROCESS_COMMUNICATION_TIMEOUT)
-            self.process.wait(timeout=config.WRITER_PROCESS_COMMUNICATION_TIMEOUT)
+
+            try:
+                self.process.wait(timeout=config.WRITER_PROCESS_TERMINATE_TIMEOUT)
+
+            except:
+                _logger.warning("Terminating writer process because it did not stop in the specified time.")
+
+                self.process.terminate()
+
+                raise RuntimeError("Writer process was terminated because it did not stop in time."
+                                   "Acquisition file is probably corrupted.")
 
         else:
             _logger.debug("Writer process is not running.")
