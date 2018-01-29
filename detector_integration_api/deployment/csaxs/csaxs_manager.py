@@ -47,9 +47,12 @@ class IntegrationManager(object):
 
         else:
             status_details = self.get_status_details()
+
             _logger.error("Trying to reach status '%s' but got '%s'. Status details: %s",
                           desired_status, status, status_details)
-            raise ValueError("Cannot reach desired status '%s'. Try to reset or get_status_details for more info.")
+
+            raise ValueError("Cannot reach desired status '%s'. Try to reset or get_status_details for more info.",
+                             desired_status)
 
     def start_acquisition(self):
         _audit_logger.info("Starting acquisition.")

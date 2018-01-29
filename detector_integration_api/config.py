@@ -13,7 +13,7 @@ BACKEND_URL_SUFFIX = "/v1"
 # Number of retries when setting the start of the experiment.
 N_COLLECT_STATUS_RETRY = 3
 # Delay between re-tries.
-N_COLLECT_STATUS_RETRY_DELAY = 0.1
+N_COLLECT_STATUS_RETRY_DELAY = 0.2
 
 # CPP writer settings
 WRITER_PROCESS_URL_FORMAT = "http://localhost:%d"
