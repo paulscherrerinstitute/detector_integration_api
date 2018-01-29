@@ -16,7 +16,7 @@ REST API for integrating beamline software with the detector, backend, and write
     2. [Set config](#set_config)
     3. [Update config](#update_config)
     4. [Set last config](#set_last_config)
-6. [Web interface](#web_interface)
+6. [Public interface](#public_interface)
     1. [Methods](#methods)
     2. [Python client](#python_client)
     3. [REST API](#rest_api)
@@ -138,8 +138,7 @@ To build the docker image, run the build from the **docker/** folder:
 
 Before building the docker image, make sure the latest version of the library is available in Anaconda.
 
-**Please note**: There is no need to build the image if you just want to run the docker container. 
-Please see the [Docker Container](#run_docker_container) chapter.
+**Please note**: There is no need to build the image if you just want to run the docker container.
 
 <a id="running_the_server"></a>
 ## Running the server
@@ -160,7 +159,7 @@ There are different methods of setting the configuration. It is recommended to a
 [Set config](#set_config), but if you are confident that nobody else interacted with the system you can use also more 
 advanced methods to facilitate the usage and speed up your software.
 
-More info on each method can be found in the [Web interface](#web_interface) chapter.
+More info on each method can be found in the [Public interface](#public_interface) chapter.
 
 <a id="get_config"></a>
 ### Get config
@@ -222,8 +221,8 @@ client.set_last_config()
 client.start()
 ```
 
-<a id="web_interface"></a>
-## Web interface
+<a id="public_interface"></a>
+## Public interface
 All integration api methods are exposed over a REST interface. For more information on what each command does 
 check the [Methods](#methods) section in this document.
 
@@ -237,14 +236,16 @@ discussed below).
 | start | / | / | Start the acquisition. |
 | stop | / | / | Stop the acquisition. |
 | reset | / | / | Reset the integration status. |
-| get_status | / | Integration status. | Returns the integration status. See [State machine](#state_machine) |
+| get_status | / | Integration status. | Returns the integration status. |
 | get_status_details | / | Status of all integration components. | Returns statuses of all components of the system. Useful when debuginig. |
 | get_server_info | / | Integration server info. | Return diagnostics. |
+| get_metrics | / | Acquisition statistics. | Return metrics for each system component. |
 | get_detector_value | Name of the value. | Detector value. | Read a value that is set on the detector. |
+| set_detector_value | JSON with name and value | Detector value. | Set a value in the detector. |
 | get_config | / | Integration configuration. | Information about the current set configuration. |
-| set_config | Writer, Backend and Detector config. | Config that was set. | Set the complete config for the acquisition. |
+| set_config | Configs for all components. | Config that was set. | Set the complete config for the acquisition. |
 | set_last_config | / | Config that was set. | Re-apply the last used config. Used to transit from INITIALIZED to CONIFGURED without sending a new config. |
-| update_config | Writer, Backend and Detector config. | Config that was set. | Update the current config on the server. You need to specify only the values you want to change. |
+| update_config | Config for any or all components. | Config that was set. | Update the current config on the server. You need to specify only the values you want to change. |
 
 
 <a id="python_client"></a>
