@@ -238,14 +238,13 @@ discussed below).
 | reset | / | / | Reset the integration status. |
 | get_status | / | Integration status. | Returns the integration status. |
 | get_status_details | / | Status of all integration components. | Returns statuses of all components of the system. Useful when debuginig. |
-| get_server_info | / | Integration server info. | Return diagnostics. |
-| get_metrics | / | Acquisition statistics. | Return metrics for each system component. |
-| get_detector_value | Name of the value. | Detector value. | Read a value that is set on the detector. |
-| set_detector_value | JSON with name and value | Detector value. | Set a value in the detector. |
 | get_config | / | Integration configuration. | Information about the current set configuration. |
 | set_config | Configs for all components. | Config that was set. | Set the complete config for the acquisition. |
-| set_last_config | / | Config that was set. | Re-apply the last used config. Used to transit from INITIALIZED to CONIFGURED without sending a new config. |
 | update_config | Config for any or all components. | Config that was set. | Update the current config on the server. You need to specify only the values you want to change. |
+| set_last_config | / | Config that was set. | Re-apply the last used config. Used to transit from INITIALIZED to CONIFGURED without sending a new config. |
+| get_detector_value | Name of the detector parameter. | Value fo the parameter. | Get a detector parameter. |
+| get_server_info | / | Integration server info. | Return diagnostics. |
+| get_metrics | / | Acquisition statistics. | Return metrics for each system component. |
 
 
 <a id="python_client"></a>
@@ -270,42 +269,131 @@ Class definition:
 ### REST API
 All request return a JSON with the following fields:
 - **state** - \["ok", "error"\]
-- **status** - Current status of the integration - \["IntegrationStatus.INITIALIZED", "IntegrationStatus.CONFIGURED", 
-"IntegrationStatus.RUNNING", "IntegrationStatus.ERROR"\]
-- Optional request specific field - \["value", "config", "server_info"\]
+- **status** - Current status of the integration
+    - if state == "ok" : ["IntegrationStatus.INITIALIZED", "IntegrationStatus.CONFIGURED", 
+    "IntegrationStatus.RUNNING", "IntegrationStatus.ERROR"\] 
+    - if state == "error" : Exception text describing the problem.
+- Optional request specific field ("field" : \[list of methods returning this field\]):
+    - "details" : get_status_details, 
+    - "config" : set_last_config, get_config, set_config, update_config
+    - "server_info" : get_server_info
+    - "metrics" : get_metrics
 
-In the API description, localhost and port 8888 are assumed. Please change this for your specific case.
+In the API description, localhost and port 10000 are assumed. Please change this for your specific case.
 **Format**: Method name: HTTP CALL - description.
 
-* start: `POST localhost:8888/api/v1/start` - Start the acquisition.
-    - Response specific field: /
+* start: POST localhost:10000/api/v1/start` - Start the acquisition.
+    - Request: ```curl -X POST http://localhost:10000/api/v1/start```
+    - Example response: 
+        ```json
+        {"state":"ok", "status": "IntegrationStatus.RUNNING"}
+        ```
+        
+* stop: `POST localhost:10000/api/v1/stop` - Stop the acquisition.
+    - Request: ```curl -X POST http://localhost:10000/api/v1/stop```
+    - Example response: 
+        ```json
+        {"state":"ok", "status": "IntegrationStatus.FINISHED"}
+        ```
+        
+* reset: `GET localhost:10000/api/v1/reset` - Reset the integration.
+    - Request: ```curl -X POST http://localhost:10000/api/v1/reset```
+    - Example response: 
+        ```json
+        {"state":"ok", "status": "IntegrationStatus.INITIALIZED"}
+        ```
+        
+* get_status: `GET localhost:10000/api/v1/status` - Get the integration status.
+    - Request: ```curl -X GET http://localhost:10000/api/v1/status```
+    - Example response: 
+        ```json
+        {"state":"ok", "status": "IntegrationStatus.RUNNING"}
+        ```
+        
+* get_status_details: `GET localhost:10000/api/v1/status_details` - Get the statuses of all sub-systems.
+    - Request: ```curl -X GET http://localhost:10000/api/v1/status_details```
+    - Example response: 
+        ```json
+        {"state": "ok", "status": "IntegrationStatus.INITIALIZED", 
+         "details": {"writer": "stopped", 
+                     "backend": "INITIALIZED", 
+                     "detector": "idle"}}
+        ```
     
-* stop: `POST localhost:8888/api/v1/stop` - Stop the acquisition.
-    - Response specific field: /
-    
-* reset: `GET localhost:8888/api/v1/reset` - Reset the integration.
-    - Response specific field: /
-    
-* get_status: `GET localhost:8888/api/v1/status` - Get the integration status.
-    - Response specific field: /
-    
-* get_status_details: `GET localhost:8888/api/v1/status_details` - Get the statuses of all sub-systems.
-    - Response specific field: "details" - Details on the statuses.
-    
-* get_config: `GET localhost:8888/api/v1/cam/config` - get the geometry of the camera.
-    - Response specific field: "config" - Configuration of the server.
+* get_config: `GET localhost:10000/api/v1/config` - Get the configs of all components.
+    - Request: ```curl -X GET http://localhost:10000/api/v1/config```
+    - Example response:
+        ```json
+        {"state": "ok", "status": "IntegrationStatus.INITIALIZED", 
+         "config": {"writer": {}, 
+                    "backend": {}, 
+                    "detector": {}}}
+        ```
 
-* set_config: `PUT localhost:8888/api/v1/cam/config` - get the geometry of the camera.
-    - Response specific field: "config" - Configuration of the server.
+* set_config: `PUT localhost:10000/api/v1/config` - Set the config for all components.
+    - Example request:
+        ```bash
+        curl -X PUT http://localhost:10000/api/v1/config -H "Content-Type: application/json" -d '
+        {"backend": {},
+         "detector": {},
+         "writer": {}}'
+        ```
+    - Example response:
+        ```json
+        {"state": "ok", "status": "IntegrationStatus.CONFIGURED", 
+         "config": {"writer": {}, 
+                    "backend": {}, 
+                    "detector": {}
+                    }}
+        ```
     
-* update_config: `POST localhost:8888/api/v1/cam/config` - get the geometry of the camera.
-    - Response specific field: "config" - Configuration of the server.
+* update_config: `POST localhost:10000/api/v1/config` - Update the config for the specified components.
+    - Example request:
+        ```bash
+        curl -X POST http://localhost:10000/api/v1/config -H "Content-Type: application/json" -d '
+        {"backend": {"frames": 500}'
+        ```
+    - Example response:
+        ```json
+        {"state": "ok", "status": "IntegrationStatus.CONFIGURED", 
+         "config": {"writer": {}, 
+                    "backend": {}, 
+                    "detector": {}
+                    }}
+        ```
     
-* set_last_config: `POST localhost:8888/api/v1/configure` - get one PNG image of the camera.
-    - Response specific field: "config" - Configuration of the server.
+* set_last_config: `POST localhost:10000/api/v1/configure` - Use the last set config.
+    - Request: ```curl -X POST http://localhost:10000/api/v1/configure```
+    - Example response:
+        ```json
+        {"state": "ok", "status": "IntegrationStatus.CONFIGURED", 
+         "config": {"writer": {}, 
+                    "backend": {}, 
+                    "detector": {}
+                    }}
+         ```
     
-* get_detector_value: `GET localhost:8888/api/v1/detector/value/<value_name>` - return info on the camera manager.
-    - Response specific field: "value" - Value of the requested parameter.
+* get_detector_value: `GET localhost:10000/api/v1/detector/value/<value_name>` - get a detector parameter.
+    - Example request: ```curl -X GET http://localhost:10000/api/v1/detector/value/dr```
+    - Example response:
+        ```json
+        {"state": "ok", "status": "IntegrationStatus.CONFIGURED", 
+         "value": 16}
+         ```
     
-* get_server_info: `GET localhost:8888/api/v1/info` - Return info on the server.
-    - Response specific field: "server_info" - Info about the server.
+* get_server_info: `GET localhost:10000/api/v1/info` - Return info on the server.
+    - Request: ```curl -X GET http://localhost:10000/api/v1/info```
+    - Example response:
+        ```json
+        {"state": "ok", "status": "IntegrationStatus.RUNNING"
+        }
+        ```
+    
+* get_metrics: `GET localhost:10000/api/v1/metrics` - Return components statistics.
+    - Request: ```curl -X GET http://localhost:10000/api/v1/metrics```
+    - Example response:
+        ```json
+        {"state": "ok", "status": "IntegrationStatus.RUNNING"
+        }
+        ```
+    
