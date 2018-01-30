@@ -17,7 +17,7 @@ class IntegrationStatus(Enum):
 
 MANDATORY_WRITER_CONFIG_PARAMETERS = ["n_frames", "user_id", "output_file"]
 MANDATORY_BACKEND_CONFIG_PARAMETERS = ["bit_depth", "n_frames"]
-MANDATORY_DETECTOR_CONFIG_PARAMETERS = ["period", "frames", "dr"]
+MANDATORY_DETECTOR_CONFIG_PARAMETERS = ["period", "frames", "dr", "exptime"]
 
 CSAXS_FORMAT_INPUT_PARAMETERS = {
     "sl2wv": float,

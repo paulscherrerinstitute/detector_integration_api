@@ -85,7 +85,7 @@ writer_config = {"n_frames": 1000, "user_id": 11057, "output_file": "/sls/X12SA/
 backend_config = {"bit_depth": 16, "n_frames": 1000}
 
 # Acquire 1000, 16 bit images with a period of 0.02.
-detector_config = {"dr": 16, "frames": 1000, "period": 0.02}
+detector_config = {"dr": 16, "frames": 1000, "period": 0.02, "exptime": 0.0001}
 
 # Add format parameters to writer. In this case, we use the debugging one.
 writer_config.update(DEBUG_FORMAT_PARAMETERS)
@@ -136,7 +136,7 @@ curl -X POST http://xbl-daq-27:10000/api/v1/reset
 # Write 1000 frames, as user id 11057 (gac-x12saop), to file "/sls/X12SA/Data10/gac-x12saop/tmp/dia_test.h5".
 curl -X PUT http://xbl-daq-27:10000/api/v1/config -H "Content-Type: application/json" -d '
 {"backend": {"bit_depth": 16, "n_frames": 10},
- "detector": {"dr": 16, "exptime": 1, "frames": 10, "period": 0.1},
+ "detector": {"dr": 16, "exptime": 1, "frames": 10, "period": 0.1, "exptime": 0.001},
  "writer": {
   "n_frames": 10,
   "output_file": "/sls/X12SA/Data10/gac-x12saop/tmp/dia_test_4.h5",
@@ -281,6 +281,7 @@ The mandatory attributes for the detector configuration are:
 - *"period"*: Period of time (in seconds) for each frame.
 - *"frames"*: Number of frames to acquire.
 - *"dr"*: Dynamic range - number of bits (16, 32 etc.)
+- *"exptime"* - Exposure time.
 
 In addition, any attribute that the detector supports can be passed here. Please refer to the detector manual for a 
 complete list and explanation of the attributes.
@@ -290,7 +291,8 @@ An example of a valid detector config:
 {
   "period": 0.1,
   "frames": 1000,
-  "dr": 32
+  "dr": 32,
+  "exptime": 0.0001
 }
 ```
 
