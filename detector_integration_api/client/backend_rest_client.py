@@ -61,8 +61,9 @@ class BackendClient(object):
         # TODO: do a default selection here
         answer = requests.get(self.backend_url + "/metrics",
                               timeout=config.BACKEND_COMMUNICATION_TIMEOUT).json()["value"]["backend"]
+
         # selecting answers
-        if metrics != []:
+        if metrics:
             ret = {k: answer.get(k, None) for k in metrics}
         else:
             ret = answer
