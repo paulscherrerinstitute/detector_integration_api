@@ -170,20 +170,6 @@ class DetectorIntegrationClient(object):
 
         return validate_response(response)
 
-    def debug_start(self, configuration=None):
-        request_url = self.api_address + "/debug" + ROUTES["start"]
-
-        response = requests.post(request_url, json=configuration).json()
-
-        return validate_response(response)
-
-    def debug_stop(self):
-        request_url = self.api_address + "/debug" + ROUTES["stop"]
-
-        response = requests.post(request_url).json()
-
-        return validate_response(response)
-
     def get_metrics(self):
         request_url = self.api_address + ROUTES["get_metrics"]
         response = requests.get(request_url)

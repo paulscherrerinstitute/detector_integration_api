@@ -34,7 +34,6 @@ def start_integration_server(host, port, backend_url, writer_url, writer_instanc
 
     app = bottle.Bottle()
     register_rest_interface(app=app, integration_manager=integration_manager)
-    register_debug_rest_interface(app=app, integration_manager=integration_manager)
 
     try:
         bottle.run(app=app, host=host, port=port)
