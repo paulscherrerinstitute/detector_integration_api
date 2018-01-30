@@ -87,25 +87,23 @@ class DetectorIntegrationClient(object):
 
         return validate_response(response)
 
-    def set_clients_enabled(self, bsread=True, writer=True, backend=True, detector=True):
+    def set_clients_enabled(self, writer=True, backend=True, detector=True):
         request_url = self.api_address + ROUTES["clients_enabled"]
 
         configuration = {"writer": writer,
                          "backend": backend,
-                         "detector": detector,
-                         "bsread": bsread}
+                         "detector": detector}
 
         response = requests.post(request_url, json=configuration).json()
 
         return validate_response(response)
 
-    def set_config(self, writer_config, backend_config, detector_config, bsread_config=None):
+    def set_config(self, writer_config, backend_config, detector_config):
         request_url = self.api_address + ROUTES["set_config"]
 
         configuration = {"writer": writer_config,
                          "backend": backend_config,
-                         "detector": detector_config,
-                         "bsread": bsread_config or {}}
+                         "detector": detector_config}
 
         response = requests.put(request_url, json=configuration).json()
 
@@ -117,8 +115,7 @@ class DetectorIntegrationClient(object):
 
         self.set_config(configuration.get("writer"),
                         configuration.get("backend"),
-                        configuration.get("detector"),
-                        configuration.get("bsread"))
+                        configuration.get("detector"))
 
     def set_last_config(self):
         request_url = self.api_address + ROUTES["set_last_config"]
@@ -127,13 +124,12 @@ class DetectorIntegrationClient(object):
 
         return validate_response(response)
 
-    def update_config(self, writer_config=None, backend_config=None, detector_config=None, bsread_config=None):
+    def update_config(self, writer_config=None, backend_config=None, detector_config=None):
         request_url = self.api_address + ROUTES["update_config"]
 
         configuration = {"writer": writer_config,
                          "backend": backend_config,
-                         "detector": detector_config,
-                         "bsread": bsread_config}
+                         "detector": detector_config}
 
         response = requests.post(request_url, json=configuration).json()
 
