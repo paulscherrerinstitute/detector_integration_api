@@ -261,8 +261,51 @@ client.get_status()
 ```
 
 Class definition:
-# TODO
 ```
+class DetectorIntegrationClient(builtins.object)
+ |  Methods defined here:
+ |  
+ |  __init__(self, api_address=None)
+ |      Initialize self.  See help(type(self)) for accurate signature.
+ |  
+ |  get_backend(self, action, configuration={})
+ |  
+ |  get_clients_enabled(self)
+ |  
+ |  get_config(self)
+ |  
+ |  get_detector_value(self, name)
+ |  
+ |  get_metrics(self)
+ |  
+ |  get_server_info(self)
+ |  
+ |  get_status(self)
+ |  
+ |  get_status_details(self)
+ |  
+ |  put_backend(self, action, configuration={})
+ |  
+ |  reset(self)
+ |  
+ |  set_clients_enabled(self, writer=True, backend=True, detector=True)
+ |  
+ |  set_config(self, writer_config, backend_config, detector_config)
+ |  
+ |  set_config_from_file(self, filename)
+ |  
+ |  set_detector_value(self, parameter_name, parameter_value)
+ |  
+ |  set_last_config(self)
+ |  
+ |  start(self)
+ |  
+ |  stop(self)
+ |  
+ |  update_config(self, writer_config=None, backend_config=None, detector_config=None)
+ |  
+ |  wait_for_status(self, target_status, timeout=None, polling_interval=0.2)
+
 ```
 
 <a id="rest_api"></a>
