@@ -8,7 +8,7 @@ from detector_integration_api import config
 from detector_integration_api.client.backend_rest_client import BackendClient
 from detector_integration_api.client.detector_cli_client import DetectorClient
 from detector_integration_api.deployment.sf import sf_manager
-from detector_integration_api.rest_api.rest_server import register_rest_interface, register_debug_rest_interface
+from detector_integration_api.rest_api.rest_server import register_rest_interface
 
 _logger = logging.getLogger(__name__)
 
