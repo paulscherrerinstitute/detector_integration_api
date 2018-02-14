@@ -17,6 +17,7 @@ requirements:
         - bottle
         - requests
         - mflow_nodes >=1.3.0
+        - sls_detector_software
 
 build:
   entry_points:
