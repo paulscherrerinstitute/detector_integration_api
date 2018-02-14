@@ -1,20 +1,10 @@
 FROM conda/miniconda3-centos7
 
-ENV INSTALL_DIR /install
 ENV RUN_DIR /runners
 ENV TERM=xterm
 
-# Install needed libraries.
-RUN yum install git make gcc-c++ telnet -y
-
 # Create directory structure.
-RUN mkdir -p ${INSTALL_DIR}
 RUN mkdir -p ${RUN_DIR}
-
-# Install the SLS detector software
-ADD sls_detectors_package/ ${INSTALL_DIR}/
-RUN cd ${INSTALL_DIR}; make REST=no textclient
-ENV PATH="${INSTALL_DIR}/bin:${PATH}"
 
 # Install detector integration API.
 RUN conda install -c paulscherrerinstitute detector_integration_api --yes
