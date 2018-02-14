@@ -1,6 +1,6 @@
 package:
     name: detector_integration_api
-    version: 0.2.1
+    version: 0.2.2
 
 source:
     path: ..
@@ -21,7 +21,7 @@ requirements:
 build:
   entry_points:
     - dia_sf = detector_integration_api.deployment.sf.sf_start_server:main
-    - dia_csaxs = detector_integration_api.deplyment.csaxs.csaxs_start_server:main
+    - dia_csaxs = detector_integration_api.deployment.csaxs.csaxs_start_server:main
 
 about:
     home: git@git.psi.ch:HPDI/integration_rest_api.git
