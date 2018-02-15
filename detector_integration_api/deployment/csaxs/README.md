@@ -90,8 +90,12 @@ detector_config = {"dr": 16, "frames": 1000, "period": 0.02, "exptime": 0.0001}
 # Add format parameters to writer. In this case, we use the debugging one.
 writer_config.update(DEBUG_FORMAT_PARAMETERS)
 
+configuration = {"writer": writer_config,
+                 "backend": backend_config,
+                 "detector": detector_config}
+
 # Set the configs.
-client.set_config(writer_config=writer_config, backend_config=backend_config, detector_config=detector_config)
+client.set_config(configuration)
 
 # Start the acquisition.
 client.start()
