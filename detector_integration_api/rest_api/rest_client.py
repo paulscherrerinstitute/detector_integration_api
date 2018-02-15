@@ -87,23 +87,15 @@ class DetectorIntegrationClient(object):
 
         return validate_response(response)
 
-    def set_clients_enabled(self, writer=True, backend=True, detector=True):
+    def set_clients_enabled(self, configuration):
         request_url = self.api_address + ROUTES["clients_enabled"]
-
-        configuration = {"writer": writer,
-                         "backend": backend,
-                         "detector": detector}
 
         response = requests.post(request_url, json=configuration).json()
 
         return validate_response(response)
 
-    def set_config(self, writer_config, backend_config, detector_config):
+    def set_config(self, configuration):
         request_url = self.api_address + ROUTES["set_config"]
-
-        configuration = {"writer": writer_config,
-                         "backend": backend_config,
-                         "detector": detector_config}
 
         response = requests.put(request_url, json=configuration).json()
 
@@ -113,9 +105,7 @@ class DetectorIntegrationClient(object):
         with open(filename) as input_file:
             configuration = json.load(input_file)
 
-        self.set_config(configuration.get("writer"),
-                        configuration.get("backend"),
-                        configuration.get("detector"))
+        self.set_config(configuration)
 
     def set_last_config(self):
         request_url = self.api_address + ROUTES["set_last_config"]
@@ -124,12 +114,8 @@ class DetectorIntegrationClient(object):
 
         return validate_response(response)
 
-    def update_config(self, writer_config=None, backend_config=None, detector_config=None):
+    def update_config(self, configuration):
         request_url = self.api_address + ROUTES["update_config"]
-
-        configuration = {"writer": writer_config,
-                         "backend": backend_config,
-                         "detector": detector_config}
 
         response = requests.post(request_url, json=configuration).json()
 

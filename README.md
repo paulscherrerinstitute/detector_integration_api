@@ -68,12 +68,14 @@ detector_config = {"period": 0.1,
                    "frames": 100,
                    "exptime": 0.01,
                    "dr": 16}
+                   
+configuration = {"writer": writer_config,
+                 "backend": backend_config,
+                 "detector": detector_config}
 
 # Send the config to the writer, backend and detector. 
 # This changes the integration to IntegrationStatus.CONFIGURED state
-response = client.set_config(writer_config=writer_config, 
-                             backend_config=backend_config, 
-                             detector_config=detector_config)
+response = client.set_config(configuration)
 
 # Start the acquisition. This changes the integration to IntegrationStatus.RUNNING state.
 client.start()
@@ -198,7 +200,7 @@ client = DetectorIntegrationClient("http://0.0.0.0:10000")
 # ... suppose we already had an acquisition, and had previously called set_config on this server.
 
 # Change only the output file, but keep the rest of the configuration.
-client.update_config(writer_config={"output_file":"/tmp/run2.h5"})
+client.update_config({"writer": {"output_file":"/tmp/run2.h5"}})
 # Do another acquisition with the same config, just different output file name.
 client.start()
 ```
@@ -288,9 +290,9 @@ class DetectorIntegrationClient(builtins.object)
  |  
  |  reset(self)
  |  
- |  set_clients_enabled(self, writer=True, backend=True, detector=True)
+ |  set_clients_enabled(self, configuration)
  |  
- |  set_config(self, writer_config, backend_config, detector_config)
+ |  set_config(self, configuration)
  |  
  |  set_config_from_file(self, filename)
  |  
@@ -302,7 +304,7 @@ class DetectorIntegrationClient(builtins.object)
  |  
  |  stop(self)
  |  
- |  update_config(self, writer_config=None, backend_config=None, detector_config=None)
+ |  update_config(self, configuration)
  |  
  |  wait_for_status(self, target_status, timeout=None, polling_interval=0.2)
 
