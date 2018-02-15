@@ -1,11 +1,9 @@
 from copy import copy
 from logging import getLogger
-from time import sleep
 
-from detector_integration_api import config
 from detector_integration_api.deployment.csaxs import csaxs_validation_eiger9m
 from detector_integration_api.deployment.csaxs.csaxs_validation_eiger9m import IntegrationStatus
-from detector_integration_api.utils import ClientDisableWrapper
+from detector_integration_api.utils import ClientDisableWrapper, check_for_target_status
 
 _logger = getLogger(__name__)
 _audit_logger = getLogger("audit_trail")
@@ -22,34 +20,6 @@ class IntegrationManager(object):
         self._last_set_detector_config = {}
 
         self.last_config_successful = False
-
-    def check_for_target_status(self, desired_statuses):
-
-        if not isinstance(desired_statuses, (tuple, list)):
-            desired_statuses = (desired_statuses,)
-
-        status = None
-
-        for _ in range(config.N_COLLECT_STATUS_RETRY):
-
-            status = self.get_acquisition_status()
-
-            if status in desired_statuses:
-                return status
-
-            sleep(config.N_COLLECT_STATUS_RETRY_DELAY)
-
-        else:
-            status_details = self.get_status_details()
-
-            desired_statuses_text = ", ".join(desired_statuses)
-
-            _logger.error("Trying to reach one of the statuses '%s' but got '%s'. Status details: %s",
-                          desired_statuses_text, status, status_details)
-
-            raise ValueError("Cannot reach desired status '%s'. Current status '%s'. "
-                             "Try to reset or get_status_details for more info." %
-                             (desired_statuses_text, status))
 
     def start_acquisition(self):
         _audit_logger.info("Starting acquisition.")
@@ -68,9 +38,10 @@ class IntegrationManager(object):
         self.detector_client.start()
 
         # We need the status FINISHED for very short acquisitions.
-        return self.check_for_target_status((IntegrationStatus.RUNNING,
-                                             IntegrationStatus.DETECTOR_STOPPED,
-                                             IntegrationStatus.FINISHED))
+        return check_for_target_status(self.get_acquisition_status,
+                                       (IntegrationStatus.RUNNING,
+                                        IntegrationStatus.DETECTOR_STOPPED,
+                                        IntegrationStatus.FINISHED))
 
     def stop_acquisition(self):
         _audit_logger.info("Stopping acquisition.")
@@ -183,7 +154,7 @@ class IntegrationManager(object):
 
         self.last_config_successful = True
 
-        return self.check_for_target_status(IntegrationStatus.CONFIGURED)
+        return check_for_target_status(self.get_acquisition_status, IntegrationStatus.CONFIGURED)
 
     def update_acquisition_config(self, config_updates):
         current_config = self.get_acquisition_config()
@@ -200,7 +171,7 @@ class IntegrationManager(object):
 
         self.set_acquisition_config(current_config)
 
-        return self.check_for_target_status(IntegrationStatus.CONFIGURED)
+        return check_for_target_status(self.get_acquisition_status, IntegrationStatus.CONFIGURED)
 
     def set_clients_enabled(self, client_status):
 
@@ -235,7 +206,7 @@ class IntegrationManager(object):
         _audit_logger.info("writer_client.reset()")
         self.writer_client.reset()
 
-        return self.check_for_target_status(IntegrationStatus.INITIALIZED)
+        return check_for_target_status(self.get_acquisition_status, IntegrationStatus.INITIALIZED)
 
     def get_server_info(self):
         return {

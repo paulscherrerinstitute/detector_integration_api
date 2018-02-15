@@ -1,10 +1,8 @@
 from copy import copy
 from enum import Enum
 from logging import getLogger
-from time import sleep
 
-from detector_integration_api import config
-from detector_integration_api.utils import ClientDisableWrapper
+from detector_integration_api.utils import ClientDisableWrapper, check_for_target_status
 
 _logger = getLogger(__name__)
 _audit_logger = getLogger("audit_trail")
@@ -34,25 +32,6 @@ class IntegrationManager(object):
 
         self.last_config_successful = False
 
-    def check_for_target_status(self, desired_status):
-
-        status = None
-
-        for _ in range(config.N_COLLECT_STATUS_RETRY):
-
-            status = self.get_acquisition_status()
-
-            if status == desired_status:
-                return status
-
-            sleep(config.N_COLLECT_STATUS_RETRY_DELAY)
-
-        else:
-            status_details = self.get_status_details()
-            _logger.error("Trying to reach status '%s' but got '%s'. Status details: %s",
-                          desired_status, status, status_details)
-            raise ValueError("Cannot reach desired status '%s'. Try to reset or get_status_details for more info.")
-
     def start_acquisition(self):
         _audit_logger.info("Starting acquisition.")
 
@@ -72,7 +51,7 @@ class IntegrationManager(object):
         _audit_logger.info("detector_client.start()")
         self.detector_client.start()
 
-        return self.check_for_target_status(IntegrationStatus.RUNNING)
+        return check_for_target_status(self.get_acquisition_status, IntegrationStatus.RUNNING)
 
     def stop_acquisition(self):
         _audit_logger.info("Stopping acquisition.")
@@ -198,7 +177,7 @@ class IntegrationManager(object):
 
         self.last_config_successful = True
 
-        return self.check_for_target_status(IntegrationStatus.CONFIGURED)
+        return check_for_target_status(self.get_acquisition_status, IntegrationStatus.CONFIGURED)
 
     def update_acquisition_config(self, config_updates):
         current_config = self.get_acquisition_config()
@@ -216,7 +195,7 @@ class IntegrationManager(object):
 
         self.set_acquisition_config(current_config)
 
-        return self.check_for_target_status(IntegrationStatus.CONFIGURED)
+        return check_for_target_status(self.get_acquisition_status, IntegrationStatus.CONFIGURED)
 
     def set_clients_enabled(self, client_status):
 
@@ -259,7 +238,7 @@ class IntegrationManager(object):
         _audit_logger.info("bsread_client.reset()")
         self.bsread_client.reset()
 
-        return self.check_for_target_status(IntegrationStatus.INITIALIZED)
+        return check_for_target_status(self.get_acquisition_status, IntegrationStatus.INITIALIZED)
 
     def get_server_info(self):
         return {
