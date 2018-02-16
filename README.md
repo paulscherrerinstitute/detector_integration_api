@@ -36,6 +36,8 @@ assume that the REST api is running on "http://0.0.0.0:10000" (you should adjust
 
 The Python client is part of the **detector\_integration\_api** module, and its class is **DetectorIntegrationClient**.
 
+**Warning**: This procedure might not work on your deployment Consult the example in your deployment README.
+
 We will start by showing the normal workflow to start an acquisition:
 ```python
 from detector_integration_api import DetectorIntegrationClient
