@@ -8,6 +8,7 @@ from time import sleep, time
 import os
 
 from detector_integration_api import DetectorIntegrationClient
+from detector_integration_api.deployment import debug_manager
 from detector_integration_api.deployment.csaxs import csaxs_manager
 from tests.utils import start_test_integration_server, get_csax9m_test_writer_parameters
 
@@ -17,7 +18,7 @@ class TestRestClient(unittest.TestCase):
         self.host = "0.0.0.0"
         self.port = 10000
 
-        self.dia_process = Process(target=start_test_integration_server, args=(self.host, self.port, csaxs_manager))
+        self.dia_process = Process(target=start_test_integration_server, args=(self.host, self.port, debug_manager))
         self.dia_process.start()
 
         # Give it some time to start.
@@ -32,12 +33,14 @@ class TestRestClient(unittest.TestCase):
     def test_client_workflow(self):
         client = DetectorIntegrationClient()
 
+        client.reset()
+
         self.assertEqual(client.get_status()["status"], "IntegrationStatus.INITIALIZED")
 
-        writer_config = get_csax9m_test_writer_parameters()
-        writer_config.update({"output_file": "/tmp/test.h5",
-                              "user_id": 0,
-                              "group_id": 0})
+        writer_config = ({"output_file": "/tmp/test.h5",
+                          "n_frames": 100,
+                          "user_id": 0,
+                          "group_id": 0})
 
         backend_config = {"bit_depth": 16,
                           "n_frames": 100}
@@ -47,16 +50,15 @@ class TestRestClient(unittest.TestCase):
                            "exptime": 0.01,
                            "dr": 16}
 
-        bsread_config = {"output_file": "/tmp/test_meta.h5",
-                         "user_id": 0,
-                         "channels": []}
+        configuration = {"writer": writer_config,
+                         "backend": backend_config,
+                         "detector": detector_config}
 
-        response = client.set_config(writer_config, backend_config, detector_config, bsread_config)
+        response = client.set_config(configuration)
 
         self.assertDictEqual(response["config"]["writer"], writer_config)
         self.assertDictEqual(response["config"]["backend"], backend_config)
         self.assertDictEqual(response["config"]["detector"], detector_config)
-        self.assertDictEqual(response["config"]["bsread"], bsread_config)
 
         self.assertEqual(client.get_status()["status"], "IntegrationStatus.CONFIGURED")
 
@@ -68,6 +70,13 @@ class TestRestClient(unittest.TestCase):
 
         self.assertEqual(client.get_status()["status"], "IntegrationStatus.INITIALIZED")
 
+        with self.assertRaisesRegex(Exception, "Cannot start acquisition"):
+            client.start()
+
+        client.set_last_config()
+
+        self.assertEqual(client.get_status()["status"], "IntegrationStatus.CONFIGURED")
+
         client.start()
 
         self.assertEqual(client.get_status()["status"], "IntegrationStatus.RUNNING")
@@ -76,29 +85,32 @@ class TestRestClient(unittest.TestCase):
 
         self.assertEqual(client.get_status()["status"], "IntegrationStatus.INITIALIZED")
 
-        response = client.update_config(writer_config={"user_id": 1},
-                                        backend_config={"n_frames": 50},
-                                        detector_config={"frames": 50},
-                                        bsread_config={"user_id": 1})
+        with self.assertRaisesRegex(Exception, "n_frames"):
+            client.update_config({"writer": {"user_id": 1},
+                                  "backend": {"n_frames": 50},
+                                  "detector": {"frames": 50}})
+
+        response = client.update_config({"writer": {"n_frames": 50,
+                                                    "user_id": 1},
+                                         "backend": {"n_frames": 50},
+                                         "detector": {"frames": 50}})
 
         writer_config["user_id"] = 1
+        writer_config["n_frames"] = 50
         backend_config["n_frames"] = 50
         detector_config["frames"] = 50
-        bsread_config["user_id"] = 1
 
         self.assertDictEqual(response["config"]["writer"], writer_config)
         self.assertDictEqual(response["config"]["backend"], backend_config)
         self.assertDictEqual(response["config"]["detector"], detector_config)
-        self.assertDictEqual(response["config"]["bsread"], bsread_config)
 
-        response = client.update_config(writer_config={"group_id": 1})
+        response = client.update_config({"writer": {"group_id": 1}})
 
         writer_config["group_id"] = 1
 
         self.assertDictEqual(response["config"]["writer"], writer_config)
         self.assertDictEqual(response["config"]["backend"], backend_config)
         self.assertDictEqual(response["config"]["detector"], detector_config)
-        self.assertDictEqual(response["config"]["bsread"], bsread_config)
 
         self.assertEqual(client.get_status()["status"], "IntegrationStatus.CONFIGURED")
 
@@ -112,8 +124,6 @@ class TestRestClient(unittest.TestCase):
         self.assertDictEqual(response["config"]["backend"], backend_config)
         self.assertDictEqual(response["config"]["detector"], detector_config)
 
-        self.assertDictEqual(response["config"]["bsread"], bsread_config)
-
         self.assertEqual(client.get_status()["status"], "IntegrationStatus.CONFIGURED")
 
         self.assertEqual(client.get_detector_value("frames"), response["config"]["detector"]["frames"])
@@ -121,7 +131,7 @@ class TestRestClient(unittest.TestCase):
         client.reset()
 
         client.set_config_from_file(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                 "csaxs_eiger_config.json"))
+                                                 "debug_config.json"))
 
         self.assertEqual(client.get_status()["status"], "IntegrationStatus.CONFIGURED")
 
@@ -134,33 +144,36 @@ class TestRestClient(unittest.TestCase):
         self.assertEqual(config["config"]["backend"], {})
         self.assertEqual(config["config"]["writer"], {})
         self.assertEqual(config["config"]["detector"], {})
-        self.assertEqual(config["config"]["bsread"], {})
 
-        detector_config = {"frames": 10000, "dr": 16, "period": 0.001}
+        detector_config = {"frames": 10000, "dr": 16, "period": 0.001, "exptime": 0.0001}
         backend_config = {"n_frames": 10000, "bit_depth": 16}
-        writer_config = {"process_uid": 16371, "output_file": "something"}
-        bsread_config = {"process_uid": 122, "output_file": "something"}
+        writer_config = {"user_id": 16371, "output_file": "something", "n_frames": 10000}
 
-        client.update_config(detector_config=detector_config,
-                             backend_config=backend_config,
-                             writer_config=writer_config,
-                             bsread_config=bsread_config)
+        configuration = {"detector": detector_config,
+                         "backend": backend_config,
+                         "writer": writer_config}
+
+        client.update_config(configuration)
 
         configuration = client.get_config()["config"]
 
         self.assertEqual(configuration["detector"], detector_config)
         self.assertEqual(configuration["writer"], writer_config)
         self.assertEqual(configuration["backend"], backend_config)
-        self.assertEqual(configuration["bsread"], bsread_config)
 
-        client.update_config(detector_config={"dr": 32})
+        with self.assertRaisesRegex(Exception, "Invalid config"):
+            client.update_config({"detector": {"dr": 32}})
+
+        client.update_config({"detector": {"dr": 32},
+                              "backend": {"bit_depth": 32}})
+
         detector_config["dr"] = 32
+        backend_config["bit_depth"] = 32
 
         configuration = client.get_config()["config"]
         self.assertEqual(configuration["detector"], detector_config)
         self.assertEqual(configuration["writer"], writer_config)
         self.assertEqual(configuration["backend"], backend_config)
-        self.assertEqual(configuration["bsread"], bsread_config)
 
     def test_set_detector_value(self):
         client = DetectorIntegrationClient()
@@ -178,15 +191,13 @@ class TestRestClient(unittest.TestCase):
 
         client = DetectorIntegrationClient()
 
-        detector_config = {"frames": 10000, "dr": 16, "period": 0.001}
+        detector_config = {"frames": 10000, "dr": 16, "period": 0.001, "exptime": 0.0001}
         backend_config = {"n_frames": 10000, "bit_depth": 16}
-        writer_config = {"process_uid": 16371, "output_file": "something"}
-        bsread_config = {"process_uid": 122, "output_file": "something"}
+        writer_config = {"user_id": 16371, "output_file": "something", "n_frames": 10000}
 
-        client.update_config(detector_config=detector_config,
-                             backend_config=backend_config,
-                             writer_config=writer_config,
-                             bsread_config=bsread_config)
+        configuration = {"detector": detector_config,
+                         "backend": backend_config,
+                         "writer": writer_config}
 
         def wait_for_status_thread():
             client2 = DetectorIntegrationClient()
@@ -204,6 +215,9 @@ class TestRestClient(unittest.TestCase):
         wait_thread.start()
 
         sleep(sleep_time)
+
+        client.reset()
+        client.set_config(configuration)
 
         client.start()
         wait_thread.join()
@@ -224,47 +238,35 @@ class TestRestClient(unittest.TestCase):
         self.assertTrue(clients_enabled["writer"])
         self.assertTrue(clients_enabled["backend"])
         self.assertTrue(clients_enabled["detector"])
-        self.assertTrue(clients_enabled["bsread"])
 
-        client.set_clients_enabled()
+        client.set_clients_enabled({})
         clients_enabled = client.get_clients_enabled()["clients_enabled"]
 
         self.assertTrue(clients_enabled["writer"])
         self.assertTrue(clients_enabled["backend"])
         self.assertTrue(clients_enabled["detector"])
-        self.assertTrue(clients_enabled["bsread"])
 
-        client.set_clients_enabled(bsread=False)
+        client.set_clients_enabled({"writer": False})
+        clients_enabled = client.get_clients_enabled()["clients_enabled"]
+
+        self.assertFalse(clients_enabled["writer"])
+        self.assertTrue(clients_enabled["backend"])
+        self.assertTrue(clients_enabled["detector"])
+
+        client.set_clients_enabled({"writer": True,
+                                    "backend": False,
+                                    "detector": False})
         clients_enabled = client.get_clients_enabled()["clients_enabled"]
 
         self.assertTrue(clients_enabled["writer"])
-        self.assertTrue(clients_enabled["backend"])
-        self.assertTrue(clients_enabled["detector"])
-        self.assertFalse(clients_enabled["bsread"])
-
-        client.set_clients_enabled(bsread=False, writer=False)
-        clients_enabled = client.get_clients_enabled()["clients_enabled"]
-
-        self.assertFalse(clients_enabled["writer"])
-        self.assertTrue(clients_enabled["backend"])
-        self.assertTrue(clients_enabled["detector"])
-        self.assertFalse(clients_enabled["bsread"])
-
-        client.set_clients_enabled(bsread=False, writer=False, detector=False)
-        clients_enabled = client.get_clients_enabled()["clients_enabled"]
-
-        self.assertFalse(clients_enabled["writer"])
-        self.assertTrue(clients_enabled["backend"])
+        self.assertFalse(clients_enabled["backend"])
         self.assertFalse(clients_enabled["detector"])
-        self.assertFalse(clients_enabled["bsread"])
 
-        client.set_clients_enabled(bsread=False, writer=False, detector=False, backend=False)
+        client.set_clients_enabled({"writer": False,
+                                    "backend": False,
+                                    "detector": False})
         clients_enabled = client.get_clients_enabled()["clients_enabled"]
 
         self.assertFalse(clients_enabled["writer"])
         self.assertFalse(clients_enabled["backend"])
         self.assertFalse(clients_enabled["detector"])
-        self.assertFalse(clients_enabled["bsread"])
-
-
-

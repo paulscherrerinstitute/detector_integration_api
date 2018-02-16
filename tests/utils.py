@@ -77,21 +77,45 @@ class MockMflowNodesClient(object):
         self.is_running = False
 
 
+class MockCppWriterClient(object):
+    def __init__(self):
+        self.status = "stopped"
+        self.parameters = None
+        self.url = "http://localhost:10000"
+
+    def start(self):
+        self.status = "writing"
+
+    def stop(self):
+        self.status = "stopped"
+
+    def get_status(self):
+        return self.status
+
+    def set_parameters(self, writer_parameters):
+        self.parameters = writer_parameters
+
+    def reset(self):
+        self.status = "stopped"
+
+    def get_statistics(self):
+        return {}
+
+
 def get_test_integration_manager(manager_module):
     backend_client = MockBackendClient()
     detector_client = MockDetectorClient()
-    writer_client = MockMflowNodesClient()
-    bsread_client = MockMflowNodesClient()
+    writer_client = MockCppWriterClient()
     manager_module = import_module(manager_module)
 
-    manager = manager_module.IntegrationManager(backend_client, writer_client, detector_client, bsread_client)
+    manager = manager_module.IntegrationManager(backend_client, writer_client, detector_client)
 
     return manager
 
 
 def start_test_integration_server(host, port, manager_module):
     backend_client = MockBackendClient()
-    writer_client = MockMflowNodesClient()
+    writer_client = MockCppWriterClient()
     detector_client = MockDetectorClient()
 
     integration_manager = manager_module.IntegrationManager(writer_client=writer_client,

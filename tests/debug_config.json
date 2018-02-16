@@ -1,0 +1,21 @@
+{
+  "detector": {
+    "period": 0.1,
+    "frames": 100,
+    "exptime": 0.01,
+    "dr": 16
+  },
+
+  "backend": {
+    "bit_depth": 16,
+    "n_frames": 100
+  },
+
+  "writer":{
+    "output_file": "/tmp/test.h5",
+    "user_id": 0,
+    "group_id": 0,
+    "n_frames": 100
+
+  }
+}
