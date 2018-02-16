@@ -131,7 +131,7 @@ class TestRestClient(unittest.TestCase):
         client.reset()
 
         client.set_config_from_file(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                 "debug_config.json"))
+                                                 "data/debug_config.json"))
 
         self.assertEqual(client.get_status()["status"], "IntegrationStatus.CONFIGURED")
 
