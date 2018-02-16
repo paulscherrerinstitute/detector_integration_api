@@ -212,7 +212,7 @@ class IntegrationManager(object):
         return {
             "clients": {
                 "backend_url": self.backend_client.backend_url,
-                "writer_url": self.writer_client._api_address.format(url="")},
+                "writer_url": self.writer_client.url},
             "clients_enabled": self.get_clients_enabled(),
             "validator": "NOT IMPLEMENTED",
             "last_config_successful": self.last_config_successful
