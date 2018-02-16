@@ -80,7 +80,7 @@ class MockMflowNodesClient(object):
 class MockCppWriterClient(object):
     def __init__(self):
         self.status = "stopped"
-        self.parameters = None
+        self.config = None
         self.url = "http://localhost:10000"
 
     def start(self):
@@ -93,7 +93,7 @@ class MockCppWriterClient(object):
         return self.status
 
     def set_parameters(self, writer_parameters):
-        self.parameters = writer_parameters
+        self.config = writer_parameters
 
     def reset(self):
         self.status = "stopped"
@@ -106,7 +106,6 @@ def get_test_integration_manager(manager_module):
     backend_client = MockBackendClient()
     detector_client = MockDetectorClient()
     writer_client = MockCppWriterClient()
-    manager_module = import_module(manager_module)
 
     manager = manager_module.IntegrationManager(backend_client, writer_client, detector_client)
 
