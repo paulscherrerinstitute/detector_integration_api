@@ -10,8 +10,11 @@ setup(name="detector_integration_api",
 
       license="GPL3",
 
+      package_dir={'detector_integration_api.tests': "tests"},
+
       packages=['detector_integration_api',
                 'detector_integration_api.client',
                 'detector_integration_api.debug',
-                'detector_integration_api.rest_api']
+                'detector_integration_api.rest_api',
+                'detector_integration_api.tests']
       )
