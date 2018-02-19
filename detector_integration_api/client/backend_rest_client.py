@@ -56,7 +56,11 @@ class BackendClient(object):
         if response_text != "CONFIGURED":
             raise ValueError("Cannot setup backend parameters, aborting: %s" % response_text)
 
-    def get_metrics(self, metrics=["received_frames", "sent_frames"]):
+    def get_metrics(self, metrics=None):
+
+        if metrics is None:
+            metrics = ["received_frames", "sent_frames"]
+
         _logger.debug("Getting backend metrics.")
         # TODO: do a default selection here
         answer = requests.get(self.backend_url + "/metrics",

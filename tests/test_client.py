@@ -8,9 +8,8 @@ from time import sleep, time
 import os
 
 from detector_integration_api import DetectorIntegrationClient
-from detector_integration_api.deployment import debug_manager
-from detector_integration_api.deployment.csaxs import csaxs_manager
-from tests.utils import start_test_integration_server, get_csax9m_test_writer_parameters
+from detector_integration_api.debug import manager
+from tests.utils import start_test_integration_server
 
 
 class TestRestClient(unittest.TestCase):
@@ -18,13 +17,16 @@ class TestRestClient(unittest.TestCase):
         self.host = "0.0.0.0"
         self.port = 10000
 
-        self.dia_process = Process(target=start_test_integration_server, args=(self.host, self.port, debug_manager))
+        self.dia_process = Process(target=start_test_integration_server, args=(self.host, self.port, manager))
         self.dia_process.start()
 
         # Give it some time to start.
         sleep(1)
 
     def tearDown(self):
+        self.dia_process.terminate()
+        sleep(0.5)
+
         os.kill(self.dia_process.pid, signal.SIGINT)
 
         # Wait for the server to die.
@@ -130,8 +132,7 @@ class TestRestClient(unittest.TestCase):
 
         client.reset()
 
-        client.set_config_from_file(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                 "data/debug_config.json"))
+        client.set_config_from_file(os.path.join(os.path.dirname(os.path.realpath(__file__)), "debug_config.json"))
 
         self.assertEqual(client.get_status()["status"], "IntegrationStatus.CONFIGURED")
 

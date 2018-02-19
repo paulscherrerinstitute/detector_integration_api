@@ -42,7 +42,7 @@ class DetectorClient(object):
         else:
             cli_command = ["sls_detector_put", parameter_name, str(value)]
 
-        _logger.debug("Exeaaacuting put command: '%s'.", " ".join(cli_command))
+        _logger.debug("Executing put command: '%s'.", " ".join(cli_command))
 
         cli_result = subprocess.check_output(cli_command)
 

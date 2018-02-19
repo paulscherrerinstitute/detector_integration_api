@@ -1,8 +1,4 @@
-import json
-from importlib import import_module
-
 import bottle
-import os
 
 from detector_integration_api.rest_api.rest_server import register_rest_interface
 
@@ -124,15 +120,3 @@ def start_test_integration_server(host, port, manager_module):
     register_rest_interface(app=app, integration_manager=integration_manager)
 
     bottle.run(app=app, host=host, port=port)
-
-
-def get_csax9m_test_writer_parameters():
-    """
-    This are all the parameters you need to pass to the writer in order to write in the csax format.
-    """
-    filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), "csaxs_eiger_config.json")
-
-    with open(filename) as input_file:
-        configuration = json.load(input_file)
-
-    return configuration["writer"]

@@ -110,7 +110,7 @@ def register_rest_interface(app, integration_manager):
                 "status": integration_manager.backend_client.get_status(),
                 "clients_enabled": integration_manager.get_clients_enabled()}
 
-    # TODO: Methods belowe access the internal state of the manager. Refactor.
+    # TODO: Methods below access the internal state of the manager. Refactor.
 
     @app.get(ROUTES["get_detector_value"] + "/<name>")
     def get_detector_value(name):

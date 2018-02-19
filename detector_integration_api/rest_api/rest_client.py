@@ -14,7 +14,7 @@ def validate_response(server_response):
 
     return server_response
 
-# TODO: Add functionality to get all the clients separatelly.
+# TODO: Add functionality to get all the clients separately.
 
 
 class DetectorIntegrationClient(object):
@@ -158,14 +158,17 @@ class DetectorIntegrationClient(object):
         
         return validate_response(response.json())
 
-    def get_backend(self, action, configuration={}):
+    def get_backend(self, action):
         request_url = self.api_address + ROUTES["backend_client"] + "/" + action
 
         response = requests.get(request_url).json() 
         return validate_response(response)
 
-    def put_backend(self, action, configuration={}):
+    def put_backend(self, action, configuration=None):
         request_url = self.api_address + ROUTES["backend_client"] + "/" + action
 
-        response = requests.put(request_url, json=configuration).json() 
+        if configuration is None:
+            configuration = {}
+
+        response = requests.put(request_url, json=configuration).json()
         return validate_response(response)

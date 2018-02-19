@@ -1,7 +1,7 @@
 import unittest
 
-from detector_integration_api.deployment import debug_manager
-from detector_integration_api.deployment.debug_validator import IntegrationStatus
+from detector_integration_api.debug import manager as debug_manager
+from detector_integration_api.debug.validator import IntegrationStatus
 from tests.utils import get_test_integration_manager
 
 
