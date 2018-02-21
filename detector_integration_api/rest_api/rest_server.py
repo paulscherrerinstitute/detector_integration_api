@@ -97,7 +97,7 @@ def register_rest_interface(app, integration_manager):
     def get_clients_enabled():
 
         return {"state": "ok",
-                "status": integration_manager.get_clients_enabled(),
+                "status": integration_manager.get_acquisition_status_string(),
                 "clients_enabled": integration_manager.get_clients_enabled()}
 
     @app.post(ROUTES["clients_enabled"])
@@ -107,7 +107,7 @@ def register_rest_interface(app, integration_manager):
         integration_manager.set_clients_enabled(config_clients_enable)
 
         return {"state": "ok",
-                "status": integration_manager.backend_client.get_status(),
+                "status": integration_manager.get_acquisition_status_string(),
                 "clients_enabled": integration_manager.get_clients_enabled()}
 
     # TODO: Methods below access the internal state of the manager. Refactor.
