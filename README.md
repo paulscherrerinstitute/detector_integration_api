@@ -20,8 +20,8 @@ REST API for integrating beamline software with the detector, backend, and write
     2. [Python client](#python_client)
     3. [REST API](#rest_api)
 7. [Deployed instances](#deployed_instances)
-    1. [cSAXS Eiger 9M](https://github.com/datastreaming/detector_integration_api/tree/master/detector_integration_api/deployment/csaxs)
-    2. [SwissFEL](#)
+    1. [cSAXS Eiger 9M](https://github.com/paulscherrerinstitute/csaxs_dia)
+    2. [SwissFEL](https://github.com/paulscherrerinstitute/sf_dia)
     
 <a id="quick"></a>
 ## Quick introduction
