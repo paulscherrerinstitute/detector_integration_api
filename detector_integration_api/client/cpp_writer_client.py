@@ -84,6 +84,9 @@ class CppWriterClient(object):
                                          timeout=config.WRITER_PROCESS_COMMUNICATION_TIMEOUT)
 
                 if response.status_code != 200:
+                    _logger.debug("Exception while trying to set parameters on h5 cpp writer. Retrying.", response)
+
+                    sleep(config.WRITER_PROCESS_RETRY_DELAY)
                     continue
 
                 break
