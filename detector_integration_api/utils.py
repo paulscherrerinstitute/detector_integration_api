@@ -10,9 +10,10 @@ class ClientDisableWrapper(object):
 
     STATUS_DISABLED = "DISABLED"
 
-    def __init__(self, client, default_enabled=True):
+    def __init__(self, client, default_enabled=True, client_name="external component"):
         self.client = client
         self.client_enabled = default_enabled
+        self.client_name = client_name
 
     def is_client_enabled(self):
         return self.client_enabled
@@ -27,8 +28,14 @@ class ClientDisableWrapper(object):
 
             def gated_function(*args, **kwargs):
                 if self.is_client_enabled():
-                    result = remote_attr(*args, **kwargs)
-                    return result
+
+                    try:
+                        result = remote_attr(*args, **kwargs)
+                        return result
+                    except Exception as e:
+                        raise RuntimeError("Cannot communicate with %s. Please check the error logs."
+                                           % self.client_name) from e
+
                 else:
                     _logger.debug("Object '%s' disabled. Not calling method '%s'.",
                                   type(self.client).__name__, attr_name)

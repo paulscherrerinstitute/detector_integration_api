@@ -1,6 +1,7 @@
 import unittest
 
 from detector_integration_api.client.detector_cli_client import DetectorClient
+from detector_integration_api.utils import ClientDisableWrapper
 
 
 class TestIntegrationManager(unittest.TestCase):
@@ -23,3 +24,19 @@ class TestIntegrationManager(unittest.TestCase):
             DetectorClient.validate_response(b'frames 10.0000', "frames", 11)
 
         DetectorClient.validate_response(b'status idle', "status", ["idle", "running"])
+
+    def test_client_wrapper_exception_handling(self):
+        class TestClient(object):
+            def exception(self):
+                raise ValueError()
+
+        raw_client = TestClient()
+        client = ClientDisableWrapper(raw_client)
+
+        with self.assertRaisesRegex(RuntimeError, "Cannot communicate with external component"):
+            client.exception()
+
+        client = ClientDisableWrapper(raw_client, True, "writer")
+
+        with self.assertRaisesRegex(RuntimeError, "Cannot communicate with writer."):
+            client.exception()
