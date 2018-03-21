@@ -1,0 +1,55 @@
+<link rel="import"  href="https://polygit.org/components/polymer/polymer-element.html">
+<link rel="import"  href="https://polygit.org/components/polymer/lib/elements/dom-repeat.html">
+<link rel="import"  href="https://polygit.org/components/iron-ajax/iron-ajax.html">
+
+<link rel="import"  href="/static/dia-status.html">
+<link rel="import"  href="/static/dia-status-details.html">
+
+<dom-module id="dia-control-panel">
+
+    <template>
+
+        <iron-ajax id="ajax"
+                   auto
+                   url="/api/v1/control_panel"
+                   last-response="{{data}}"
+                   on-response="_onResponse"
+                   handleAs="json">
+        </iron-ajax>
+
+        <dia-status status="{{data.status}}"></dia-status>
+        <dia-status-details details="{{data.details}}"></dia-status-details>
+
+    </template>
+
+    <script>
+        HTMLImports.whenReady(function() {
+            Polymer({
+                is: 'dia-control-panel',
+
+                _updateData: function() {
+
+                    this.async(function() {
+                        this.$.ajax.generateRequest();
+                    }, 1000);
+
+                },
+
+                _onResponse: function() {
+                    this._updateData();
+                },
+
+                _toArray: function(obj) {
+                    return Object.keys(obj).map(function(key) {
+                        return {
+                            name: key,
+                            value: obj[key]
+                        };
+                    });
+                }
+            });
+        });
+    </script>
+
+
+</dom-module>

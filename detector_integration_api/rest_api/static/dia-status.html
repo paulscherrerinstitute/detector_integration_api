@@ -1,0 +1,64 @@
+<link rel="import"  href="https://polygit.org/components/polymer/polymer-element.html">
+
+<dom-module id="dia-status">
+    <template>
+
+        <style>
+
+            .status_circle {
+                display: inline-block;
+                width: 30px;
+                height: 30px;
+                -moz-border-radius: 30px;
+                -webkit-border-radius: 30px;
+                border-radius: 30px;
+                margin-left: 10px;
+                margin-right: 10px;
+            }
+
+            .status_text {
+                display: inline-block;
+                vertical-align: top;
+                line-height: 30px;
+                font-size: 20px;
+
+            }
+
+            .is_error_false {
+                background: green;
+            }
+
+            .is_error_true {
+                background: red;
+            }
+
+        </style>
+
+        <h1>DIA status</h1>
+        <div class$="status_circle is_error_{{_is_error(status)}}"></div>
+        <div class="status_text">{{_get_status_text(status)}}</div>
+    </template>
+
+    <script>
+        HTMLImports.whenReady(function() {
+            Polymer({
+                is: 'dia-status',
+
+                _is_error: function(status) {
+                    if (status == "IntegrationStatus.ERROR") {
+                        return "true";
+                    } else {
+                        return "false";
+                    }
+                },
+
+                _get_status_text(status) {
+                    return status.substring(status.indexOf(".")+1);
+                }
+
+            });
+        });
+    </script>
+
+
+</dom-module>

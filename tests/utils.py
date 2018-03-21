@@ -25,6 +25,9 @@ class MockBackendClient(object):
     def reset(self):
         self.status = "INITIALIZED"
 
+    def get_metrics(self):
+        return {}
+
 
 class MockDetectorClient(object):
     def __init__(self):
