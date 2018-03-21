@@ -49,6 +49,8 @@ ROUTES = {
 
     "get_server_info": "/api/v1/info",
 
+    "get_control_panel_info": "/api/v1/control_panel",
+
     "get_metrics": "/api/v1/metrics",
 
     "backend_client": "/api/v1/backend",

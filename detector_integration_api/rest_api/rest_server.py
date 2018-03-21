@@ -98,6 +98,16 @@ def register_rest_interface(app, integration_manager):
                 "status": integration_manager.get_acquisition_status_string(),
                 "server_info": integration_manager.get_server_info()}
 
+    @app.get(ROUTES["get_control_panel_info"])
+    def get_control_panel_info():
+
+        return {"state": "ok",
+                "status": integration_manager.get_acquisition_status_string(),
+                "details": integration_manager.get_status_details(),
+                "clients_enabled": integration_manager.get_clients_enabled(),
+                "config": integration_manager.get_acquisition_config(),
+                "metrics": integration_manager.get_metrics()}
+
     @app.get(ROUTES["get_metrics"])
     def get_metrics():
 
@@ -176,6 +186,10 @@ def register_rest_interface(app, integration_manager):
             integration_manager.backend_client.__getattribute__(action)()
             return {"state": "ok",
                     "status": integration_manager.backend_client.get_status()}
+
+    @app.get(ROUTES["html_index"] + "static/<filename:path>")
+    def get_static(filename):
+        return bottle.static_file(filename=filename, root=static_root_path)
 
     @app.error(500)
     def error_handler_500(error):
