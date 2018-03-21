@@ -144,3 +144,5 @@ ENV/
 
 # Docker build
 sls_detectors_package/
+
+.DS_Store
