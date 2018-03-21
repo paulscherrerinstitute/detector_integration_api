@@ -31,6 +31,7 @@ WRITER_PROCESS_LOG_FILENAME_TIME_FORMAT = "%Y%m%d-%H%M%S"
 
 # Rest API routes.
 ROUTES = {
+    "html_index": "/",
     "start": "/api/v1/start",
     "stop": "/api/v1/stop",
     "reset": "/api/v1/reset",

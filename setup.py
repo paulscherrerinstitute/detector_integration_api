@@ -16,5 +16,7 @@ setup(name="detector_integration_api",
                 'detector_integration_api.client',
                 'detector_integration_api.debug',
                 'detector_integration_api.rest_api',
-                'detector_integration_api.tests']
+                'detector_integration_api.tests'],
+
+      include_package_data=True
       )

@@ -1,6 +1,8 @@
 import json
 from logging import getLogger
 
+import bottle
+import os
 from bottle import request, response
 
 from detector_integration_api.config import ROUTES
@@ -9,6 +11,16 @@ _logger = getLogger(__name__)
 
 
 def register_rest_interface(app, integration_manager):
+    static_root_path = os.path.join(os.path.dirname(__file__), "static")
+    _logger.debug("Static files root folder: %s", static_root_path)
+
+    # Set the path for the templates.
+    bottle.TEMPLATE_PATH = [static_root_path]
+
+    @app.get(ROUTES["html_index"])
+    @bottle.view("index")
+    def index():
+        pass
 
     @app.post(ROUTES["start"])
     def start():
