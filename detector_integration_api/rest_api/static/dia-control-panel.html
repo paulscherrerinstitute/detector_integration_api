@@ -3,7 +3,6 @@
 <link rel="import"  href="https://polygit.org/components/iron-ajax/iron-ajax.html">
 
 <link rel="import"  href="/static/dia-status.html">
-<link rel="import"  href="/static/dia-status-details.html">
 
 <dom-module id="dia-control-panel">
 
@@ -18,7 +17,18 @@
         </iron-ajax>
 
         <dia-status status="{{data.status}}"></dia-status>
-        <dia-status-details details="{{data.details}}"></dia-status-details>
+
+        <h1>Status details</h1>
+
+        <template is="dom-repeat" items="{{_toArray(data.details)}}">
+            <p><b>[[item.name]]</b>: [[item.value]]</p>
+        </template>
+
+        <h1>Clients enabled</h1>
+
+        <template is="dom-repeat" items="{{_toArray(data.clients_enabled)}}">
+            <p><b>[[item.name]]</b>: [[item.value]]</p>
+        </template>
 
     </template>
 
