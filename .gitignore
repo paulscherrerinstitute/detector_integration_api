@@ -146,3 +146,6 @@ ENV/
 sls_detectors_package/
 
 .DS_Store
+
+# Ignore bower components.
+detector_integration_api/rest_api/static/bower_components
