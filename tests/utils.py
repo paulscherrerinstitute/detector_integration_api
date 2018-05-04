@@ -76,7 +76,7 @@ class MockMflowNodesClient(object):
         self.is_running = False
 
 
-class MockCppWriterClient(object):
+class MockExternalProcessClient(object):
     def __init__(self):
         self.status = "stopped"
         self.config = None
@@ -104,7 +104,7 @@ class MockCppWriterClient(object):
 def get_test_integration_manager(manager_module):
     backend_client = MockBackendClient()
     detector_client = MockDetectorClient()
-    writer_client = MockCppWriterClient()
+    writer_client = MockExternalProcessClient()
 
     manager = manager_module.IntegrationManager(backend_client, writer_client, detector_client)
 
@@ -113,7 +113,7 @@ def get_test_integration_manager(manager_module):
 
 def start_test_integration_server(host, port, manager_module):
     backend_client = MockBackendClient()
-    writer_client = MockCppWriterClient()
+    writer_client = MockExternalProcessClient()
     detector_client = MockDetectorClient()
 
     integration_manager = manager_module.IntegrationManager(writer_client=writer_client,

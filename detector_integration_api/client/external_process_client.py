@@ -12,7 +12,7 @@ from detector_integration_api import config
 _logger = getLogger(__name__)
 
 
-class CppWriterClient(object):
+class ExternalProcessClient(object):
     PROCESS_STARTUP_PARAMETERS = ("output_file", "n_frames", "user_id")
 
     def __init__(self, stream_url, writer_executable, writer_port, log_folder=None):

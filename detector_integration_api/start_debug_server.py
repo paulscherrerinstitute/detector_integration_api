@@ -5,7 +5,7 @@ import bottle
 from detector_integration_api import config
 from detector_integration_api.debug import manager
 from detector_integration_api.rest_api.rest_server import register_rest_interface
-from tests.utils import MockBackendClient, MockDetectorClient, MockCppWriterClient
+from tests.utils import MockBackendClient, MockDetectorClient, MockExternalProcessClient
 
 _logger = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ def start_integration_server(host, port):
     _logger.info("Starting debug integration REST API.")
 
     backend_client = MockBackendClient()
-    writer_client = MockCppWriterClient()
+    writer_client = MockExternalProcessClient()
     detector_client = MockDetectorClient()
 
     integration_manager = manager.IntegrationManager(writer_client=writer_client,
