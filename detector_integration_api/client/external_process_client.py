@@ -157,6 +157,8 @@ class ExternalProcessClient(object):
 
     def get_status(self):
 
+        status = False
+
         if self.is_running():
             status = self._send_request_to_process(requests.get,
                                                    self.process_url + "/status",
