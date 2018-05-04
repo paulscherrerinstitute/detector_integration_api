@@ -1,20 +1,10 @@
 <link rel="import"  href="bower_components/polymer/polymer-element.html">
 <link rel="import"  href="bower_components/polymer/lib/elements/dom-repeat.html">
-<link rel="import"  href="bower_components/iron-ajax/iron-ajax.html">
-
 <link rel="import"  href="dia-status.html">
 
 <dom-module id="dia-control-panel">
 
     <template>
-
-        <iron-ajax id="ajax"
-                   auto
-                   url="/api/v1/control_panel"
-                   last-response="{{data}}"
-                   on-response="_onResponse"
-                   handleAs="json">
-        </iron-ajax>
 
         <dia-status status="{{data.status}}"></dia-status>
 
