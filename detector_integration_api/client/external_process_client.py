@@ -13,7 +13,7 @@ _logger = getLogger(__name__)
 
 
 class ExternalProcessClient(object):
-    PROCESS_STARTUP_PARAMETERS = ("output_file", "n_frames", "user_id")
+    PROCESS_STARTUP_PARAMETERS = ()
 
     def __init__(self, stream_url, writer_executable, writer_port, log_folder=None):
 
