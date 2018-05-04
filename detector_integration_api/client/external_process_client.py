@@ -14,6 +14,7 @@ _logger = getLogger(__name__)
 
 class ExternalProcessClient(object):
     PROCESS_STARTUP_PARAMETERS = ()
+    PROCESS_NAME = "unknown"
 
     def __init__(self, stream_url, writer_executable, writer_port, log_folder=None):
 
@@ -25,11 +26,12 @@ class ExternalProcessClient(object):
         if log_folder is not None:
 
             if not os.path.exists(log_folder):
-                raise ValueError("Provided writer log folder '%s' does not exist." % log_folder)
+                raise ValueError("Provided %s log folder for process '%s' does not exist."
+                                 % (self.PROCESS_NAME, log_folder))
 
             self.log_folder = log_folder
 
-        self.writer_url = config.WRITER_PROCESS_URL_FORMAT % writer_port
+        self.writer_url = config.EXTERNAL_PROCESS_URL_FORMAT % writer_port
         self.writer_parameters = None
 
         self.process = None
@@ -39,16 +41,17 @@ class ExternalProcessClient(object):
         return {key: parameters[key] for key in parameters if key not in self.PROCESS_STARTUP_PARAMETERS}
 
     def _send_request_to_process(self, requests_method, url, request_json=None, return_response=False):
-        for _ in range(config.WRITER_PROCESS_RETRY_N):
+        for _ in range(config.EXTERNAL_PROCESS_RETRY_N):
 
             try:
                 response = requests_method(url=url, json=request_json,
-                                           timeout=config.WRITER_PROCESS_COMMUNICATION_TIMEOUT)
+                                           timeout=config.EXTERNAL_PROCESS_COMMUNICATION_TIMEOUT)
 
                 if response.status_code != 200:
-                    _logger.debug("Error while trying to communicate with the writer. Retrying.", response)
+                    _logger.debug("Error while trying to communicate with the %s process. Retrying." %
+                                  self.PROCESS_NAME, response)
 
-                    sleep(config.WRITER_PROCESS_RETRY_DELAY)
+                    sleep(config.EXTERNAL_PROCESS_RETRY_DELAY)
                     continue
 
                 if return_response:
@@ -57,24 +60,25 @@ class ExternalProcessClient(object):
                     return True
 
             except:
-                sleep(config.WRITER_PROCESS_RETRY_DELAY)
+                sleep(config.EXTERNAL_PROCESS_RETRY_DELAY)
 
         return False
 
     def start(self):
 
         if self.is_running():
-            raise RuntimeError("Writer process already running. Cannot start new one until old one is still alive.")
+            raise RuntimeError("Process %s already running. Cannot start new one until old one is still alive."
+                               % self.PROCESS_NAME)
 
         if not self.writer_parameters:
-            raise ValueError("Writer parameters not set.")
+            raise ValueError("Process %s parameters not set." % self.PROCESS_NAME)
 
-        timestamp = datetime.now().strftime(config.WRITER_PROCESS_LOG_FILENAME_TIME_FORMAT)
+        timestamp = datetime.now().strftime(config.EXTERNAL_PROCESS_LOG_FILENAME_TIME_FORMAT)
 
         # If the log folder is not specified, redirect the logs to /dev/null.
         if self.log_folder is not None:
             log_filename = os.path.join(self.log_folder,
-                                        config.WRITER_PROCESS_LOG_FILENAME_FORMAT % timestamp)
+                                        config.EXTERNAL_PROCESS_LOG_FILENAME_FORMAT % timestamp)
         else:
             log_filename = os.devnull
 
@@ -93,25 +97,26 @@ class ExternalProcessClient(object):
         _logger.debug("Starting writer with command '%s'.", writer_command)
         self.process = Popen(writer_command, shell=True, stdout=self.process_log_file, stderr=self.process_log_file)
 
-        sleep(config.WRITER_PROCESS_STARTUP_WAIT_TIME)
+        sleep(config.EXTERNAL_PROCESS_STARTUP_WAIT_TIME)
 
         process_parameters = self._sanitize_parameters(self.writer_parameters)
-        _logger.debug("Setting process parameters: %s", process_parameters)
+        _logger.debug("Setting process %s parameters: %s", self.PROCESS_NAME, process_parameters)
 
         if not self._send_request_to_process(requests.post, self.writer_url + "/parameters",
                                              request_json=process_parameters):
-            _logger.warning("Terminating writer process because it did not respond in the specified time.")
+            _logger.warning("Terminating %s process because it did not respond in the specified time." %
+                            self.PROCESS_NAME)
             self._kill()
 
-            raise RuntimeError("Count not start writer process in time. Check writer logs.")
+            raise RuntimeError("Count not start %s process in time. Check writer logs." % self.PROCESS_NAME)
 
     def _kill(self):
-        _logger.warning("Terminating writer. Data files might be corrupted.")
+        _logger.warning("Terminating process %s. Data files might be corrupted." % self.PROCESS_NAME)
 
         self._send_request_to_process(requests.get, self.writer_url + "/kill")
 
         try:
-            self.process.wait(timeout=config.WRITER_PROCESS_TERMINATE_TIMEOUT)
+            self.process.wait(timeout=config.EXTERNAL_PROCESS_TERMINATE_TIMEOUT)
         except:
             self.process.terminate()
 
@@ -121,26 +126,26 @@ class ExternalProcessClient(object):
 
     def stop(self):
 
-        _logger.debug("Stopping writer.")
+        _logger.debug("Stopping process %s." % self.PROCESS_NAME)
 
         if self.is_running():
-            _logger.debug("Sending stop command to the writer.")
+            _logger.debug("Sending stop command to the process %s." % self.PROCESS_NAME)
 
             if not self._send_request_to_process(requests.get, self.writer_url + "/stop"):
                 if self.is_running():
-                    raise ValueError("Writer is running but cannot send stop command.")
+                    raise ValueError("Process %s is running but cannot send stop command." % self.PROCESS_NAME)
 
             try:
-                self.process.wait(timeout=config.WRITER_PROCESS_TERMINATE_TIMEOUT)
+                self.process.wait(timeout=config.EXTERNAL_PROCESS_TERMINATE_TIMEOUT)
             except:
-                error_message = "Process termination timeout exceeded for writer. Killing."
+                error_message = "Process %s termination timeout exceeded. Killing." % self.PROCESS_NAME
                 _logger.warning(error_message)
 
                 self._kill()
 
                 raise RuntimeError(error_message)
         else:
-            _logger.debug("Writer process is not running.")
+            _logger.debug("Process %s is not running.", self.PROCESS_NAME)
 
         if self.process_log_file:
             self.process_log_file.flush()
@@ -161,7 +166,7 @@ class ExternalProcessClient(object):
 
         if status is False:
             if self.is_running():
-                raise ValueError("Writer is running but cannot get status.")
+                raise ValueError("Process %s is running but cannot get status." % self.PROCESS_NAME)
             else:
                 return "stopped"
 
@@ -171,7 +176,7 @@ class ExternalProcessClient(object):
         self.writer_parameters = writer_parameters
 
     def reset(self):
-        _logger.debug("Resetting writer.")
+        _logger.debug("Resetting process %s.", self.PROCESS_NAME)
 
         self.stop()
 
@@ -188,7 +193,7 @@ class ExternalProcessClient(object):
 
         if statistics is False:
             if self.is_running():
-                raise ValueError("Writer is running but cannot get statistics.")
+                raise ValueError("Process %s is running but cannot get statistics." % self.PROCESS_NAME)
             else:
                 return {}
 
