@@ -162,7 +162,7 @@ class ExternalProcessClient(object):
         if self.is_running():
             status = self._send_request_to_process(requests.get,
                                                    self.process_url + "/status",
-                                                   return_response=True).json()
+                                                   return_response=True)
 
         if status is False:
             if self.is_running():
@@ -170,6 +170,7 @@ class ExternalProcessClient(object):
             else:
                 return "stopped"
 
+        status = status.json()
         return status["status"]
 
     def set_parameters(self, writer_parameters):
@@ -189,7 +190,7 @@ class ExternalProcessClient(object):
 
         statistics = self._send_request_to_process(requests.get,
                                                    self.process_url + "/statistics",
-                                                   return_response=True).json()
+                                                   return_response=True)
 
         if statistics is False:
             if self.is_running():
@@ -197,4 +198,5 @@ class ExternalProcessClient(object):
             else:
                 return {}
 
+        statistics = statistics.json()
         return statistics
