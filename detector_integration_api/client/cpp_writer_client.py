@@ -35,10 +35,31 @@ class CppWriterClient(object):
         self.process = None
         self.process_log_file = None
 
-    @staticmethod
-    def _sanitize_parameters(parameters):
+    def _sanitize_parameters(self, parameters):
+        return {key: parameters[key] for key in parameters if key not in self.PROCESS_STARTUP_PARAMETERS}
 
-        return {key: parameters[key] for key in parameters if key not in CppWriterClient.PROCESS_STARTUP_PARAMETERS}
+    def _send_request_to_process(self, requests_method, url, request_json=None, return_response=False):
+        for _ in range(config.WRITER_PROCESS_RETRY_N):
+
+            try:
+                response = requests_method(url=url, json=request_json,
+                                           timeout=config.WRITER_PROCESS_COMMUNICATION_TIMEOUT)
+
+                if response.status_code != 200:
+                    _logger.debug("Error while trying to communicate with the writer. Retrying.", response)
+
+                    sleep(config.WRITER_PROCESS_RETRY_DELAY)
+                    continue
+
+                if return_response:
+                    return response
+                else:
+                    return True
+
+            except:
+                sleep(config.WRITER_PROCESS_RETRY_DELAY)
+
+        return False
 
     def start(self):
 
@@ -77,55 +98,47 @@ class CppWriterClient(object):
         process_parameters = self._sanitize_parameters(self.writer_parameters)
         _logger.debug("Setting process parameters: %s", process_parameters)
 
-        for _ in range(config.WRITER_PROCESS_RETRY_N):
-
-            try:
-                response = requests.post(self.writer_url + "/parameters", json=process_parameters,
-                                         timeout=config.WRITER_PROCESS_COMMUNICATION_TIMEOUT)
-
-                if response.status_code != 200:
-                    _logger.debug("Exception while trying to set parameters on h5 cpp writer. Retrying.", response)
-
-                    sleep(config.WRITER_PROCESS_RETRY_DELAY)
-                    continue
-
-                break
-
-            except:
-                sleep(config.WRITER_PROCESS_RETRY_DELAY)
-        else:
+        if not self._send_request_to_process(requests.post, self.writer_url + "/parameters",
+                                             request_json=process_parameters):
             _logger.warning("Terminating writer process because it did not respond in the specified time.")
-
-            requests.get(self.writer_url + "/kill", timeout=config.WRITER_PROCESS_COMMUNICATION_TIMEOUT)
-
-            self.process.wait(timeout=config.WRITER_PROCESS_TERMINATE_TIMEOUT)
-
-            self.process.terminate()
+            self._kill()
 
             raise RuntimeError("Count not start writer process in time. Check writer logs.")
+
+    def _kill(self):
+        _logger.warning("Terminating writer. Data files might be corrupted.")
+
+        self._send_request_to_process(requests.get, self.writer_url + "/kill")
+
+        try:
+            self.process.wait(timeout=config.WRITER_PROCESS_TERMINATE_TIMEOUT)
+        except:
+            self.process.terminate()
+
+        if self.process_log_file:
+            self.process_log_file.flush()
+            self.process_log_file.close()
 
     def stop(self):
 
         _logger.debug("Stopping writer.")
 
         if self.is_running():
-            requests.get(self.writer_url + "/stop", timeout=config.WRITER_PROCESS_COMMUNICATION_TIMEOUT)
+            _logger.debug("Sending stop command to the writer.")
+
+            if not self._send_request_to_process(requests.get, self.writer_url + "/stop"):
+                if self.is_running():
+                    raise ValueError("Writer is running but cannot send stop command.")
 
             try:
                 self.process.wait(timeout=config.WRITER_PROCESS_TERMINATE_TIMEOUT)
-
             except:
-                _logger.warning("Terminating writer process because it did not stop in the specified time.")
+                error_message = "Process termination timeout exceeded for writer. Killing."
+                _logger.warning(error_message)
 
-                requests.get(self.writer_url + "/kill", timeout=config.WRITER_PROCESS_COMMUNICATION_TIMEOUT)
+                self._kill()
 
-                self.process.wait(timeout=config.WRITER_PROCESS_TERMINATE_TIMEOUT)
-
-                self.process.terminate()
-
-                raise RuntimeError("Writer process was terminated because it did not stop in time. "
-                                   "Acquisition file maybe corrupted.")
-
+                raise RuntimeError(error_message)
         else:
             _logger.debug("Writer process is not running.")
 
@@ -141,13 +154,18 @@ class CppWriterClient(object):
 
     def get_status(self):
 
-        # Writer is running. Get status from the process.
         if self.is_running():
-            status = requests.get(self.writer_url + "/status", timeout=config.WRITER_PROCESS_COMMUNICATION_TIMEOUT).json()
+            status = self._send_request_to_process(requests.get,
+                                                   self.writer_url + "/status",
+                                                   return_response=True).json()
 
-            return status["status"]
+        if status is False:
+            if self.is_running():
+                raise ValueError("Writer is running but cannot get status.")
+            else:
+                return "stopped"
 
-        return "stopped"
+        return status["status"]
 
     def set_parameters(self, writer_parameters):
         self.writer_parameters = writer_parameters
@@ -164,4 +182,14 @@ class CppWriterClient(object):
         if not self.is_running():
             return {}
 
-        return requests.get(self.writer_url + "/statistics", timeout=config.WRITER_PROCESS_COMMUNICATION_TIMEOUT).json()
+        statistics = self._send_request_to_process(requests.get,
+                                                   self.writer_url + "/statistics",
+                                                   return_response=True).json()
+
+        if statistics is False:
+            if self.is_running():
+                raise ValueError("Writer is running but cannot get statistics.")
+            else:
+                return {}
+
+        return statistics
