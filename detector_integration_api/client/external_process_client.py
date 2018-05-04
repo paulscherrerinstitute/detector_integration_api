@@ -19,8 +19,8 @@ class ExternalProcessClient(object):
     def __init__(self, stream_url, writer_executable, writer_port, log_folder=None):
 
         self.stream_url = stream_url
-        self.writer_executable = writer_executable
-        self.writer_port = writer_port
+        self.process_executable = writer_executable
+        self.process_port = writer_port
 
         self.log_folder = None
         if log_folder is not None:
@@ -31,8 +31,8 @@ class ExternalProcessClient(object):
 
             self.log_folder = log_folder
 
-        self.writer_url = config.EXTERNAL_PROCESS_URL_FORMAT % writer_port
-        self.writer_parameters = None
+        self.process_url = config.EXTERNAL_PROCESS_URL_FORMAT % writer_port
+        self.process_parameters = None
 
         self.process = None
         self.process_log_file = None
@@ -64,13 +64,16 @@ class ExternalProcessClient(object):
 
         return False
 
+    def get_execution_command(self):
+        return self.process_executable
+
     def start(self):
 
         if self.is_running():
             raise RuntimeError("Process %s already running. Cannot start new one until old one is still alive."
                                % self.PROCESS_NAME)
 
-        if not self.writer_parameters:
+        if not self.process_parameters:
             raise ValueError("Process %s parameters not set." % self.PROCESS_NAME)
 
         timestamp = datetime.now().strftime(config.EXTERNAL_PROCESS_LOG_FILENAME_TIME_FORMAT)
@@ -84,36 +87,31 @@ class ExternalProcessClient(object):
 
         _logger.debug("Creating log file '%s'.", log_filename)
         self.process_log_file = open(log_filename, 'w')
-        self.process_log_file.write("Parameters:\n%s\n" % json.dumps(self.writer_parameters, indent=4))
+        self.process_log_file.write("Parameters:\n%s\n" % json.dumps(self.process_parameters, indent=4))
         self.process_log_file.flush()
 
-        writer_command_format = "sh " + self.writer_executable + " %s %s %s %s %s"
-        writer_command = writer_command_format % (self.stream_url,
-                                                  self.writer_parameters["output_file"],
-                                                  self.writer_parameters.get("n_frames", 0),
-                                                  self.writer_port,
-                                                  self.writer_parameters.get("user_id", -1))
+        process_command = self.get_execution_command()
 
-        _logger.debug("Starting writer with command '%s'.", writer_command)
-        self.process = Popen(writer_command, shell=True, stdout=self.process_log_file, stderr=self.process_log_file)
+        _logger.debug("Starting process %s with command '%s'.", self.PROCESS_NAME, process_command)
+        self.process = Popen(process_command, shell=True, stdout=self.process_log_file, stderr=self.process_log_file)
 
         sleep(config.EXTERNAL_PROCESS_STARTUP_WAIT_TIME)
 
-        process_parameters = self._sanitize_parameters(self.writer_parameters)
+        process_parameters = self._sanitize_parameters(self.process_parameters)
         _logger.debug("Setting process %s parameters: %s", self.PROCESS_NAME, process_parameters)
 
-        if not self._send_request_to_process(requests.post, self.writer_url + "/parameters",
+        if not self._send_request_to_process(requests.post, self.process_url + "/parameters",
                                              request_json=process_parameters):
             _logger.warning("Terminating %s process because it did not respond in the specified time." %
                             self.PROCESS_NAME)
             self._kill()
 
-            raise RuntimeError("Count not start %s process in time. Check writer logs." % self.PROCESS_NAME)
+            raise RuntimeError("Could not start %s process in time. Check writer logs." % self.PROCESS_NAME)
 
     def _kill(self):
         _logger.warning("Terminating process %s. Data files might be corrupted." % self.PROCESS_NAME)
 
-        self._send_request_to_process(requests.get, self.writer_url + "/kill")
+        self._send_request_to_process(requests.get, self.process_url + "/kill")
 
         try:
             self.process.wait(timeout=config.EXTERNAL_PROCESS_TERMINATE_TIMEOUT)
@@ -131,7 +129,7 @@ class ExternalProcessClient(object):
         if self.is_running():
             _logger.debug("Sending stop command to the process %s." % self.PROCESS_NAME)
 
-            if not self._send_request_to_process(requests.get, self.writer_url + "/stop"):
+            if not self._send_request_to_process(requests.get, self.process_url + "/stop"):
                 if self.is_running():
                     raise ValueError("Process %s is running but cannot send stop command." % self.PROCESS_NAME)
 
@@ -161,7 +159,7 @@ class ExternalProcessClient(object):
 
         if self.is_running():
             status = self._send_request_to_process(requests.get,
-                                                   self.writer_url + "/status",
+                                                   self.process_url + "/status",
                                                    return_response=True).json()
 
         if status is False:
@@ -173,14 +171,14 @@ class ExternalProcessClient(object):
         return status["status"]
 
     def set_parameters(self, writer_parameters):
-        self.writer_parameters = writer_parameters
+        self.process_parameters = writer_parameters
 
     def reset(self):
         _logger.debug("Resetting process %s.", self.PROCESS_NAME)
 
         self.stop()
 
-        self.writer_parameters = None
+        self.process_parameters = None
 
     def get_statistics(self):
 
@@ -188,7 +186,7 @@ class ExternalProcessClient(object):
             return {}
 
         statistics = self._send_request_to_process(requests.get,
-                                                   self.writer_url + "/statistics",
+                                                   self.process_url + "/statistics",
                                                    return_response=True).json()
 
         if statistics is False:
