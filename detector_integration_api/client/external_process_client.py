@@ -200,3 +200,10 @@ class ExternalProcessClient(object):
 
         statistics = statistics.json()
         return statistics
+
+    def kill(self):
+
+        if not self.is_running():
+            return
+
+        self._send_request_to_process(requests.get, self.process_url + "/kill")
