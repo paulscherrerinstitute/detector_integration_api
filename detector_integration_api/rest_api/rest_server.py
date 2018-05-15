@@ -91,6 +91,13 @@ def register_rest_interface(app, integration_manager):
         return {"state": "ok",
                 "status": str(status)}
 
+    @app.post(ROUTES["kill"])
+    def kill():
+        status = integration_manager.kill()
+
+        return {"state": "ok",
+                "status": str(status)}
+
     @app.get(ROUTES["get_server_info"])
     def get_server_info():
 

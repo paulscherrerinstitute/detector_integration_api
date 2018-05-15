@@ -145,6 +145,13 @@ class DetectorIntegrationClient(object):
 
         return validate_response(response)
 
+    def kill(self):
+        request_url = self.api_address + ROUTES["kill"]
+
+        response = requests.post(request_url).json()
+
+        return validate_response(response)
+
     def get_server_info(self):
         request_url = self.api_address + ROUTES["get_server_info"]
 

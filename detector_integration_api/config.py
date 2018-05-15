@@ -35,6 +35,7 @@ ROUTES = {
     "start": "/api/v1/start",
     "stop": "/api/v1/stop",
     "reset": "/api/v1/reset",
+    "kill": "/api/v1/kill",
 
     "get_status": "/api/v1/status",
     "get_status_details": "/api/v1/status_details",

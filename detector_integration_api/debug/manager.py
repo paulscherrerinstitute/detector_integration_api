@@ -208,6 +208,9 @@ class IntegrationManager(object):
 
         return check_for_target_status(self.get_acquisition_status, IntegrationStatus.INITIALIZED)
 
+    def kill(self):
+        self.stop_acquisition()
+
     def get_server_info(self):
         return {
             "clients": {

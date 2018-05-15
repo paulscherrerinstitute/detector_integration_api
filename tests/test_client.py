@@ -138,6 +138,8 @@ class TestRestClient(unittest.TestCase):
 
         self.assertTrue("server_info" in client.get_server_info())
 
+        client.kill()
+
     def test_update_config(self):
         client = DetectorIntegrationClient()
 
