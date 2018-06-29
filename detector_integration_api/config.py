@@ -56,5 +56,7 @@ ROUTES = {
 
     "backend_client": "/api/v1/backend",
 
-    "clients_enabled": "/api/v1/enabled_clients"
+    "clients_enabled": "/api/v1/enabled_clients",
+
+    "daq_test": "/api/v1/daq_test"
 }

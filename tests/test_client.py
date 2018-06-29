@@ -273,3 +273,13 @@ class TestRestClient(unittest.TestCase):
         self.assertFalse(clients_enabled["writer"])
         self.assertFalse(clients_enabled["backend"])
         self.assertFalse(clients_enabled["detector"])
+
+    def test_daq_test(self):
+        client = DetectorIntegrationClient()
+
+        configuration = {"not really": "important"}
+
+        test_result = client.daq_test(configuration)["result"]
+
+        self.assertDictEqual(configuration, test_result)
+

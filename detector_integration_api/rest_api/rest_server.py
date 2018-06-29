@@ -194,6 +194,16 @@ def register_rest_interface(app, integration_manager):
             return {"state": "ok",
                     "status": integration_manager.backend_client.get_status()}
 
+    @app.post(ROUTES["daq_test"])
+    def post_daq_test():
+        test_configuration = request.json
+
+        test_results = integration_manager.test_daq(test_configuration)
+
+        return {"state": "ok",
+                "status": integration_manager.get_acquisition_status_string(),
+                "result": test_results}
+
     @app.get(ROUTES["html_index"] + "static/<filename:path>")
     def get_static(filename):
         return bottle.static_file(filename=filename, root=static_root_path)

@@ -226,3 +226,6 @@ class IntegrationManager(object):
         return {"writer": self.writer_client.get_statistics(),
                 "backend": self.backend_client.get_metrics(),
                 "detector": {}}
+
+    def test_daq(self, test_configuration):
+        return test_configuration

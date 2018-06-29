@@ -179,3 +179,12 @@ class DetectorIntegrationClient(object):
 
         response = requests.put(request_url, json=configuration).json()
         return validate_response(response)
+
+    def daq_test(self, configuration=None):
+        request_url = self.api_address + ROUTES["daq_test"]
+
+        if configuration is None:
+            configuration = {}
+
+        response = requests.post(request_url, json=configuration).json()
+        return validate_response(response)
