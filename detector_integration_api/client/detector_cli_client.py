@@ -7,40 +7,43 @@ _logger = getLogger(__name__)
 
 
 class DetectorClient(object):
+    def __init__(self, id=0):
+        self.detector_id = "" if id == 0 else str(id)+"-"
+
     def start(self):
-        cli_command = ["taskset", "-c", "0", "sls_detector_put", "status", "start"]
+        cli_command = ["taskset", "-c", "0", "sls_detector_put", self.detector_id +"status", "start"]
         _logger.debug("Executing start command: '%s'.", " ".join(cli_command))
 
         cli_result = subprocess.check_output(cli_command)
         response, received_parameter_name, received_value = self.interpret_response(cli_result, "status")
         # The status can also be 'idle', for single image short exptime acquisitions.
-        self.verify_response_data(response, "status", received_parameter_name, ["idle", "running", "waiting"],
+        self.verify_response_data(response, self.detector_id+"status", received_parameter_name, ["idle", "running", "waiting"],
                                   received_value)
 
     def stop(self):
-        cli_command = ["taskset", "-c", "0", "sls_detector_put", "status", "stop"]
+        cli_command = ["taskset", "-c", "0", "sls_detector_put", self.detector_id + "status", "stop"]
         _logger.debug("Executing start command: '%s'.", " ".join(cli_command))
 
         cli_result = subprocess.check_output(cli_command)
         response, received_parameter_name, received_value = self.interpret_response(cli_result, "status")
-        self.verify_response_data(response, "status", received_parameter_name, "idle", received_value)
+        self.verify_response_data(response, self.detector_id+"status", received_parameter_name, "idle", received_value)
 
     def get_status(self):
         raw_status = self.get_value("status")
         return raw_status
 
     def get_value(self, parameter_name):
-        cli_command = ["taskset", "-c", "0", "sls_detector_get", parameter_name]
+        cli_command = ["taskset", "-c", "0", "sls_detector_get", self.detector_id + parameter_name]
         _logger.debug("Executing get command: '%s'.", " ".join(cli_command))
 
         cli_result = subprocess.check_output(cli_command)
-        return self.validate_response(cli_result, parameter_name)
+        return self.validate_response(cli_result, self.detector_id+parameter_name)
 
     def set_value(self, parameter_name, value, no_verification=False):
         if isinstance(value, str):
-            cli_command = ["taskset", "-c", "0", "sls_detector_put", parameter_name, ] + list(map(str, value.split()))
+            cli_command = ["taskset", "-c", "0", "sls_detector_put", self.detector_id + parameter_name, ] + list(map(str, value.split()))
         else:
-            cli_command = ["taskset", "-c", "0", "sls_detector_put", parameter_name, str(value)]
+            cli_command = ["taskset", "-c", "0", "sls_detector_put", self.detector_id + parameter_name, str(value)]
 
         _logger.debug("Executing put command: '%s'.", " ".join(cli_command))
 
@@ -50,7 +53,7 @@ class DetectorClient(object):
         if no_verification:
             return cli_result.decode("utf-8")
         else:
-            return self.validate_response(cli_result, parameter_name)
+            return self.validate_response(cli_result, self.detector_id + parameter_name)
 
     def set_config(self, configuration):
         for name, value in configuration.items():

@@ -136,7 +136,7 @@ def register_rest_interface(app, integration_manager):
 
     @app.get(ROUTES["get_detector_value"] + "/<name>")
     def get_detector_value(name):
-        value = integration_manager.detector_client.get_value(name)
+        value = integration_manager.detector_client_get_value(name)
 
         return {"state": "ok",
                 "status": integration_manager.get_acquisition_status_string(),
@@ -156,7 +156,7 @@ def register_rest_interface(app, integration_manager):
         parameter_name = parameter_request["name"]
         parameter_value = parameter_request["value"]
 
-        value = integration_manager.detector_client.set_value(parameter_name, parameter_value, no_verification=True)
+        value = integration_manager.detector_client_set_value(parameter_name, parameter_value, no_verification=True)
 
         return {"state": "ok",
                 "status": integration_manager.get_acquisition_status_string(),
@@ -164,7 +164,7 @@ def register_rest_interface(app, integration_manager):
 
     @app.get(ROUTES["backend_client"] + "/<action>")
     def get_backend_client(action):
-        value = integration_manager.backend_client.__getattribute__(action)()
+        value = integration_manager.backend_client_action(action)()
 
         return {"state": "ok",
                 "status": integration_manager.get_acquisition_status_string(),
@@ -177,15 +177,15 @@ def register_rest_interface(app, integration_manager):
         new_config = request.json
         if action == "config":
             integration_manager.validator.validate_backend_config(new_config)
-            integration_manager.backend_client.set_config(new_config)
+            integration_manager.backend_client_set_config(new_config)
             integration_manager._last_set_backend_config = new_config
             return {"state": "ok",
-                    "status": integration_manager.backend_client.get_status(),
-                    "config": integration_manager.backend_client._last_set_backend_config}
+                    "status": integration_manager.backend_client_get_status(),
+                    "config": integration_manager.backend_client_get_config()}
         else:
-            integration_manager.backend_client.__getattribute__(action)()
+            integration_manager.backend_client_action(action)()
             return {"state": "ok",
-                    "status": integration_manager.backend_client.get_status()}
+                    "status": integration_manager.backend_client_get_status()}
 
     @app.get(ROUTES["html_index"] + "static/<filename:path>")
     def get_static(filename):
