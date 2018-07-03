@@ -138,6 +138,8 @@ class TestRestClient(unittest.TestCase):
 
         self.assertTrue("server_info" in client.get_server_info())
 
+        client.kill()
+
     def test_update_config(self):
         client = DetectorIntegrationClient()
 
@@ -271,3 +273,13 @@ class TestRestClient(unittest.TestCase):
         self.assertFalse(clients_enabled["writer"])
         self.assertFalse(clients_enabled["backend"])
         self.assertFalse(clients_enabled["detector"])
+
+    def test_daq_test(self):
+        client = DetectorIntegrationClient()
+
+        configuration = {"not really": "important"}
+
+        test_result = client.daq_test(configuration)["result"]
+
+        self.assertDictEqual(configuration, test_result)
+

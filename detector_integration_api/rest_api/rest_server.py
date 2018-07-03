@@ -91,6 +91,13 @@ def register_rest_interface(app, integration_manager):
         return {"state": "ok",
                 "status": str(status)}
 
+    @app.post(ROUTES["kill"])
+    def kill():
+        status = integration_manager.kill()
+
+        return {"state": "ok",
+                "status": str(status)}
+
     @app.get(ROUTES["get_server_info"])
     def get_server_info():
 
@@ -186,6 +193,16 @@ def register_rest_interface(app, integration_manager):
             integration_manager.backend_client_action(action)()
             return {"state": "ok",
                     "status": integration_manager.backend_client_get_status()}
+
+    @app.post(ROUTES["daq_test"])
+    def post_daq_test():
+        test_configuration = request.json
+
+        test_results = integration_manager.test_daq(test_configuration)
+
+        return {"state": "ok",
+                "status": integration_manager.get_acquisition_status_string(),
+                "result": test_results}
 
     @app.get(ROUTES["html_index"] + "static/<filename:path>")
     def get_static(filename):

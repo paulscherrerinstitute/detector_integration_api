@@ -145,6 +145,13 @@ class DetectorIntegrationClient(object):
 
         return validate_response(response)
 
+    def kill(self):
+        request_url = self.api_address + ROUTES["kill"]
+
+        response = requests.post(request_url).json()
+
+        return validate_response(response)
+
     def get_server_info(self):
         request_url = self.api_address + ROUTES["get_server_info"]
 
@@ -171,4 +178,13 @@ class DetectorIntegrationClient(object):
             configuration = {}
 
         response = requests.put(request_url, json=configuration).json()
+        return validate_response(response)
+
+    def daq_test(self, configuration=None):
+        request_url = self.api_address + ROUTES["daq_test"]
+
+        if configuration is None:
+            configuration = {}
+
+        response = requests.post(request_url, json=configuration).json()
         return validate_response(response)

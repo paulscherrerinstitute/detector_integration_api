@@ -19,14 +19,14 @@ N_COLLECT_STATUS_RETRY_DELAY = 0.2
 # CPP writer settings
 EXTERNAL_PROCESS_URL_FORMAT = "http://localhost:%d"
 
-EXTERNAL_PROCESS_STARTUP_WAIT_TIME = 0.5
-EXTERNAL_PROCESS_RETRY_DELAY = 0.5
-EXTERNAL_PROCESS_RETRY_N = 4
+EXTERNAL_PROCESS_STARTUP_WAIT_TIME = 0.2
+EXTERNAL_PROCESS_RETRY_DELAY = 0.1
+EXTERNAL_PROCESS_RETRY_N = 10
 
 EXTERNAL_PROCESS_COMMUNICATION_TIMEOUT = 2
 EXTERNAL_PROCESS_TERMINATE_TIMEOUT = 10
 
-EXTERNAL_PROCESS_LOG_FILENAME_FORMAT = "h5_zmq_writer-%s.log"
+EXTERNAL_PROCESS_LOG_FILENAME_FORMAT = "%s-%s.log"
 EXTERNAL_PROCESS_LOG_FILENAME_TIME_FORMAT = "%Y%m%d-%H%M%S"
 
 # Rest API routes.
@@ -35,6 +35,7 @@ ROUTES = {
     "start": "/api/v1/start",
     "stop": "/api/v1/stop",
     "reset": "/api/v1/reset",
+    "kill": "/api/v1/kill",
 
     "get_status": "/api/v1/status",
     "get_status_details": "/api/v1/status_details",
@@ -55,5 +56,7 @@ ROUTES = {
 
     "backend_client": "/api/v1/backend",
 
-    "clients_enabled": "/api/v1/enabled_clients"
+    "clients_enabled": "/api/v1/enabled_clients",
+
+    "daq_test": "/api/v1/daq_test"
 }

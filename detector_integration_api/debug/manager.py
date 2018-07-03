@@ -208,6 +208,9 @@ class IntegrationManager(object):
 
         return check_for_target_status(self.get_acquisition_status, IntegrationStatus.INITIALIZED)
 
+    def kill(self):
+        self.stop_acquisition()
+
     def get_server_info(self):
         return {
             "clients": {
@@ -223,3 +226,6 @@ class IntegrationManager(object):
         return {"writer": self.writer_client.get_statistics(),
                 "backend": self.backend_client.get_metrics(),
                 "detector": {}}
+
+    def test_daq(self, test_configuration):
+        return test_configuration

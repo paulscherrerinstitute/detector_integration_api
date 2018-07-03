@@ -81,7 +81,7 @@ class ExternalProcessClient(object):
         # If the log folder is not specified, redirect the logs to /dev/null.
         if self.log_folder is not None:
             log_filename = os.path.join(self.log_folder,
-                                        config.EXTERNAL_PROCESS_LOG_FILENAME_FORMAT % timestamp)
+                                        config.EXTERNAL_PROCESS_LOG_FILENAME_FORMAT % (self.PROCESS_NAME, timestamp))
         else:
             log_filename = os.devnull
 
@@ -200,3 +200,10 @@ class ExternalProcessClient(object):
 
         statistics = statistics.json()
         return statistics
+
+    def kill(self):
+
+        if not self.is_running():
+            return
+
+        self._send_request_to_process(requests.get, self.process_url + "/kill")
