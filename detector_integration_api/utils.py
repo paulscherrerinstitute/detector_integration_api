@@ -1,3 +1,4 @@
+import logging
 from logging import getLogger
 from time import sleep
 
@@ -78,3 +79,9 @@ def check_for_target_status(get_status_function, desired_statuses):
         raise ValueError("Cannot reach desired status '%s'. Current status '%s'. "
                          "Try to reset or get_status_details for more info." %
                          (desired_statuses_text, status))
+
+
+def turn_off_requests_logging():
+        requests_log = logging.getLogger("requests.packages.urllib3")
+        requests_log.setLevel(logging.WARNING)
+        requests_log.propagate = False
