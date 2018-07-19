@@ -82,5 +82,8 @@ def check_for_target_status(get_status_function, desired_statuses):
 
 
 def turn_off_requests_logging():
-    logging.getLogger("urllib3").setLevel(logging.WARNING)
+    _logger.info("Disabling logging on Requests.")
+
     logging.getLogger("requests").setLevel(logging.WARNING)
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
+    logging.getLogger("bottle").setLevel(logging.WARNING)
