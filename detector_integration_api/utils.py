@@ -82,6 +82,5 @@ def check_for_target_status(get_status_function, desired_statuses):
 
 
 def turn_off_requests_logging():
-        requests_log = logging.getLogger("requests.packages.urllib3")
-        requests_log.setLevel(logging.WARNING)
-        requests_log.propagate = False
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
+    logging.getLogger("requests").setLevel(logging.WARNING)
