@@ -66,13 +66,17 @@ class DetectorClient(object):
 
         _logger.debug("Executing put command: '%s'.", " ".join(cli_command))
 
-        cli_result = subprocess.check_output(cli_command)
+        try:
+            cli_result = subprocess.check_output(cli_command)
 
-        # This is to be used only when user interact manually with the detector.
-        if no_verification:
-            return cli_result.decode("utf-8")
-        else:
-            return self.validate_response(cli_result, self.detector_id + parameter_name)
+            # This is to be used only when user interact manually with the detector.
+            if no_verification:
+                return cli_result.decode("utf-8")
+            else:
+                return self.validate_response(cli_result, self.detector_id + parameter_name)
+
+        except:
+            raise RuntimeError("Cannot execute detector command %s, please check the detector" % cli_command)
 
     def set_config(self, configuration):
         for name, value in configuration.items():
