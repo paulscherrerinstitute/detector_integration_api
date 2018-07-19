@@ -7,11 +7,19 @@ _logger = getLogger(__name__)
 
 
 class DetectorClient(object):
-    def __init__(self, id=0):
+
+    TASK_SET = ["taskset", "-c", "0"]
+
+    def __init__(self, id=0, use_taskset=True):
         self.detector_id = "" if id == 0 else str(id)+"-"
+        self.use_taskset = use_taskset
 
     def start(self):
-        cli_command = ["taskset", "-c", "0", "sls_detector_put", self.detector_id +"status", "start"]
+        cli_command = ["sls_detector_put", self.detector_id + "status", "start"]
+
+        if self.use_taskset:
+            cli_command = self.TASK_SET + cli_command
+
         _logger.debug("Executing start command: '%s'.", " ".join(cli_command))
 
         cli_result = subprocess.check_output(cli_command)
@@ -21,7 +29,11 @@ class DetectorClient(object):
                                   received_value)
 
     def stop(self):
-        cli_command = ["taskset", "-c", "0", "sls_detector_put", self.detector_id + "status", "stop"]
+        cli_command = ["sls_detector_put", self.detector_id + "status", "stop"]
+
+        if self.use_taskset:
+            cli_command = self.TASK_SET + cli_command
+
         _logger.debug("Executing start command: '%s'.", " ".join(cli_command))
 
         cli_result = subprocess.check_output(cli_command)
@@ -33,7 +45,11 @@ class DetectorClient(object):
         return raw_status
 
     def get_value(self, parameter_name):
-        cli_command = ["taskset", "-c", "0", "sls_detector_get", self.detector_id + parameter_name]
+        cli_command = ["sls_detector_get", self.detector_id + parameter_name]
+
+        if self.use_taskset:
+            cli_command = self.TASK_SET + cli_command
+
         _logger.debug("Executing get command: '%s'.", " ".join(cli_command))
 
         cli_result = subprocess.check_output(cli_command)
@@ -41,9 +57,12 @@ class DetectorClient(object):
 
     def set_value(self, parameter_name, value, no_verification=False):
         if isinstance(value, str):
-            cli_command = ["taskset", "-c", "0", "sls_detector_put", self.detector_id + parameter_name, ] + list(map(str, value.split()))
+            cli_command = ["sls_detector_put", self.detector_id + parameter_name, ] + list(map(str, value.split()))
         else:
-            cli_command = ["taskset", "-c", "0", "sls_detector_put", self.detector_id + parameter_name, str(value)]
+            cli_command = ["sls_detector_put", self.detector_id + parameter_name, str(value)]
+
+        if self.use_taskset:
+            cli_command = self.TASK_SET + cli_command
 
         _logger.debug("Executing put command: '%s'.", " ".join(cli_command))
 
