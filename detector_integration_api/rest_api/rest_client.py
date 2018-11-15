@@ -72,7 +72,10 @@ class DetectorIntegrationClient(object):
                 return
 
             if last_status == 'IntegrationStatus.ERROR':
-                raise RuntimeError("Received status 'IntegrationStatus.ERROR'. Use get_status_details for more info.")
+                # check again status, may be it's a bug
+                last_status = self.get_status()["status"]
+                if last_status == 'IntegrationStatus.ERROR':
+                    raise RuntimeError("Received status 'IntegrationStatus.ERROR'. Use get_status_details for more info.")
 
             if timeout and time() - start_time > timeout:
                 raise ValueError("Timeout exceeded. Could not reach target status '%s'. Last received status: '%s'." %
@@ -188,3 +191,9 @@ class DetectorIntegrationClient(object):
 
         response = requests.post(request_url, json=configuration).json()
         return validate_response(response)
+
+    def ping(self):
+        request_url = self.api_address + ROUTES["ping"]
+        response = requests.get(request_url)
+        return validate_response(response)
+
