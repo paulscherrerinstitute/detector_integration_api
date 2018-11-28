@@ -24,10 +24,10 @@ class DetectorIntegrationClient(object):
 
         self.api_address = api_address.rstrip("/")
 
-    def start(self):
+    def start(self, trigger_start=True):
         request_url = self.api_address + ROUTES["start"]
 
-        response = requests.post(request_url).json()
+        response = requests.post(request_url, json={"trigger_start": trigger_start}).json()
 
         return validate_response(response)
 
@@ -72,7 +72,7 @@ class DetectorIntegrationClient(object):
                 return
 
             if last_status == 'IntegrationStatus.ERROR':
-                # check again status, may be it's a bug
+                # check again status, may be it's a (known) bug which happened 1/100.000
                 last_status = self.get_status()["status"]
                 if last_status == 'IntegrationStatus.ERROR':
                     raise RuntimeError("Received status 'IntegrationStatus.ERROR'. Use get_status_details for more info.")
