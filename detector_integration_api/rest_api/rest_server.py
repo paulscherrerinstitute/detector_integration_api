@@ -39,8 +39,16 @@ def register_rest_interface(app, integration_manager):
     @app.get(ROUTES["get_status"])
     def get_status():
 
-        return {"state": "ok",
-                "status": integration_manager.get_acquisition_status_string()}
+        status = integration_manager.get_acquisition_status_string()
+
+        if status == "IntegrationStatus.ERROR":
+            return {"state": "ok",
+                    "status": status,
+                    "details": integration_manager.get_status_details()}
+
+        else:
+            return {"state": "ok",
+                    "status": status}
 
     @app.get(ROUTES["get_status_details"])
     def get_status_details():
