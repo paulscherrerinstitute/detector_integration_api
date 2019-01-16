@@ -26,7 +26,7 @@ def register_rest_interface(app, integration_manager):
     def start():
         parameter_request = request.json
         trigger_start = True
-        if "trigger_start" in parameter_request:
+        if parameter_request != None and "trigger_start" in parameter_request:
             trigger_start = parameter_request["trigger_start"]
         status = integration_manager.start_acquisition(trigger_start=trigger_start)
 
