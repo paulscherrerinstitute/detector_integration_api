@@ -24,11 +24,9 @@ def register_rest_interface(app, integration_manager):
 
     @app.post(ROUTES["start"])
     def start():
-        parameter_request = request.json
-        trigger_start = True
-        if parameter_request != None and "trigger_start" in parameter_request:
-            trigger_start = parameter_request["trigger_start"]
-        status = integration_manager.start_acquisition(trigger_start=trigger_start)
+        parameters = request.json
+
+        status = integration_manager.start_acquisition(parameters=parameters)
 
         return {"state": "ok",
                 "status": str(status)}

@@ -24,10 +24,16 @@ class DetectorIntegrationClient(object):
 
         self.api_address = api_address.rstrip("/")
 
-    def start(self, trigger_start=True):
+    # TODO: Remove trigger_start parameter from start (use parameters instead).
+    def start(self, trigger_start=True, parameters=None):
         request_url = self.api_address + ROUTES["start"]
 
-        response = requests.post(request_url, json={"trigger_start": trigger_start}).json()
+        if not parameters:
+            parameters = {}
+
+        parameters["trigger_start"] = trigger_start
+
+        response = requests.post(request_url, json=parameters).json()
 
         return validate_response(response)
 
