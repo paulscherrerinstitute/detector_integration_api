@@ -1,6 +1,6 @@
 from logging import getLogger
 
-from detector_integration_api.validation import IntegrationStatus
+from detector_integration_api.validator import IntegrationStatus
 from detector_integration_api.utils.client_disable_wrapper import ClientDisableWrapper
 
 _audit_logger = getLogger("audit_trail")
