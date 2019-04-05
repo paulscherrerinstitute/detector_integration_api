@@ -1,18 +1,8 @@
-from enum import Enum
 from logging import getLogger
 
-from detector_integration_api.utils import ClientDisableWrapper
+from detector_integration_api.validator import IntegrationStatus
 
 _logger = getLogger(__name__)
-
-
-class IntegrationStatus(Enum):
-    INITIALIZED = "initialized",
-    CONFIGURED = "configured",
-    RUNNING = "running",
-    DETECTOR_STOPPED = "detector_stopped",
-    FINISHED = "finished"
-    ERROR = "error"
 
 
 MANDATORY_WRITER_CONFIG_PARAMETERS = ["n_frames", "user_id", "output_file"]
