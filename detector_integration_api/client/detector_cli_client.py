@@ -7,11 +7,10 @@ _logger = getLogger(__name__)
 
 
 class DetectorClient(object):
-
     TASK_SET = ["taskset", "-c", "0"]
 
     def __init__(self, id=0, use_taskset=True):
-        self.detector_id = "" if id == 0 else str(id)+"-"
+        self.detector_id = "" if id == 0 else str(id) + "-"
         self.use_taskset = use_taskset
 
     def start(self):
@@ -25,7 +24,8 @@ class DetectorClient(object):
         cli_result = subprocess.check_output(cli_command)
         response, received_parameter_name, received_value = self.interpret_response(cli_result, "status")
         # The status can also be 'idle', for single image short exptime acquisitions.
-        self.verify_response_data(response, self.detector_id+"status", received_parameter_name, ["idle", "running", "waiting"],
+        self.verify_response_data(response, self.detector_id + "status", received_parameter_name,
+                                  ["idle", "running", "waiting"],
                                   received_value)
 
     def stop(self):
@@ -38,14 +38,18 @@ class DetectorClient(object):
 
         cli_result = subprocess.check_output(cli_command)
         response, received_parameter_name, received_value = self.interpret_response(cli_result, "status")
-        self.verify_response_data(response, self.detector_id+"status", received_parameter_name, "idle", received_value)
+        self.verify_response_data(response, self.detector_id + "status", received_parameter_name, "idle",
+                                  received_value)
 
     def get_status(self):
         try:
             raw_status = self.get_value("status")
         except:
-            #WIP: will be different anyway with python client to communicate with detector, currently sometime (~1/x0000) _get 2-status returns "Undefined function"
-            _logger.debug("Got error while asking for the status, there may be because of known rare bug in cli, so we try once more")
+            # WIP: will be different anyway with python client to communicate with detector,
+            # currently sometime (~1/x0000) _get 2-status returns "Undefined function"
+            _logger.debug(
+                "Got error while asking for the status, there may be because "
+                "of known rare bug in cli, so we try once more")
             raw_status = self.get_value("status")
         return raw_status
 
@@ -55,10 +59,10 @@ class DetectorClient(object):
         if self.use_taskset:
             cli_command = self.TASK_SET + cli_command
 
-        #_logger.debug("Executing get command: '%s'.", " ".join(cli_command))
+        # _logger.debug("Executing get command: '%s'.", " ".join(cli_command))
 
         cli_result = subprocess.check_output(cli_command)
-        return self.validate_response(cli_result, self.detector_id+parameter_name)
+        return self.validate_response(cli_result, self.detector_id + parameter_name)
 
     def set_value(self, parameter_name, value, no_verification=False):
         if isinstance(value, str):
