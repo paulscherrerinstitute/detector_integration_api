@@ -1,9 +1,9 @@
 from copy import copy
 from logging import getLogger
 
-from detector_integration_api.debug import validator
-from detector_integration_api.debug.validator import IntegrationStatus
-from detector_integration_api.utils import ClientDisableWrapper, check_for_target_status
+from detector_integration_api.example import example_validator
+from detector_integration_api.utils.client_disable_wrapper import ClientDisableWrapper
+from detector_integration_api.validator import IntegrationStatus
 
 _logger = getLogger(__name__)
 _audit_logger = getLogger("audit_trail")
@@ -61,7 +61,7 @@ class IntegrationManager(object):
         return self.reset()
 
     def get_acquisition_status(self):
-        status = validator.interpret_status(self.get_status_details())
+        status = example_validator.interpret_status(self.get_status_details())
 
         # There is no way of knowing if the detector is configured as the user desired.
         # We have a flag to check if the user config was passed on to the detector.

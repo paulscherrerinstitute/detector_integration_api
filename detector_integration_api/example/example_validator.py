@@ -1,5 +1,6 @@
 from logging import getLogger
 
+from detector_integration_api.utils.client_disable_wrapper import ClientDisableWrapper
 from detector_integration_api.validator import IntegrationStatus
 
 _logger = getLogger(__name__)
