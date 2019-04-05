@@ -8,7 +8,6 @@ from time import sleep, time
 import os
 
 from detector_integration_api import DetectorIntegrationClient
-from detector_integration_api.debug import manager
 from tests.utils import start_test_integration_server
 
 
