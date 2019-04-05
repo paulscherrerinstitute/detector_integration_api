@@ -1,4 +1,6 @@
-from detector_integration_api.utils import _logger
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 class ClientDisableWrapper(object):
