@@ -7,6 +7,17 @@ from detector_integration_api import config
 _logger = getLogger(__name__)
 
 
+def try_catch(func, error_message_prefix):
+    def wrapped(*args, **kwargs):
+
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            _logger.error(error_message_prefix, e)
+
+    return wrapped
+
+
 def check_for_target_status(get_status_function, desired_statuses):
 
     if not isinstance(desired_statuses, (tuple, list)):
