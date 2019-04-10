@@ -9,8 +9,8 @@ _logger = getLogger(__name__)
 class DetectorClient(object):
     TASK_SET = ["taskset", "-c", "0"]
 
-    def __init__(self, id=0, use_taskset=True):
-        self.detector_id = "" if id == 0 else str(id) + "-"
+    def __init__(self, detector_id=0, use_taskset=True):
+        self.detector_id = "" if detector_id == 0 else str(detector_id) + "-"
         self.use_taskset = use_taskset
 
     def start(self):
@@ -23,6 +23,7 @@ class DetectorClient(object):
 
         cli_result = subprocess.check_output(cli_command)
         response, received_parameter_name, received_value = self.interpret_response(cli_result, "status")
+
         # The status can also be 'idle', for single image short exptime acquisitions.
         self.verify_response_data(response, self.detector_id + "status", received_parameter_name,
                                   ["idle", "running", "waiting"],
@@ -58,8 +59,6 @@ class DetectorClient(object):
 
         if self.use_taskset:
             cli_command = self.TASK_SET + cli_command
-
-        # _logger.debug("Executing get command: '%s'.", " ".join(cli_command))
 
         cli_result = subprocess.check_output(cli_command)
         return self.validate_response(cli_result, self.detector_id + parameter_name)
