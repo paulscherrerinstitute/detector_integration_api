@@ -3,6 +3,7 @@ from logging import getLogger
 from time import sleep
 
 from detector_integration_api import config
+from detector_integration_api.utils.client_disable_wrapper import ClientDisableWrapper
 
 _logger = getLogger(__name__)
 
@@ -16,6 +17,19 @@ def try_catch(func, error_message_prefix):
             _logger.error(error_message_prefix, e)
 
     return wrapped
+
+
+def compare_client_status(status, expected_value):
+
+    _logger.debug("Comparing status '%s' with expected status '%s'.", status, expected_value)
+
+    if status == ClientDisableWrapper.STATUS_DISABLED:
+        return True
+
+    if isinstance(expected_value, (tuple, list)):
+        return status in expected_value
+    else:
+        return status == expected_value
 
 
 def check_for_target_status(get_status_function, desired_statuses):
