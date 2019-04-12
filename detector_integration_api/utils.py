@@ -3,7 +3,7 @@ from logging import getLogger
 from time import sleep
 
 from detector_integration_api import config
-from detector_integration_api.utils.client_disable_wrapper import ClientDisableWrapper
+from detector_integration_api.common.client_disable_wrapper import ClientDisableWrapper
 
 _logger = getLogger(__name__)
 

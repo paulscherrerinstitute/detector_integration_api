@@ -1,7 +1,7 @@
 from logging import getLogger
 
-from detector_integration_api.validator import IntegrationStatus
-from detector_integration_api.utils.client_disable_wrapper import ClientDisableWrapper
+from detector_integration_api.default_validator import IntegrationStatus
+from detector_integration_api.common.client_disable_wrapper import ClientDisableWrapper
 
 _audit_logger = getLogger("audit_trail")
 _logger = getLogger(__name__)
