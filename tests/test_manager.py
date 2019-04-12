@@ -1,7 +1,7 @@
 import unittest
 
 from detector_integration_api.example import example_manager
-from detector_integration_api.validator import IntegrationStatus
+from detector_integration_api.default_validator import IntegrationStatus
 from tests.utils import get_test_integration_manager
 
 

@@ -8,6 +8,7 @@ from time import sleep, time
 import os
 
 from detector_integration_api import DetectorIntegrationClient
+from detector_integration_api.example import example_manager
 from tests.utils import start_test_integration_server
 
 
@@ -16,7 +17,7 @@ class TestRestClient(unittest.TestCase):
         self.host = "0.0.0.0"
         self.port = 10000
 
-        self.dia_process = Process(target=start_test_integration_server, args=(self.host, self.port, manager))
+        self.dia_process = Process(target=start_test_integration_server, args=(self.host, self.port, example_manager))
         self.dia_process.start()
 
         # Give it some time to start.
