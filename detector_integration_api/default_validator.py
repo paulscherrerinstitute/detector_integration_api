@@ -8,27 +8,27 @@ class IntegrationStatus(Enum):
     COMPONENT_NOT_RESPONDING = "component_not_responding"
 
 
-MANDATORY_WRITER_CONFIG_PARAMETERS = ["n_frames", "user_id", "output_file"]
+E_ACCOUNT_USER_ID_RANGE = [10000, 29999]
+
+
+MANDATORY_WRITER_CONFIG_PARAMETERS = {
+    "n_frames": int, "user_id": int, "output_file": str
+}
 
 
 def validate_writer_config(configuration):
     if not configuration:
         raise ValueError("Writer configuration cannot be empty.")
 
-    writer_cfg_params = MANDATORY_WRITER_CONFIG_PARAMETERS + list(CSAXS_FORMAT_INPUT_PARAMETERS.keys())
-
     # Check if all mandatory parameters are present.
-    if not all(x in configuration for x in writer_cfg_params):
-        missing_parameters = [x for x in writer_cfg_params if x not in configuration]
-        raise ValueError("Writer configuration missing mandatory parameters: %s" % missing_parameters)
+    if not all(x in configuration for x in MANDATORY_WRITER_CONFIG_PARAMETERS.keys()):
+        missing_parameters = [x for x in MANDATORY_WRITER_CONFIG_PARAMETERS.keys() if x not in configuration]
 
-    unexpected_parameters = [x for x in configuration.keys() if x not in writer_cfg_params]
-    if unexpected_parameters:
-        _logger.warning("Received unexpected parameters for writer: %s" % unexpected_parameters)
+        raise ValueError("Writer configuration missing mandatory parameters: %s" % missing_parameters)
 
     # Check if all format parameters are of correct type.
     wrong_parameter_types = ""
-    for parameter_name, parameter_type in CSAXS_FORMAT_INPUT_PARAMETERS.items():
+    for parameter_name, parameter_type in MANDATORY_WRITER_CONFIG_PARAMETERS.items():
         if not isinstance(configuration[parameter_name], parameter_type):
 
             # If the input type is an int, but float is required, convert it.
@@ -43,10 +43,9 @@ def validate_writer_config(configuration):
         raise ValueError("Received parameters of invalid type:\n%s", wrong_parameter_types)
 
     user_id = configuration["user_id"]
-    if user_id < E_ACCOUNT_USER_ID_RANGE[0] or user_id > E_ACCOUNT_USER_ID_RANGE[1]:
-        raise ValueError("Provided user_id %d outside of specified range [%d-%d]." % (user_id,
-                                                                                      E_ACCOUNT_USER_ID_RANGE[0],
-                                                                                      E_ACCOUNT_USER_ID_RANGE[1]))
+    if user_id != -1 and (user_id < E_ACCOUNT_USER_ID_RANGE[0] or user_id > E_ACCOUNT_USER_ID_RANGE[1]):
+            raise ValueError("Provided user_id %d outside of specified range [%d-%d]."
+                             % (user_id, E_ACCOUNT_USER_ID_RANGE[0], E_ACCOUNT_USER_ID_RANGE[1]))
 
     # Check if the filename ends with h5.
     if configuration["output_file"][-3:] != ".h5":
