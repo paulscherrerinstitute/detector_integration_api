@@ -1,12 +1,13 @@
 from copy import copy
 from logging import getLogger
 
+from detector_integration_api import default_validator
 from detector_integration_api.example import example_validator
-from detector_integration_api.utils.client_disable_wrapper import ClientDisableWrapper
+from detector_integration_api.common.client_disable_wrapper import ClientDisableWrapper
 from detector_integration_api.default_validator import IntegrationStatus
+from detector_integration_api.utils import check_for_target_status
 
 _logger = getLogger(__name__)
-_audit_logger = getLogger("audit_trail")
 
 
 class IntegrationManager(object):
@@ -22,19 +23,14 @@ class IntegrationManager(object):
         self.last_config_successful = False
 
     def start_acquisition(self):
-        _audit_logger.info("Starting acquisition.")
+        _logger.info("Starting acquisition.")
 
         status = self.get_acquisition_status()
         if status != IntegrationStatus.CONFIGURED:
             raise ValueError("Cannot start acquisition in %s state. Please configure first." % status)
 
-        _audit_logger.info("backend_client.open()")
         self.backend_client.open()
-
-        _audit_logger.info("writer_client.start()")
         self.writer_client.start()
-
-        _audit_logger.info("detector_client.start()")
         self.detector_client.start()
 
         # We need the status FINISHED for very short acquisitions.
@@ -44,18 +40,13 @@ class IntegrationManager(object):
                                         IntegrationStatus.FINISHED))
 
     def stop_acquisition(self):
-        _audit_logger.info("Stopping acquisition.")
+        _logger.info("Stopping acquisition.")
 
         status = self.get_acquisition_status()
 
         if status == IntegrationStatus.RUNNING:
-            _audit_logger.info("detector_client.stop()")
             self.detector_client.stop()
-
-            _audit_logger.info("backend_client.close()")
             self.backend_client.close()
-
-            _audit_logger.info("writer_client.stop()")
             self.writer_client.stop()
 
         return self.reset()
@@ -74,17 +65,14 @@ class IntegrationManager(object):
         return str(self.get_acquisition_status())
 
     def get_status_details(self):
-        _audit_logger.info("Getting status details.")
+        _logger.info("Getting status details.")
 
-        _audit_logger.info("writer_client.get_status()")
         writer_status = self.writer_client.get_status() \
             if self.writer_client.is_client_enabled() else ClientDisableWrapper.STATUS_DISABLED
 
-        _audit_logger.info("backend_client.get_status()")
         backend_status = self.backend_client.get_status() \
             if self.backend_client.is_client_enabled() else ClientDisableWrapper.STATUS_DISABLED
 
-        _audit_logger.info("detector_client.get_status()")
         detector_status = self.detector_client.get_status() \
             if self.detector_client.is_client_enabled() else ClientDisableWrapper.STATUS_DISABLED
 
@@ -122,7 +110,7 @@ class IntegrationManager(object):
             _logger.debug("Integration status is %s. Resetting before applying config.", status)
             self.reset()
 
-        _audit_logger.info("Set acquisition configuration:\n"
+        _logger.info("Set acquisition configuration:\n"
                            "Writer config: %s\n"
                            "Backend config: %s\n"
                            "Detector config: %s\n",
@@ -130,25 +118,22 @@ class IntegrationManager(object):
 
         # Before setting the new config, validate the provided values. All must be valid.
         if self.writer_client.client_enabled:
-            validator.validate_writer_config(writer_config)
+            default_validator.validate_writer_config(writer_config)
 
         if self.backend_client.client_enabled:
-            validator.validate_backend_config(backend_config)
+            default_validator.validate_backend_config(backend_config)
 
         if self.detector_client.client_enabled:
-            validator.validate_detector_config(detector_config)
+            default_validator.validate_detector_config(detector_config)
 
-        validator.validate_configs_dependencies(writer_config, backend_config, detector_config)
+        default_validator.validate_configs_dependencies(writer_config, backend_config, detector_config)
 
-        _audit_logger.info("backend_client.set_config(backend_config)")
         self.backend_client.set_config(backend_config)
         self._last_set_backend_config = backend_config
 
-        _audit_logger.info("writer_client.set_parameters(writer_config)")
         self.writer_client.set_parameters(writer_config)
         self._last_set_writer_config = writer_config
 
-        _audit_logger.info("detector_client.set_config(detector_config)")
         self.detector_client.set_config(detector_config)
         self._last_set_detector_config = detector_config
 
@@ -193,17 +178,14 @@ class IntegrationManager(object):
                 "detector": self.detector_client.is_client_enabled()}
 
     def reset(self):
-        _audit_logger.info("Resetting integration api.")
+        _logger.info("Resetting integration api.")
 
         self.last_config_successful = False
 
-        _audit_logger.info("detector_client.stop()")
         self.detector_client.stop()
 
-        _audit_logger.info("backend_client.reset()")
         self.backend_client.reset()
 
-        _audit_logger.info("writer_client.reset()")
         self.writer_client.reset()
 
         return check_for_target_status(self.get_acquisition_status, IntegrationStatus.INITIALIZED)
