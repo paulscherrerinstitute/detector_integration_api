@@ -1,13 +1,13 @@
 from logging import getLogger
 
-from detector_integration_api.utils.client_disable_wrapper import ClientDisableWrapper
-from detector_integration_api.validator import IntegrationStatus
+from detector_integration_api.utils import compare_client_status
+from detector_integration_api.default_validator import IntegrationStatus
 
 _logger = getLogger(__name__)
 
 
 MANDATORY_WRITER_CONFIG_PARAMETERS = ["n_frames", "user_id", "output_file"]
-MANDATORY_BACKEND_CONFIG_PARAMETERS = ["bit_depth", "n_frames"]
+MANDATORY_BACKEND_CONFIG_PARAMETERS = ["bit_depth"]
 MANDATORY_DETECTOR_CONFIG_PARAMETERS = ["period", "frames", "dr", "exptime"]
 
 
@@ -60,40 +60,15 @@ def interpret_status(statuses):
     _logger.debug("Interpreting statuses: %s", statuses)
 
     writer = statuses["writer"]
-    backend = statuses["backend"]
-    detector = statuses["detector"]
-
-    def cmp(status, expected_value):
-
-        _logger.debug("Comparing status '%s' with expected status '%s'.", status, expected_value)
-
-        if status == ClientDisableWrapper.STATUS_DISABLED:
-            return True
-
-        if isinstance(expected_value, (tuple, list)):
-            return status in expected_value
-        else:
-            return status == expected_value
 
     # If no other conditions match.
     interpreted_status = IntegrationStatus.ERROR
 
-    # Dia after reset.
-    if cmp(writer, "stopped") and cmp(detector, "idle") and cmp(backend, "INITIALIZED"):
-        interpreted_status = IntegrationStatus.INITIALIZED
+    if compare_client_status(writer, "stopped"):
+        interpreted_status = IntegrationStatus.READY
 
-    elif cmp(writer, "stopped") and cmp(detector, "idle") and cmp(backend, "CONFIGURED"):
-        interpreted_status = IntegrationStatus.CONFIGURED
-
-    elif cmp(writer, ("receiving", "writing")) and cmp(detector, ("running", "waiting")) and cmp(backend, "OPEN"):
+    elif compare_client_status(writer, "writing"):
         interpreted_status = IntegrationStatus.RUNNING
 
-    elif cmp(writer, ("receiving", "writing")) and cmp(detector, "idle") and cmp(backend, "OPEN"):
-        interpreted_status = IntegrationStatus.DETECTOR_STOPPED
-
-    elif cmp(writer, ("finished", "stopped")) and cmp(detector, "idle") and cmp(backend, "OPEN"):
-        interpreted_status = IntegrationStatus.FINISHED
-
-    _logger.debug("Statuses interpreted as '%s'.", interpreted_status)
-
     return interpreted_status
+

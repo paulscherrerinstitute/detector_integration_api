@@ -3,7 +3,7 @@ from logging import getLogger
 
 from detector_integration_api.example import example_validator
 from detector_integration_api.utils.client_disable_wrapper import ClientDisableWrapper
-from detector_integration_api.validator import IntegrationStatus
+from detector_integration_api.default_validator import IntegrationStatus
 
 _logger = getLogger(__name__)
 _audit_logger = getLogger("audit_trail")
