@@ -32,6 +32,36 @@ def compare_client_status(status, expected_value):
         return status == expected_value
 
 
+def validate_mandatory_parameters(input_parameters, mandatory_parameters):
+    if not input_parameters:
+        raise ValueError("Input parameters cannot be empty.")
+
+    if not mandatory_parameters:
+        raise ValueError("Mandatory parameters cannot be empty.")
+
+    # Check if all mandatory parameters are present.
+    if not all(x in input_parameters for x in mandatory_parameters.keys()):
+        missing_parameters = [x for x in mandatory_parameters.keys() if x not in input_parameters]
+
+        raise ValueError("Configuration missing mandatory parameters: %s" % missing_parameters)
+
+    # Check if all format parameters are of correct type.
+    wrong_parameter_types = ""
+    for parameter_name, parameter_type in mandatory_parameters.items():
+        if not isinstance(input_parameters[parameter_name], parameter_type):
+
+            # If the input type is an int, but float is required, convert it.
+            if parameter_type == float and isinstance(input_parameters[parameter_name], int):
+                input_parameters[parameter_name] = float(input_parameters[parameter_name])
+                continue
+
+            wrong_parameter_types += "\tParameter '%s' expected of type '%s', but received of type '%s'.\n" % \
+                                     (parameter_name, parameter_type, type(input_parameters[parameter_name]))
+
+    if wrong_parameter_types:
+        raise ValueError("Parameters of invalid type:\n%s", wrong_parameter_types)
+
+
 def check_for_target_status(get_status_function, desired_statuses):
 
     if not isinstance(desired_statuses, (tuple, list)):
