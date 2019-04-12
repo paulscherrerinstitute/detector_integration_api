@@ -12,11 +12,8 @@ class DetectorClient(object):
 
     TASK_SET = ["taskset", "-c", "0"]
 
-    def __init__(self, id=0, use_taskset=True, detector_type = "Jungfrau"):
-        if detector_type == "Eiger":
-            self.detector = Eiger(id)
-        else:
-            self.detector = Jungfrau(id)
+    def __init__(self, id=0, use_taskset=True):
+        self.detector = Jungfrau(id)
 
         self.detector_id = "" if id == 0 else str(id)+"-"
         self.use_taskset = use_taskset
