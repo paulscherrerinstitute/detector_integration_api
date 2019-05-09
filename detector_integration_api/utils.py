@@ -3,54 +3,63 @@ from logging import getLogger
 from time import sleep
 
 from detector_integration_api import config
+from detector_integration_api.common.client_disable_wrapper import ClientDisableWrapper
 
 _logger = getLogger(__name__)
 
 
-class ClientDisableWrapper(object):
+def try_catch(func, error_message_prefix):
+    def wrapped(*args, **kwargs):
 
-    STATUS_DISABLED = "DISABLED"
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            _logger.error(error_message_prefix, e)
 
-    def __init__(self, client, default_enabled=True, client_name="external component"):
-        self.client = client
-        self.client_enabled = default_enabled
-        self.client_name = client_name
+    return wrapped
 
-    def is_client_enabled(self):
-        return self.client_enabled
 
-    def set_client_enabled(self, enabled):
-        self.client_enabled = enabled
+def compare_client_status(status, expected_value):
 
-    def __getattr__(self, attr_name):
-        remote_attr = object.__getattribute__(self.client, attr_name)
+    _logger.debug("Comparing status '%s' with expected status '%s'.", status, expected_value)
 
-        if hasattr(remote_attr, '__call__'):
+    if status == ClientDisableWrapper.STATUS_DISABLED:
+        return True
 
-            def gated_function(*args, **kwargs):
-                if self.is_client_enabled():
+    if isinstance(expected_value, (tuple, list)):
+        return status in expected_value
+    else:
+        return status == expected_value
 
-                    try:
-                        result = remote_attr(*args, **kwargs)
-                        return result
-                    except Exception as e:
-                        raise RuntimeError("Cannot communicate with %s. Please check the error logs."
-                                           % self.client_name) from e
 
-                else:
-                    _logger.debug("Object '%s' disabled. Not calling method '%s'.",
-                                  type(self.client).__name__, attr_name)
+def validate_mandatory_parameters(input_parameters, mandatory_parameters):
+    if not input_parameters:
+        raise ValueError("Input parameters cannot be empty.")
 
-            return gated_function
+    if not mandatory_parameters:
+        raise ValueError("Mandatory parameters cannot be empty.")
 
-        else:
-            return remote_attr
+    # Check if all mandatory parameters are present.
+    if not all(x in input_parameters for x in mandatory_parameters.keys()):
+        missing_parameters = [x for x in mandatory_parameters.keys() if x not in input_parameters]
 
-    def __setattr__(self, key, value):
-        if key in ("client_enabled", "client"):
-            self.__dict__[key] = value
-        else:
-            self.client.__setattr__(key, value)
+        raise ValueError("Configuration missing mandatory parameters: %s" % missing_parameters)
+
+    # Check if all format parameters are of correct type.
+    wrong_parameter_types = ""
+    for parameter_name, parameter_type in mandatory_parameters.items():
+        if not isinstance(input_parameters[parameter_name], parameter_type):
+
+            # If the input type is an int, but float is required, convert it.
+            if parameter_type == float and isinstance(input_parameters[parameter_name], int):
+                input_parameters[parameter_name] = float(input_parameters[parameter_name])
+                continue
+
+            wrong_parameter_types += "\tParameter '%s' expected of type '%s', but received of type '%s'.\n" % \
+                                     (parameter_name, parameter_type, type(input_parameters[parameter_name]))
+
+    if wrong_parameter_types:
+        raise ValueError("Parameters of invalid type:\n%s", wrong_parameter_types)
 
 
 def check_for_target_status(get_status_function, desired_statuses):

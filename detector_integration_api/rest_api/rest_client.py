@@ -81,7 +81,8 @@ class DetectorIntegrationClient(object):
                 # check again status, may be it's a (known) bug which happened 1/100.000
                 last_status = self.get_status()["status"]
                 if last_status == 'IntegrationStatus.ERROR':
-                    raise RuntimeError("Received status 'IntegrationStatus.ERROR'. Use get_status_details for more info.")
+                    raise RuntimeError("Received status 'IntegrationStatus.ERROR'."
+                                       "Use get_status_details for more info.")
 
             if timeout and time() - start_time > timeout:
                 raise ValueError("Timeout exceeded. Could not reach target status '%s'. Last received status: '%s'." %

@@ -1,14 +1,13 @@
 import unittest
 
-from detector_integration_api.debug import manager as debug_manager
-from detector_integration_api.debug.validator import IntegrationStatus
+from detector_integration_api.example import example_manager
+from detector_integration_api.default_validator import IntegrationStatus
 from tests.utils import get_test_integration_manager
 
 
 class TestIntegrationManager(unittest.TestCase):
     def test_state_machine(self):
-        manager = get_test_integration_manager(debug_manager)
-
+        manager = get_test_integration_manager(example_manager)
         manager.writer_client.status = "stopped"
         manager.backend_client.status = "INITIALIZED"
         manager.detector_client.status = "idle"
@@ -54,7 +53,7 @@ class TestIntegrationManager(unittest.TestCase):
 
     def test_set_config(self):
 
-        manager = get_test_integration_manager(debug_manager)
+        manager = get_test_integration_manager(example_manager)
 
         manager.writer_client.status = "stopped"
         manager.backend_client.status = "INITIALIZED"
@@ -120,7 +119,7 @@ class TestIntegrationManager(unittest.TestCase):
         manager.set_acquisition_config(configuration)
 
     def test_acquisition_procedure(self):
-        manager = get_test_integration_manager(debug_manager)
+        manager = get_test_integration_manager(example_manager)
 
         self.assertEqual(manager.get_acquisition_status_string(), "IntegrationStatus.INITIALIZED")
 
