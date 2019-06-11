@@ -61,6 +61,9 @@ class DetectorClient(object):
 
     def get_status(self):
  
+        #Workaround, see below
+        self.detector.online = True
+
         raw_status = self.detector.status
         return raw_status
         #try:
@@ -110,6 +113,9 @@ class DetectorClient(object):
     def set_value(self, parameter_name, value, no_verification=False):
 
         _logger.debug("Will set parameter %s to %s for detector %s." % (parameter_name, value, self.detector_id))
+        # as workaround for the problem of first command sent after silence, ping all modules
+        # with parallel command
+        self.detector.online = True
 #TODO: replace by enumarate
         if parameter_name == "exptime":
             self.detector.exposure_time = value
