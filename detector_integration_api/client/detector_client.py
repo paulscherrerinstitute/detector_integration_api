@@ -123,7 +123,7 @@ class DetectorClient(object):
 # powerchip function makes delay between each module (implemented in version 4.0.2)
             if self.detector_type == "Jungfrau":
                 _logger.info("Powerchip-ing detector")
-                self.detector.powerchip = 1
+                self.detector.power_chip = True
 
             _logger.info("Setting HV of the Detector")
             self.detector.high_voltage = 120
