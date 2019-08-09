@@ -36,6 +36,7 @@ install:
   - conda update -q --all
   - conda install conda-build anaconda-client
   # build
+  - mkdir detector_integration_api/debug
   - conda build --no-test conda-recipe
 
 script:
