@@ -1,7 +1,7 @@
 import unittest
 
 from detector_integration_api.client.detector_cli_client import DetectorClient
-from detector_integration_api.utils import ClientDisableWrapper
+from detector_integration_api.utils.client_disable_wrapper import ClientDisableWrapper
 
 
 class TestIntegrationManager(unittest.TestCase):
