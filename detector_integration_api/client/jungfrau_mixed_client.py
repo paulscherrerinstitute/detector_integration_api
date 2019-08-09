@@ -10,13 +10,14 @@ _logger = getLogger(__name__)
 
 class DetectorClient(object):
 
-    TASK_SET = ["taskset", "-c", "0"]
-
-    def __init__(self, id=0, use_taskset=True):
-        self.detector = Jungfrau(id)
+    def __init__(self, id=0, detector_type = "Jungfrau"):
+        if detector_type == "Eiger":
+            self.detector = Eiger(id)
+        else:
+            self.detector = Jungfrau(id)
 
         self.detector_id = "" if id == 0 else str(id)+"-"
-        self.use_taskset = use_taskset
+        self.detector_type = detector_type
 
     def start(self):
  
@@ -25,36 +26,12 @@ class DetectorClient(object):
         status = self.detector.status
         self.verify_response_data2(self.detector_id+'start-status', ["idle", "running", "waiting"], status)
 
-        #cli_command = ["sls_detector_put", self.detector_id + "status", "start"]
-
-        #if self.use_taskset:
-        #    cli_command = self.TASK_SET + cli_command
-
-        #_logger.debug("Executing start command: '%s'.", " ".join(cli_command))
-
-        #cli_result = subprocess.check_output(cli_command)
-        #response, received_parameter_name, received_value = self.interpret_response(cli_result, "status")
-        # The status can also be 'idle', for single image short exptime acquisitions.
-        #self.verify_response_data(response, self.detector_id+"status", received_parameter_name, ["idle", "running", "waiting"],
-        #                          received_value)
-
     def stop(self):
 
         self.detector.stop_detector()
 
         status = self.detector.status
         self.verify_response_data2(self.detector_id+'stop-status', ["idle", "running", "waiting"], status)
-
-        #cli_command = ["sls_detector_put", self.detector_id + "status", "stop"]
-
-        #if self.use_taskset:
-        #    cli_command = self.TASK_SET + cli_command
-
-        #_logger.debug("Executing start command: '%s'.", " ".join(cli_command))
-
-        #cli_result = subprocess.check_output(cli_command)
-        #response, received_parameter_name, received_value = self.interpret_response(cli_result, "status")
-        #self.verify_response_data(response, self.detector_id+"status", received_parameter_name, "idle", received_value)
 
     def get_status(self):
  
@@ -63,13 +40,6 @@ class DetectorClient(object):
 
         raw_status = self.detector.status
         return raw_status
-        #try:
-        #    raw_status = self.get_value("status")
-        #except:
-            #WIP: will be different anyway with python client to communicate with detector, currently sometime (~1/x0000) _get 2-status returns "Undefined function"
-        #    _logger.debug("Got error while asking for the status, there may be because of known rare bug in cli, so we try once more")
-        #    raw_status = self.get_value("status")
-        #return raw_status
 
     def get_value(self, parameter_name):
 #TODO: replace by enumarate
@@ -90,22 +60,7 @@ class DetectorClient(object):
         elif parameter_name == "vhighvoltage":
             return self.detector.high_voltage
         else:
-            _logger.debug("get_value called with deprecated name : %s " % parameter_name)
-            return self.get_value_cli(parameter_name)
-
-    def get_value_cli(self, parameter_name):
-
-        _logger.debug("CLIVERSION get called. Paramters :%s" % parameter_name)
-
-        cli_command = ["sls_detector_get", self.detector_id + parameter_name]
-
-        if self.use_taskset:
-            cli_command = self.TASK_SET + cli_command
-
-        _logger.debug("Executing get command: '%s'.", " ".join(cli_command))
-
-        cli_result = subprocess.check_output(cli_command)
-        return self.validate_response(cli_result, self.detector_id+parameter_name)
+            raise RuntimeError("get_value called with deprecated name : %s " % parameter_name)
 
     def set_value(self, parameter_name, value, no_verification=False):
 
@@ -149,38 +104,29 @@ class DetectorClient(object):
             else:
                 raise RuntimeError("Wrong parameters for setbit (%s) : %s." % (parameter_name, value))
         else:
-            _logger.debug("set_value called with deprecated name : %s (value: %s)." % (parameter_name, value))
-            return self.set_value_cli(parameter_name, value, no_verification)
+            raise RuntimeError("set_value called with deprecated name : %s (value: %s)." % (parameter_name, value))
 
-    def set_value_cli(self, parameter_name, value, no_verification=False):
-
-        _logger.debug("CLIVERSION set called. Paramters :%s, value : %s" % (parameter_name, value)) 
-
-        if isinstance(value, str):
-            cli_command = ["sls_detector_put", self.detector_id + parameter_name, ] + list(map(str, value.split()))
-        else:
-            cli_command = ["sls_detector_put", self.detector_id + parameter_name, str(value)]
-
-        if self.use_taskset:
-            cli_command = self.TASK_SET + cli_command
-
-        _logger.debug("Executing put command: '%s'.", " ".join(cli_command))
-
-        try:
-            cli_result = subprocess.check_output(cli_command)
-
-            # This is to be used only when user interact manually with the detector.
-            if no_verification:
-                return cli_result.decode("utf-8")
-            else:
-                return self.validate_response(cli_result, self.detector_id + parameter_name)
-
-        except:
-            raise RuntimeError("Cannot execute detector command %s, please check the detector" % cli_command)
 
     def set_config(self, configuration):
         for name, value in configuration.items():
             self.set_value(name, value)
+
+    def initialise(self, config_file=None, n_modules=0):
+
+        self.detector.stop_detector()
+        self.detector.free_shared_memory()
+
+        if config_file != None:
+            _logger.info("Load detector configuration")
+            self.detector.load_config(config_file)
+
+# powerchip function makes delay between each module (implemented in version 4.0.2)
+            if self.detector_type == "Jungfrau":
+                _logger.info("Powerchip-ing detector")
+                self.detector.power_chip = True
+
+            _logger.info("Setting HV of the Detector")
+            self.detector.high_voltage = 120
 
     @staticmethod
     def interpret_response(output_bytes, parameter_name):
