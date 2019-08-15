@@ -69,6 +69,14 @@ class ExternalProcessClient(object):
 
     def start(self):
 
+        itry=0
+        while itry <= config.EXTERNAL_PROCESS_PREVIOUS_WAIT_N and self.is_running():
+            itry += 1
+            _logger.info("Process %s is still running, sleep for %d seconds (attempt %d from %d)" 
+                          % (self.PROCESS_NAME, 
+                             config.EXTERNAL_PROCESS_SLEEP_PREVIOUS, itry, config.EXTERNAL_PROCESS_PREVIOUS_WAIT_N))
+            sleep(config.EXTERNAL_PROCESS_SLEEP_PREVIOUS)   
+
         if self.is_running():
             raise RuntimeError("Process %s already running. Cannot start new one until old one is still alive."
                                % self.PROCESS_NAME)
