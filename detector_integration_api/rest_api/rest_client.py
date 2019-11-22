@@ -104,6 +104,28 @@ class DetectorIntegrationClient(object):
 
         return validate_response(response)
 
+    def set_client_configuration(self, configuration):
+        request_url = self.api_address + ROUTES["set_client_configuration"]
+ 
+        response = requests.post(request_url, json=configuration).json()
+
+        return validate_response(response)
+
+    def clear_client_configuration(self, client):
+        request_url = self.api_address + ROUTES["clear_client_configuration"] + "/" + client
+
+        response = requests.post(request_url).json()
+
+        return validate_response(response)
+
+    def get_client_configuration(self, client):
+        request_url = self.api_address + ROUTES["get_client_configuration"] + "/" + client
+
+        response = requests.post(request_url).json()
+
+        return validate_response(response)
+
+
     def set_config(self, configuration):
         request_url = self.api_address + ROUTES["set_config"]
 

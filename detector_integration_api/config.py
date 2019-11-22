@@ -61,5 +61,9 @@ ROUTES = {
 
     "clients_enabled": "/api/v1/enabled_clients",
 
+    "set_client_configuration":   "/api/v1/set_client_cinfiguration",
+    "clear_client_configuration": "/api/v1/clear_client_configuration",
+    "get_client_configuration":   "/api/v1/get_client_configuration",
+
     "daq_test": "/api/v1/daq_test"
 }

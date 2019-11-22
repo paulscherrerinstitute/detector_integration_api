@@ -149,6 +149,32 @@ def register_rest_interface(app, integration_manager):
                 "status": integration_manager.get_acquisition_status_string(),
                 "clients_enabled": integration_manager.get_clients_enabled()}
 
+    @app.post(ROUTES["set_client_configuration"])
+    def set_client_configuration():
+        config_client_configuration = request.json
+
+        integration_manager.set_client_configuration(config_client_configuration)
+
+        return {"state": "ok",
+                "status": integration_manager.get_acquisition_status_string(),
+                "client_configuration": [ integration_manager.get_client_configuration(client) for client in config_client_configuration] }
+
+    @app.post(ROUTES["clear_client_configuration"] + "/<client>")
+    def clear_client_configuration(client):
+        integration_manager.clear_client_configuration(client)
+
+        return {"state": "ok",
+                "status": integration_manager.get_acquisition_status_string(),
+                "client_configuration": integration_manager.get_client_configuration(client) }
+
+    @app.post(ROUTES["get_client_configuration"] + "/<client>")
+    def get_client_configuration(client):
+        config = integration_manager.get_client_configuration(client)
+
+        return {"state": "ok",
+                "status": integration_manager.get_acquisition_status_string(),
+                "client_configuration": config }
+
     # TODO: Methods below access the internal state of the manager. Refactor.
 
     @app.get(ROUTES["get_detector_value"] + "/<name>")
