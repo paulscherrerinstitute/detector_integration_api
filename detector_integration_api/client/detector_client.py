@@ -103,6 +103,11 @@ class DetectorClient(object):
                 self.detector._api.setBitInRegister(int(value.split()[0],16), int(value.split()[1]))
             else:
                 raise RuntimeError("Wrong parameters for setbit (%s) : %s." % (parameter_name, value))
+        elif parameter_name == "highG0":
+            if value:
+                self.set_value("setbit","0x5d 0")
+            else:
+                self.set_value("clearbit","0x5d 0")
         else:
             raise RuntimeError("set_value called with deprecated name : %s (value: %s)." % (parameter_name, value))
 
