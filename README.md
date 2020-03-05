@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/datastreaming/detector_integration_api.svg?branch=master)](https://travis-ci.org/datastreaming/detector_integration_api)
+[![Build Status](https://travis-ci.org/paulscherrerinstitute/detector_integration_api.svg?branch=master)](https://travis-ci.org/paulscherrerinstitute/detector_integration_api)
 
 # Integration REST API
 REST API for integrating beamline software with the detector, backend, and writer.
