@@ -1,6 +1,6 @@
 package:
     name: detector_integration_api
-    version: 1.8.2
+    version: 1.8.3
 
 source:
     path: ..
@@ -16,7 +16,6 @@ requirements:
         - python
         - bottle
         - requests
-        - mflow_nodes >=1.3.0
 
 about:
     home: https://github.com/datastreaming/detector_integration_api
