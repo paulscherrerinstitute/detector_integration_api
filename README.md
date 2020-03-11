@@ -51,7 +51,7 @@ client = DetectorIntegrationClient(api_address)
 status = client.get_status()
 
 # Check if the integration is in the INITIALIZED state.
-if status != "IntegrationStatus.INITIALIZED":
+if status["status"] != "IntegrationStatus.INITIALIZED":
     # Resetting the integration will bring us to the IntegrationStatus.INITIALIZED state.
     client.reset()
 
